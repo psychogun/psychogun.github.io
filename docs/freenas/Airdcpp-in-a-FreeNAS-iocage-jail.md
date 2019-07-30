@@ -9,37 +9,32 @@ nav_order: 1
 {: .no_toc }
 This is how i installed a communal peer-to-peer file sharing application for file servers/NAS devices called Airdcpp on FreeNAS in a standalone iocage jail.
 
-
 ## Table of contents
 {: .no_toc .text-delta }
 
 1. TOC
 {:toc}
 ---
-
 ## Getting started
-Airdcpp does not provide binaries for installing in FreeNAS (FreeBSD), you have to compile it yourself. 
-
-More information about that topic can be found here: [https://airdcpp-web.github.io/docs/installation/installation.html](https://airdcpp-web.github.io/docs/installation/installation.html)
+These instructions will download, compile, install and run Airdcpp in an iocage jail on FreeNAS. There are no provided binaries for BSD on https://airdcpp-web.github.io/docs/installation/installation.html](https://airdcpp-web.github.io/docs/installation/installation.html)
 
 ### Prerequisites
-* Internet connection
 * Knowledge of SSH and how to navigate to your jail in FreeNAS
 * FreeNAS 11.2 and knowledge of how to create a jail with shares and knowledge of UNIX folder and files permissions
 
-## Compile
+## Compiling
 Update and upgrade your iocage jail first:
-```
+```tcsh
 root@Airdccp:/ # pkg upgrade && pkg update
 ```
 To compile Airdcpp on FreeNAS (FreeBSD), we need to install all the required dependencies: 
 https://airdcpp-web.github.io/docs/installation/dependencies.html
-``` 
+```bash
 root@Airdccp:/ # pkg install gcc cmake pkgconf npm node python boost-all bzip2 leveldb miniupnpc openssl websocketpp tbb php72-maxminddb git nano 
 ```
 
 Use git clone to download airdcpp:
-```
+```sh
 root@Airdccp:/ # cd /usr/local/
 root@Airdccp:/usr/local# git clone [https://github.com/airdcpp-web/airdcpp-webclient.git](https://github.com/airdcpp-web/airdcpp-webclient.git)
 
