@@ -406,7 +406,7 @@ elk@stack:~$ sudo gunzip GeoLite2-City.mmdb.gz
 
 ### Grok
 Grok is a great way to parse unstructured log data into something structured and queryable. Sometimes logstash doesn’t have a pattern you need, so you'll have to make it yourself. Or download it. From here, or wherever I first found it.
-```bash
+```grok
 elkn@stack:~$ cd /etc/logstash/conf.d
 elkn@stack:~$ sudo mkdir patterns
 elkn@stack:~$ sudo nano pfsense_2_4_2.grok
@@ -469,12 +469,6 @@ PFSENSE_APP_GEN (%{GREEDYDATA:pfsense_ACTION})
 
 # SURICATA
 PFSENSE_SURICATA %{SPACE}\[%{NUMBER:ids_gen_id}:%{NUMBER:ids_sig_id}:%{NUMBER:ids_sig_rev}\]%{SPACE}%{GREEDYDATA:ids_desc}%{SPACE}\[Classification:%{SPACE}%{GREEDYDATA:ids_class}\]%{SPACE}\[Priority:%{SPACE}%{NUMBER:ids_pri}\]%{SPACE}{%{WORD:ids_proto}}%{SPACE}%{IP:ids_src_ip}:%{NUMBER:ids_src_port}%{SPACE}->%{SPACE}%{IP:ids_dest_ip}:%{NUMBER:ids_dest_port} %}
-
-
-
-
-
-
 ```
 
 
