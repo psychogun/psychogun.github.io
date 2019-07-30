@@ -427,7 +427,7 @@ elkn@stack:~$ sudo nano pfsense_2_4_2.grok
 # TODO: Add/expand support for IPv6 messages.
 ```
 
-```
+```go
 PFSENSE_LOG_ENTRY %{PFSENSE_LOG_DATA}%{PFSENSE_IP_SPECIFIC_DATA}%{PFSENSE_IP_DATA}%{PFSENSE_PROTOCOL_DATA}?
 PFSENSE_LOG_DATA %{INT:rule},%{INT:sub_rule}?,,%{INT:tracker},%{DATA:iface},%{WORD:reason},%{WORD:action},%{WORD:direction},
 PFSENSE_IP_DATA %{INT:length},%{IP:src_ip},%{IP:dest_ip},
