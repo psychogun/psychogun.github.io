@@ -2,7 +2,7 @@
 layout: default
 title: Home
 nav_order: 1
-description: "Wielding a cybernetic arm-laser gun, fighting monsters and meddling in the Pirate Guild's criminal enterprises have forced me to save my favourite items on the GitHub."
+description: "Wielding a cybernetic arm-laser gun, fighting monsters and meddling in the Pirate Guild's criminal enterprises has forced me to save my favourite items on the GitHub."
 permalink: /
 ---
 
