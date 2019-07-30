@@ -108,4 +108,7 @@ root@Airdccp:/ # top
  1000 zanko         13  52   19 57528K 28520K uwait  10   0:01   0.05% airdcppd
 ```
 
-Basically, what you now want to do is open `screen` and run that command above and detach from the session. 
+Basically, what you now want to do is open `screen` and run that command above and detach from the session.
+
+# Acknowledgments
+* #FreeBSD on irc.freenode.org
