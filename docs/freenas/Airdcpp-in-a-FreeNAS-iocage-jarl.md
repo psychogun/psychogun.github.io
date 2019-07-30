@@ -7,7 +7,7 @@ nav_order: 2
 # How to install Airdcpp in a FreeNAS iocage jail
 {: .no_toc }
 This is how i installed a communal peer-to-peer file sharing application for file servers/NAS devices called Airdcpp on FreeNAS in a standalone iocage jail.
-{: .fs-6 .fw-300 }
+
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -24,7 +24,7 @@ Airdcpp does not provide binaries for installing in FreeNAS (FreeBSD). Therefore
 * Knowledge of SSH and how to navigate to your jail in FreeNAS
 * FreeNAS 11.2 and knowledge of how to create a jail with shares and knowledge of UNIX folder and files permissions
 
-## Installing
+## Compile
 Update and upgrade your iocage jail first:
 ```
 root@Airdccp:/ # pkg upgrade && pkg update
@@ -48,7 +48,7 @@ Make, using gcc to compile airdcpp. The number after -j indicates how many proce
 ```
 root@Airdccp:/usr/local/airdcpp-webclient # make -j6
 ```
-
+## Add a user
 Add a user to run airdcpp, we do not want airdcpp to run as root:
 ```
 root@Airdccp:/usr/local/airdcpp-webclient # adduser
@@ -80,6 +80,7 @@ adduser: INFO: Successfully added (zanko) to the user database.
 adduser: INFO: Password for (zanko) is: 
 Add another user? (yes/no): no
 ```
+## Install
 Install it:
 ```
 root@Airdccp:/usr/local/airdcpp-webclient # make install
@@ -107,4 +108,4 @@ root@Airdccp:/ # top
  PID USERNAME    THR PRI NICE   SIZE    RES STATE   C   TIME    WCPU COMMAND
  1000 zanko         13  52   19 57528K 28520K uwait  10   0:01   0.05% airdcppd
 ```
-
+There you have it. 
