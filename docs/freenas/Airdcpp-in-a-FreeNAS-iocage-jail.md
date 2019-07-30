@@ -112,5 +112,8 @@ root@Airdccp:/ # top
 Hit ctrl + c to close `top`.
 To connect to your session again, write `screen -r`.
 
-# Acknowledgments
-* google :)
+## Authors
+Mr. Johnson
+
+## Acknowledgments
+
