@@ -1,6 +1,3 @@
----
-title: Home
----
 
 ## Welcome to the Koprulu sector
 
