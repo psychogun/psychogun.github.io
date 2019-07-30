@@ -1,3 +1,9 @@
+---
+title: Home
+has_children: false
+nav_order: 1
+---
+
 ## Welcome to the Koprulu sector
 
 I am Mr. Johnson (コブラ), king of an harem and commander of a battlestar.
