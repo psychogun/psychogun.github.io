@@ -1,7 +1,8 @@
 ---
+layout: default
 title: How to install Elastic Stack on Ubuntu 18.04 LTS and use it with pfSense 2.4.4
-has_children: no
-nav_order: 3
+parent: Linux
+nav_order: 1
 ---
 
 # How to install Elastic Stack on Ubuntu 18.04 LTS and use it with PFSense 2.4.4

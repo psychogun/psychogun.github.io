@@ -1,7 +1,8 @@
 ---
+layout: default
 title: How to install Airdcpp in a FreeNAS iocage jail
-has_children: no
-nav_order: 2
+parent: FreeNAS
+nav_order: 1
 ---
 
 # How to install Airdcpp in a FreeNAS iocage jail
