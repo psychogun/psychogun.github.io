@@ -4,19 +4,24 @@ title: How to install AirDC++ in a FreeNAS iocage jail
 parent: FreeNAS
 nav_order: 1
 ---
+
 # How to install AirDC++ in a FreeNAS iocage jail
 {: .no_toc }
 This is how i installed a communal peer-to-peer file sharing application for file servers/NAS devices called AirDC++ on FreeNAS in a standalone iocage jail.
+
 ## Table of contents
 {: .no_toc .text-delta }
 1. TOC
 {:toc}
 ---
+
 ## Getting started
 These instructions will download, compile, install and run AirDC++ in an iocage jail on FreeNAS. There are no provided binaries for BSD on [https://airdcpp-web.github.io/docs/installation/installation.html](https://airdcpp-web.github.io/docs/installation/installation.html).
+
 ### Prerequisites
 * Knowledge of SSH and how to navigate to your jail in FreeNAS
 * FreeNAS 11.2 and knowledge of how to create a jail with shares and knowledge of UNIX folder and files permissions
+
 ## Compiling
 Update and upgrade your iocage jail first:
 ```tcsh
@@ -41,6 +46,7 @@ Use `make` to compile AirDC++ with gcc (the number after -j indicates how many p
 ```
 root@Airdccp:/usr/local/airdcpp-webclient # make -j6
 ```
+
 ## Add a user
 Add a user to run AirDC++, we do not want AirDC++ to run as root:
 ```
@@ -73,6 +79,7 @@ adduser: INFO: Successfully added (zanko) to the user database.
 adduser: INFO: Password for (zanko) is: 
 Add another user? (yes/no): no
 ```
+
 ## Install
 Install it:
 ```
