@@ -1,6 +1,19 @@
+---
+title: How to install Elastic Stack on Ubuntu 18.04 LTS and use it with pfSense 2.4.4
+has_children: no
+nav_order: 3
+---
+
 # How to install Elastic Stack on Ubuntu 18.04 LTS and use it with PFSense 2.4.4
+{: .no_toc }
 So, on a whim I googled syslog + pfsense, and I saw some images of some nice dashboards (Kibana) for the firewall logs from PFSense. The tutorials I found did not tell me exactly how this all works, particularly how Elasticsearch, Logstash and Kibana work together. This is how i installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beats and SHIELD) on a Ubuntu 18.04 with encrypted communication, so that I could have a nice visualization of my PFSense firewall logs (syslog) and a flow chart of my network (NetFlow).
 
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+---
 ## Getting started
 Logstash combines logdata from different sources to a joint Java Script Object Notation (JSON)-format. Elasticsearch indexes and saves JSON-logdata in a central database. Kibana graphically presents logdata to the user on a webbrowser. 
 
