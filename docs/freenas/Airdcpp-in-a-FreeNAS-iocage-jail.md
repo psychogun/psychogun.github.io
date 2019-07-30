@@ -1,13 +1,13 @@
 ---
 layout: default
-title: How to install Airdcpp in a FreeNAS iocage jail
+title: How to install AirDC++ in a FreeNAS iocage jail
 parent: FreeNAS
 nav_order: 1
 ---
 
-# How to install Airdcpp in a FreeNAS iocage jail
+# How to install AirDC++ in a FreeNAS iocage jail
 {: .no_toc }
-This is how i installed a communal peer-to-peer file sharing application for file servers/NAS devices called Airdcpp on FreeNAS in a standalone iocage jail.
+This is how i installed a communal peer-to-peer file sharing application for file servers/NAS devices called AirDC++ on FreeNAS in a standalone iocage jail.
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -16,7 +16,7 @@ This is how i installed a communal peer-to-peer file sharing application for fil
 {:toc}
 ---
 ## Getting started
-These instructions will download, compile, install and run Airdcpp in an iocage jail on FreeNAS. There are no provided binaries for BSD on https://airdcpp-web.github.io/docs/installation/installation.html](https://airdcpp-web.github.io/docs/installation/installation.html)
+These instructions will download, compile, install and run AirDC++ in an iocage jail on FreeNAS. There are no provided binaries for BSD on [https://airdcpp-web.github.io/docs/installation/installation.html](https://airdcpp-web.github.io/docs/installation/installation.html).
 
 ### Prerequisites
 * Knowledge of SSH and how to navigate to your jail in FreeNAS
@@ -27,27 +27,27 @@ Update and upgrade your iocage jail first:
 ```tcsh
 root@Airdccp:/ # pkg upgrade && pkg update
 ```
-To compile Airdcpp on FreeNAS (FreeBSD), we need to install all the required dependencies: 
-https://airdcpp-web.github.io/docs/installation/dependencies.html
-```bash
+To compile Airdcpp on FreeNAS (FreeBSD), we need to install all the required dependencies listed here
+[https://airdcpp-web.github.io/docs/installation/dependencies.html](https://airdcpp-web.github.io/docs/installation/dependencies.html).
+```tcsh
 root@Airdccp:/ # pkg install gcc cmake pkgconf npm node python boost-all bzip2 leveldb miniupnpc openssl websocketpp tbb php72-maxminddb git nano 
 ```
-
-Use git clone to download airdcpp:
-```sh
+Use git clone to download AirDC++ in an appropiate folder:
+```tcsh
 root@Airdccp:/ # cd /usr/local/
-root@Airdccp:/usr/local# git clone [https://github.com/airdcpp-web/airdcpp-webclient.git](https://github.com/airdcpp-web/airdcpp-webclient.git)
-
+root@Airdccp:/usr/local# git clone https://github.com/airdcpp-web/airdcpp-webclient.git
+````
+Hop on in to the newly created folder and call on `cmake .` to generate a makefile:
+```tcsh
 root@Airdccp:/usr/local # cd airdcpp-webclient/
 root@Airdccp:/usr/local/airdcpp-webclient # cmake .
 ```
-
-Make, using gcc to compile airdcpp. The number after -j indicates how many processor cores you are giving the task:
+Use `make` to compile AirDC++ with gcc (the number after -j indicates how many processor cores you are giving the task):
 ```
 root@Airdccp:/usr/local/airdcpp-webclient # make -j6
 ```
 ## Add a user
-Add a user to run airdcpp, we do not want airdcpp to run as root:
+Add a user to run AirDC++, we do not want AirDC++ to run as root:
 ```
 root@Airdccp:/usr/local/airdcpp-webclient # adduser
 Username: zanko
@@ -83,7 +83,7 @@ Install it:
 ```
 root@Airdccp:/usr/local/airdcpp-webclient # make install
 ```
-First time you are using airdcpp, you have to configure it:
+First time you are using AirDC++, you have to configure it:
 ```
 root@Airdcpp:/usr/local/airdcpp-webclient # airdcppd/airdcppd --configure
 ```
@@ -91,14 +91,13 @@ The --configure option will create a config file, WebServer.xml, under your root
 ```
 root@Airdcpp:/usr/local/airdcpp-webclient # cp /root/.airdc++/WebServer.xml /home/zanko/.airdc++/WebServer.xml
 ```
-Change ownership of folder which we just created, recursively (-R):
+Change ownership of the .airdc++ folder which we just created, recursively (-R):
 ```
 root@Airdcpp:/usr/local/airdcpp-webclient # chown -R zanko:zanko /home/zanko/.airdc++/
 ```
-Check if you are able to run airdcpp as your user: (more about the command line options can be found here: https://airdcpp-web.github.io/docs/usage/command-line-options.html)
+Check if you are able to run AirDC++ as our newly created user: (more about the command line options can be found here: [https://airdcpp-web.github.io/docs/usage/command-line-options.html](https://airdcpp-web.github.io/docs/usage/command-line-options.html)
 ```
 root@Airdcpp:/usr/local/airdcpp-webclient # su -m zanko -c '/usr/local/airdcpp-webclient/airdcppd/airdcppd -c=/home/zanko/.airdc++/'
-
 ```
 Use the command 'top' to see if airdcpp is running as our user zanko:
 ```
@@ -106,4 +105,5 @@ root@Airdccp:/ # top
  PID USERNAME    THR PRI NICE   SIZE    RES STATE   C   TIME    WCPU COMMAND
  1000 zanko         13  52   19 57528K 28520K uwait  10   0:01   0.05% airdcppd
 ```
-There you have it. 
+
+Basically, what you now want to do is open `screen` and run that command above and detach from the session. 
