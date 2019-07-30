@@ -19,7 +19,7 @@ This is how i installed a communal peer-to-peer file sharing application for fil
 ## Getting started
 Airdcpp does not provide binaries for installing in FreeNAS (FreeBSD), you have to compile it yourself. 
 
-More information about that topic can be found here: https://airdcpp-web.github.io/docs/installation/installation.html
+More information about that topic can be found here: [https://airdcpp-web.github.io/docs/installation/installation.html](https://airdcpp-web.github.io/docs/installation/installation.html)
 
 ### Prerequisites
 * Internet connection
@@ -40,7 +40,7 @@ root@Airdccp:/ # pkg install gcc cmake pkgconf npm node python boost-all bzip2 l
 Use git clone to download airdcpp:
 ```
 root@Airdccp:/ # cd /usr/local/
-root@Airdccp:/usr/local# git clone https://github.com/airdcpp-web/airdcpp-webclient.git
+root@Airdccp:/usr/local# git clone [https://github.com/airdcpp-web/airdcpp-webclient.git](https://github.com/airdcpp-web/airdcpp-webclient.git)
 
 root@Airdccp:/usr/local # cd airdcpp-webclient/
 root@Airdccp:/usr/local/airdcpp-webclient # cmake .
