@@ -9,6 +9,7 @@ nav_order: 1
 {: .no_toc }
 So, on a whim I googled syslog + pfsense, and I saw some images of some nice dashboards (Kibana) for the firewall logs from PFSense. The tutorials I found did not tell me exactly how this all works, particularly how Elasticsearch, Logstash and Kibana work together. 
 
+
 This is how i installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beats and SHIELD) on a Ubuntu 18.04 with encrypted communication, so that I could have a nice visualization of my PFSense firewall logs (syslog) and a flow chart of my network (NetFlow).
 
 ## Table of contents
