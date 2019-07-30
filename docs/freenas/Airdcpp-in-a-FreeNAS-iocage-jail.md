@@ -111,4 +111,4 @@ root@Airdccp:/ # top
 Basically, what you now want to do is open `screen` and run that command above and detach from the session.
 
 # Acknowledgments
-* #FreeBSD on irc.freenode.org
+* google :)
