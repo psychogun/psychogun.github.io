@@ -10,5 +10,7 @@ permalink: /
 
 I am Mr. Johnson (コブラ), king of a harem and commander of a battlestar.
 
-Wielding a cybernetic arm-laser gun, fighting monsters and meddling in the Pirate Guild's criminal enterprises have forced me to save my favourite items on the GitHub.
+Wielding a cybernetic arm-laser gun, fighting monsters and meddling in the Pirate Guild's criminal enterprises has forced me to save my favourite items, journals and thoughts on the GitHub.
+
+Jokes aside, just trying to learn new things.
 
