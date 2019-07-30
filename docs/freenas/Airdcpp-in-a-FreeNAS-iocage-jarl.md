@@ -17,7 +17,9 @@ This is how i installed a communal peer-to-peer file sharing application for fil
 ---
 
 ## Getting started
-Airdcpp does not provide binaries for installing in FreeNAS (FreeBSD). Therefore, you have to compile it yourself. More information about that topic can be found here: https://airdcpp-web.github.io/docs/installation/installation.html
+Airdcpp does not provide binaries for installing in FreeNAS (FreeBSD), you have to compile it yourself. 
+
+More information about that topic can be found here: https://airdcpp-web.github.io/docs/installation/installation.html
 
 ### Prerequisites
 * Internet connection
