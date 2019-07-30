@@ -89,7 +89,7 @@ First time you are using AirDC++, you have to configure it:
 ```
 root@Airdcpp:/usr/local/airdcpp-webclient # airdcppd/airdcppd --configure
 ```
-The --configure option will create a config file, WebServer.xml, under your root home folder which we will copy to our created user' home space:
+The `--configure` parameter will create a config file, `WebServer.xml`, under your root home folder which we will copy to our created user' home space:
 ```
 root@Airdcpp:/usr/local/airdcpp-webclient # cp /root/.airdc++/WebServer.xml /home/zanko/.airdc++/WebServer.xml
 ```
@@ -98,7 +98,9 @@ Change ownership of the .airdc++ folder which we just created, recursively (-R):
 root@Airdcpp:/usr/local/airdcpp-webclient # chown -R zanko:zanko /home/zanko/.airdc++/
 ```
 Check if you are able to run AirDC++ as our newly created user: (more about the command line options can be found here: [https://airdcpp-web.github.io/docs/usage/command-line-options.html](https://airdcpp-web.github.io/docs/usage/command-line-options.html)
+Basically, what you now want to do is open `screen` and run the command below and then detach (ctrl + a, d) from the `screen` session.
 ```
+root@Airdcpp:/usr/local/airdcpp-webclient # screen
 root@Airdcpp:/usr/local/airdcpp-webclient # su -m zanko -c '/usr/local/airdcpp-webclient/airdcppd/airdcppd -c=/home/zanko/.airdc++/'
 ```
 Use the command 'top' to see if airdcpp is running as our user zanko:
@@ -107,8 +109,8 @@ root@Airdccp:/ # top
  PID USERNAME    THR PRI NICE   SIZE    RES STATE   C   TIME    WCPU COMMAND
  1000 zanko         13  52   19 57528K 28520K uwait  10   0:01   0.05% airdcppd
 ```
-
-Basically, what you now want to do is open `screen` and run that command above and detach from the session.
+Hit ctrl + c to close `top`.
+To connect to your session again, write `screen -r`.
 
 # Acknowledgments
 * google :)
