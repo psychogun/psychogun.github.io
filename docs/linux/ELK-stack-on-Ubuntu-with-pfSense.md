@@ -406,7 +406,7 @@ elk@stack:~$ sudo gunzip GeoLite2-City.mmdb.gz
 
 ### Grok
 Grok is a great way to parse unstructured log data into something structured and queryable. Sometimes logstash doesn’t have a pattern you need, so you'll have to make it yourself. Or download it. From here, or wherever I first found it.
-```
+```bash
 # GROK Custom Patterns (add to patterns directory and reference in GROK filter for pfSense events):
 # GROK Patterns for pfSense 2.4.2 Logging Format
 #
