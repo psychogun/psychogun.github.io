@@ -98,7 +98,7 @@ elk@stack:~$ echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/lib/jvm/java-8-openjdk-amd64/bin
 ```
 
-## Installing Elasticsearch
+### Installing Elasticsearch
 We'll install Elasticsearch first, because Logstash and Kibana are dependent on Elasticsearch. When you install each component of the stack, the install will automatically create service users for running the different components. 
 
 Import the Elasticsearch PGP key and install Elasticsearch from the APT repository by following this excellent guide; 
@@ -146,7 +146,7 @@ elk@stack:~$ curl -X GET http://localhost:9200
 }
 
 ```
-## Installing Logstash
+### Installing Logstash
 After Elasticsearch is installed, we'll go ahead and install Logstash.
 
 Follow this excellent guide in in order to install the Public Signing Key and save the repository definition so you can `sudo apt-get install logstash` (APT):
@@ -167,7 +167,7 @@ elk@stack:~$ sudo systemctl stop logstash.service
 ```
 Just stop it for now. 
 
-### Pipelines
+#### Pipelines
 So.  Pipelines. 
 In order to specify how Logstash listens to incoming connections (ports/protocols) and where to send data (Elasticsearch), and whether or not to apply a filter, we will have to create configuration files (input, output, filter) in the JSON-format. Where to put these configuration files ("pipelines"), are stated in `pipelines.yml`:
 ```bash
@@ -406,7 +406,7 @@ elk@stack:/etc/logstash/conf.d$ tail -f /var/log/logstash/logstash-plain.log
 ```
 If you have tried to start logstash, you can now stop it by `sudo systemctl stop logstash.service`. Because we are referencing `geoip` and a different non-standard grok pattern `match =>` in our logstash configs, which we haven't installed yet, you'll see in `/var/log/logstash/logstash-plain.log` that logstash will not boot well.  
 
-### MaxMind GeoIP database
+#### MaxMind GeoIP database
 Download and extract the MaxMind GeoIP database:
 ```bash
 elk@stack:~$ cd /etc/logstash
@@ -414,7 +414,7 @@ elk@stack:/etc/logstash$ sudo wget http://geolite.maxmind.com/download/geoip/dat
 elk@stack:/etc/logstash$ sudo gunzip GeoLite2-City.mmdb.gz
 ```
 
-### Grok
+#### Grok
 Grok is a great way to parse unstructured log data into something structured and queryable. Sometimes logstash doesn’t have a pattern you need, so you'll have to make it yourself. Or download it:
 ```bash
 elk@stack:~$ cd /etc/logstash/conf.d/
@@ -432,7 +432,7 @@ Hopefully it started succesfully:
 elkn@stack:~$ sudo tail -f /var/log/logstash/logstash-plain.log 
 ```
 
-## Installing Kibana 
+### Installing Kibana 
 Follow this excellent guide to install Kibana and make it start automatically when the system boots :
 * [https://www.elastic.co/guide/en/kibana/current/deb.html](https://www.elastic.co/guide/en/kibana/current/deb.html)
 
@@ -444,32 +444,33 @@ What we first and foremost want to do with our `kibana.yml`, is to edit the `ser
 
 Restart (or start) your Kibana with `sudo systemctl start kibana` and go to http://ip-adress:5601 to check if it is up and running (choose No when asked if you want to import some data). Select 'Explore on your own', we'll get back to Kibana in a bit. Now we need some data to visualize, e.g. make pfSense send data to logstash.
 
-## Configure pfSense for syslog
+## Configuration
+### pfSense and syslog
 Log on to your pfSense and go to Status > System logs > Settings. 
 
 For content, we will for now log "Firewall Events".
 
 Enable Remote Logging and point one of the 'Remote log servers' to 'logstash-syslog-input-ip:and-port', e.g.: 192.168.4.100:5140, as stated in `01-inputs.conf`. Syslog sends UDP datagrams to port 514 on the specified remote syslog server, unless another port is specified.
 
-## Kibana configuration 
+### Kibana configuration 
 
-### Index patterns
+#### Index patterns
 *Index patterns* tell Kibana which Elasticsearch indices you want to explore. An index pattern can match the name of a single index, or include a wildcard (*) to match multiple indices.
 
 For example, Logstash typically creates a series of indices in the format logstash-YYYY.MMM.DD. To explore all of the log data from May 2018, you could specify the index pattern logstash-2018.05*.
 
-### Discover
+#### Discover
 *Discover* enables you to explore your data with Kibana’s data discovery functions. You have access to every document in every index that matches the selected index pattern. You can submit search queries, filter the search results, and view document data. Go to Discover to see your syslogs flowing in!
 
-### Visualization
+#### Visualization
 Kibana *visualizations* are based on Elasticsearch queries. By using a series of Elasticsearch aggregations to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
-### Dashboard
+#### Dashboard
 A Kibana *dashboard* displays a collection of visualizations, searches, and maps. You can arrange, resize, and edit the dashboard content and then save the dashboard so you can share it.
 
 Go to http://ip-adress:5601 and go to Management > Create Index Pattern (Kibana Index Patterns) > and our logstash service which we started have enabled us to select that indicies, so write "logstash*". Press 'Next step'.  Under 'Time Filter field name' choose '@timestamp' and then hit 'Create Index pattern'. 
 
-### Saved Objects
+#### Saved Objects
 With 'Saved Objects' you are able to import searches, dashboards and visualizations that has been made before. Let us do that.
 
 Go to Saved Objects > Import > and import 'Discover - Firewall and pfSense.json', you might have to re-associate the object with your logstash* index pattern. You are successfull when you have imported 6 objects. [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)).
@@ -483,7 +484,7 @@ Import "Dashboard - Firewall - External Block.json", "Dashboard - Firewall - Ext
 
 Hopefully now you have 3 dashboards. One which is showing blocked traffic, one which is showing traffic that is let through, and one "overall" dashboard with syslog events from your pfSense firewall. 
 
-## Configure0 pfSense for NetFlow
+### pfSense and netflow
 Log on to your PFSense and go to System > Package Manager > Available Packages and install `softflowd`. Edit `softlowd` by navigating to Services > softlowd. A basic configuration looks like this:
 
 * Select which interfaces to monitor. I selected WAN.
@@ -495,7 +496,7 @@ Log on to your PFSense and go to System > Package Manager > Available Packages a
 
 PS: Communication between PFSense and Logstash for Netflow is not encrypted. Make sure you are creating a good network design by using VLAN or something else to ensure the metadata of the communication on your monitored interfaces is not intentionally going where it should not go. 
 
-## Configure Logstash for NetFlow
+### Logstash and netflow
 Stop logstash.service:
 ```bash
 elk@stack:/usr/share/logstash$ sudo systemctl stop logstash.service
@@ -530,7 +531,7 @@ elk@stack:/usr/share/logstash$ sudo systemctl start logstash.service
 
 Voilà. Netflow and syslogs in Kibana from pfSense.
 
-## Enable HTTPS on Kibana
+### Enable HTTPS on Kibana
 You are able to access the Kibana interface via HTTPS by setting `server.sssl.enable` to true in `kibana.yml` configuration file. To be able to do so, you have to create your certificates.
 
 Generate a key with a pass-phrase:
@@ -576,7 +577,7 @@ elk@stack:/etc/kibana$ sudo systemctl start kibana.service
 ```
 Now you are able to communicate with Kibana over an encrypted connection (https).
 
-## Enable Elasticsearch via SSL
+### Enable Elasticsearch via SSL
 Even though we are using the Open Source version of Kibana, we are able to encrypt communication between Kibana and Elasticsearch. For further hardening of your Elastic Stack, go to https://www.elastic.co/subscriptions to see if you are willing to pay the dues. 
 
 Add the ```xpack.security.enabled: true``` in elasticsearch.yml 
@@ -598,12 +599,14 @@ Replace 'localhost' with your domain name. Run commands one by one because opens
 For further information, go check out the excellent guide here: https://www.elastic.co/guide/en/logstash/current/netflow-module.html
 
 
-## Yellow cluster
-
+## Fault finding
+More should come
+### Yellow cluster
+More should come
 http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html
 
 
-## Version control
+### Version control
 To see which version of ELK Stack you have installed are, do:
 ```
 elk@stack:~$ sudo /usr/share/logstash/bin/logstash --version
@@ -670,8 +673,11 @@ stdout {
 ```
 
 
-## Logstash with just Netflow
+### Logstash with just netflow
 If you are not using syslogs, doing the grok patterns and everything above, do this to quick and dirty populate netflow in your Kibana. 
+
+Stop logstash. Start with `--modules netflow --setup``
+Stop logstash.
 
 Edit `logstash.yml`:
 ```
@@ -680,7 +686,7 @@ elk@stack:/usr/share/logstash$ sudo nano /etc/logstash/logstash.yml
 (...)
 modules:
    - name: netflow
-     var.input.udp.port: 2056
+     var.input.udp.port: 2055
      var.elasticsearch.hosts: http://127.0.0.1:9200
      var.elasticsearch.ssl.enabled: false
      var.kibana.host: 127.0.0.1:5601
@@ -689,8 +695,9 @@ modules:
      var.kibana.ssl.verification_mode: disable
     
 ```
+Start with `sudo systemctl start logstash.service`
 
-### Acknowledgments (in no particular order)
+## Acknowledgments 
 * https://arnaudloos.com/2019/enable-x-pack-security/
 * https://www.elastic.co/elk-stack 
 * https://extelligenceblog.it/2017/10/18/elasticstack-elk-and-pfsense-firewall-ip-traffic-statistics-with-netflow/
