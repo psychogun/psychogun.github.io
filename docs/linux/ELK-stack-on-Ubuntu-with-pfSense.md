@@ -10,7 +10,7 @@ nav_order: 1
 So, on a whim I googled syslog + pfsense, and I saw some images of some nice dashboards (Kibana) for the firewall logs from PFSense. The tutorials I found did not tell me exactly how this all works, particularly how Elasticsearch, Logstash and Kibana work together. 
 
 
-This is how i installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beats and SHIELD) on a Ubuntu 18.04 with encrypted communication, so that I could have a nice visualization of my PFSense firewall logs (syslog) and a flow chart of my network (NetFlow).
+These instructions will tell you what I have learned and how I installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beats and SHIELD) on Ubuntu 18.04 LTS with encrypted communication, so that I could have a nice visualization of my PFSense firewall logs with syslogs and netflow.
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -19,10 +19,10 @@ This is how i installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beat
 {:toc}
 ---
 ## Getting started
-Logstash combines logdata from different sources to a joint Java Script Object Notation (JSON)-format. Elasticsearch indexes and saves JSON-logdata in a central database. Kibana graphically presents logdata to the user on a webbrowser. 
+Logstash combines logdata from different sources to a joint Java Script Object Notation (JSON)-format. Elasticsearch indexes and saves JSON-logdata in a central database. Kibana graphically presents logdata to the user in a webbrowser. 
 
 ### Logstash
-Logstash continiously looks after (different types of) logdata which is presented (syslog on TCP/UDP, or FileBeat, or Netflow, ++) on specified ports.
+Logstash continiously looks after (different types of) logdata which is presented (syslog, or FileBeat, or Netflow, ++) on specified ports.
 
 Logstash accepts different types of traffic, applies a filter and transforms the logdata to JSON-format which is then sent to Elasticsearch for indexing and saving in a central database.
 
@@ -44,13 +44,13 @@ SHIELD has the following main features:
 * IP filtering
 * Traceability
 
-SHIELD is a commcercial product, so you'll have to pay for it. 
+SHIELD is a commercial product, so you'll have to pay for it. 
 
 ### PFSense
 pfSense is an open source firewall/router computer software distribution based on FreeBSD. It is installed on a physical computer or a virtual machine to make a dedicated firewall/router for a network. It can be configured and upgraded through a web-based interface, and requires no knowledge of the underlying FreeBSD system to manage.
 
 ## Disclaimer
-I am using Github for my own sake and configuration files. Use at own risk. And with every how-to's, read through the entire thing before starting.  
+As with every how-to's, read through the entire thing before starting. 
 
 ### Prerequisites
 * Internet connection?
@@ -62,70 +62,73 @@ I am using Github for my own sake and configuration files. Use at own risk. And 
 * PFSene 2.4.4
 
 ## Installlation
-Firstmost, update and upgrade our Ubuntu installation:
+First and foremost, update and upgrade our Ubuntu installation:
 ```
 elk@stack:~$ sudo apt-get update
 elk@stack:~$ sudo apt-get upgrade
 ```
 ### Installing Java
-Logstash requires Java 8 or Java 11, so we'll go ahead and install the OpenJDK Runtime Environment:
-```
+Logstash requires Java 8 or Java 11, so we'll go ahead and install the OpenJDK Runtime Environment. I have used Java 8:
+```bash
 elk@stack:~$  sudo apt install -y openjdk-8-jdk
 ```
 Was it installed properly?
-```
+```bash
 elk@stack:~$ java -version
+openjdk version "1.8.0_212"
+OpenJDK Runtime Environment (build 1.8.0_212-8u212-b03-0ubuntu1.18.04.1-b03)
+OpenJDK 64-Bit Server VM (build 25.212-b03, mixed mode)
 ```
 You'll have to ensure that your JAVA HOME environment is properly set up. To see your current JAVA HOME environment variable, issue command:
-```
+```bash
 elk@stack:~$ echo $JAVA_HOME 
 ```
-If nothing shows up, your JAVA_HOME environment path was not set. To set your JAVA_HOME path, run:
-```
+If nothing shows up, your JAVA_HOME environment path is not set. To set your JAVA_HOME path, run:
+```bash
 elk@stack:~$ export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ```
 Add JAVA bin directory to the PATH variable:
-```
+```bash
 elk@stack:~$ export PATH=$PATH:$JAVA_HOME/bin
 ```
 Check your PATH variable:
-```
+```bash
 elk@stack:~$ echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/lib/jvm/java-8-openjdk-amd64/bin
 ```
 
 ## Installing Elasticsearch
-We'll install Elasticsearch first, because Logstash and Kibana are dependent on Elasticsearch (atleast I read that somewhere). When you install each component of the stack, the install will automatically create service users for running the different components. 
+We'll install Elasticsearch first, because Logstash and Kibana are dependent on Elasticsearch. When you install each component of the stack, the install will automatically create service users for running the different service. 
 
-Import the Elasticsearch PGP key and install from the APT repository by following this excellent guide; 
-* https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html (remember to install wget and apt-transport-https)
+Import the Elasticsearch PGP key and install Elasticsearch from the APT repository by following this excellent guide; 
+* [https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html) (remember to install wget and apt-transport-https)
 
 In order for Elasticsearch to function optimally, you should increase the number of files the (service) user 'elasticsearch' is allowed to open at the same time. Edit ```limits.conf``` and add the following:
-```
+```bash
 elk@stack:~$ nano /etc/security/limits.conf 
 elasticsearch soft nofile 32000
 elasticsearch hard nofile 32000
 ```
 Also edit /etc/sysctl.conf and add the following:
-```
+```bash
 fs.file-max = 300000
 ```
-For some more information about file handling, read; https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d
+For some more information about file handling, read; [https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d](https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d)
 
 To start Elasticsearch, write:
-```
+```bash
 elk@stack:~$ sudo systemctl start elasticsearch
 ```
 To enable Elasticsearch to start when you boot, write:
-```
+```bash
 elkeson@elk:~$ sudo systemctl enable elasticsearch
 ```
 To see if Elasticsearch has started, curl it:
-```
+```bash
 curl -X GET http://localhost:9200
 ```
 If everything installed as it should, the output of curl will look something like this:
-```
+```bash
 elk@stack:~$ curl -X GET http://localhost:9200
 {
   "name" : "stack",
@@ -150,27 +153,27 @@ elk@stack:~$ curl -X GET http://localhost:9200
 After Elasticsearch is installed, we'll go ahead and install Logstash.
 
 Follow this excellent guide in in order to install the Public Signing Key and save the repository definition so you can 'sudo apt-get install logstash' (APT):
-* https://www.elastic.co/guide/en/logstash/current/installing-logstash.html
+* [https://www.elastic.co/guide/en/logstash/current/installing-logstash.html](https://www.elastic.co/guide/en/logstash/current/installing-logstash.html)
 
 After installing the package, you can enable and start up Logstash with:
-```
+```bash
 elk@stack:~$ sudo systemctl enable logstash.service
 elk@stack:~$ sudo systemctl start logstash.service
 ```
 To see if our Logstash service is running as it should, issue command:
-```
+```bash
 elk@stack:~$ sudo systemctl status logstash.service
 ```
 And to stop it?
-```
+```bash
 elk@stack:~$ sudo systemctl stop logstash.service
 ```
 Just stop it for now. 
 
 ### Pipelines
 So.  Pipelines. 
-In order to specify how Logstash listens to incoming connections (ports/protocols) and where to send data (elasticsearch), and whether or not to apply a filter, we will have to create configuration file(s) in the JSON-format. Where to put these configuration files ("pipelines"), are stated in ```pipelines.yml```;
-```
+In order to specify how Logstash listens to incoming connections (ports/protocols) and where to send data (elasticsearch), and whether or not to apply a filter, we will have to create configuration files (input, output, filter) in the JSON-format. Where to put these configuration files ("pipelines"), are stated in `pipelines.yml`:
+```bash
 elk@stack:~$ more /etc/logstash/pipelines.yml 
 # This file is where you define your pipelines. You can define multiple.
 # For more information on multiple pipelines, see the documentation:
@@ -179,9 +182,9 @@ elk@stack:~$ more /etc/logstash/pipelines.yml
 - pipeline.id: main
   path.config: "/etc/logstash/conf.d/*.conf"
 ```
-You can have one 'big' .conf configuration file, or you can separate them in multiple .conf configuration files. I have them separated:
+You can have one 'big' .conf configuration file, or you can separate them in multiple .conf configuration files. You will see I have some separated, and one joined:
 
-Input file: ```/etc/logstash/conf.d/01-inputs.conf```
+Input file: `/etc/logstash/conf.d/01-inputs.conf`
 ```
 elk@stack:~$ more /etc/logstash/conf.d/01-inputs.conf 
 input {  
@@ -198,10 +201,10 @@ input {
   }
 }
 ```
-The input file listens for syslog's on both TCP and UDP at port 5120 and 5140. 
+This input file listens for syslog's on both TCP and UDP at port 5120 and 5140. 
 
 
-Syslog filter file: ```/etc/logstash/conf.d/10-syslog.conf```
+Syslog filter file: `/etc/logstash/conf.d/10-syslog.conf`
 ```
 elk@stack:~$ more /etc/logstash/conf.d/10-syslog.conf 
 filter {
@@ -255,10 +258,10 @@ filter {
   }
 }
 ```
-I will not try to explain what the filter for syslog exactly does, because I have no experience with JSON. But you can see that it tags syslog traffic from my PFSense with both 'pfsense' and 'Ready', and adds some extra fields. The if [host] above (192.168.40.1) is the IP adress to my PFSense 2.4.4 firewall, which address you'll probably have to change. And if you have another pfsense box, add it here as well (the one with 172.22.2.1 address).
+I will not try to explain what the filter for syslog exactly does, because I have no experience with JSON. But you can see that it tags syslog traffic from my pfSense with both 'pfsense' and 'Ready', and adds some extra fields. The if [host] above (192.168.40.1) is the IP adress to my pfSense firewall, which address you'll probably have to change. And if you have another pfSense firewall, add it here as well (the one with 172.22.2.1 address).
 
-PFSense filter: ```/etc/logstash/conf.d/11-pfsense.conf```
-```
+pfSense filter: `/etc/logstash/conf.d/11-pfsense.conf`
+```bash
 elk@stack:~$ more /etc/logstash/conf.d/11-pfsense.conf 
 filter {
   if "pfsense" in [tags] {
@@ -374,7 +377,7 @@ filter {
 ```
 
 Since we have the Elastic stack installed on the same machine, our Logstash would connect to Elasticsearch (30-outputs.conf) like this:
-```
+```bash
 elkn@stack:~$ more /etc/logstash/conf.d/30-outputs.conf 
 output {
         elasticsearch {
@@ -382,63 +385,67 @@ output {
                 index => "logstash-%{+YYYY.MM.dd}" }
 }
 ```
-The index statement dictates that a rotating of the database file with a date stamp will occour. If you want to debug the Logstash configuration, you could also send output to console by adding stdout:
-```
+The index statement dictates that a rotating of the database file with a date stamp will occour. If you want to view the Logstash output realtime, you could also send output to console by adding stdout:
+```bash
 elkeson@elk:~$ more /etc/logstash/conf.d/30-outputs.conf 
 output {
         elasticsearch {
                 hosts => ["http://localhost:9200"]
                 index => "logstash-%{+YYYY.MM.dd}" }
-                stdout { codec => rubydebug} 
+                stdout { codec => rubydebug } 
 }
 ```
-Or just use tail -f and see what the output is whenever you are starting logstash. 
-```
+**Disclaimer: I have to investigate why that is not working (stdout)
+
+Use `tail -f` to see the status of the logstash service: 
+```bash
 elk@stack:/etc/logstash/conf.d$ tail -f /var/log/logstash/logstash-plain.log 
 ```
-Now, if you haven't already stopped logstash, do it. Because we are referencing geoip and a different non-standard grok pattern in our logstash configs, so logstash would not boot well. 
+If you have tried to start logstash, you can now stop it by `sudo systemctl stop logstash.service`. Because we are referencing geoip and a different non-standard grok pattern in our logstash configs, which we haven't installed yet, you'll see through logstash-plain.log that the logstash will not boot well.  
 
 ### Download and install MaxMind GeoIP database
-```
+```bash
 elk@stack:~$ cd /etc/logstash
 elk@stack:~$ sudo wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz
 elk@stack:~$ sudo gunzip GeoLite2-City.mmdb.gz
 ```
 
 ### Grok
-Grok is a great way to parse unstructured log data into something structured and queryable. Sometimes logstash doesn’t have a pattern you need, so you'll have to make it yourself. Or download it. From here, or wherever I first found it.
-```bash
+Grok is a great way to parse unstructured log data into something structured and queryable. Sometimes logstash doesn’t have a pattern you need, so you'll have to make it yourself. Or download it.
+`~~~~
 elk@stack:~$ cd /etc/logstash/conf.d/
 elk@stack:~$ sudo mkdir patterns
 elk@stack:~$ cd patterns
 elk@stack:~$ sudo wget https://raw.githubusercontent.com/a3ilson/pfelk/master/pfsense_2_4_2.grok
-```
-
+~~~~
 
 Now, go ahead and start logstash!
-```
+```bash
 elkn@stack:~$ sudo systemctl start logstash
+```
+Hopefully it started succesfully:
+```bash
 elkn@stack:~$ sudo tail -f /var/log/logstash/logstash-plain.log 
 ```
 
 ## Installing Kibana 
 Follow this excellent guide to install Kibana and make it start automatically when the system boots :
-* https://www.elastic.co/guide/en/kibana/current/deb.html
+* [https://www.elastic.co/guide/en/kibana/current/deb.html](https://www.elastic.co/guide/en/kibana/current/deb.html)
 
-Kibana loads its configuration from the /etc/kibana/kibana.yml file by default. The format of this config file is explained in https://www.elastic.co/guide/en/kibana/7.2/settings.html
+Kibana loads its configuration from the /etc/kibana/kibana.yml file by default. The format of this config file is explained in [https://www.elastic.co/guide/en/kibana/7.2/settings.html](https://www.elastic.co/guide/en/kibana/7.2/settings.html)
 
 If our Elasticsearch database is not on the same host as Kibana, you will have to tell where Elasticsearch is by specifying 'elasticsearch.hosts', e.g.: elasticsearch.hosts http://ip-adress:9200 in kibana.yml
 
-What we first and foremost want to do with our kibana.yml, is to edit the ```server.host: "localhost"```and bind it to (all) interfaces by writing ```server.host: "0.0.0.0"```. Editing this parameter from a non-loopback address enables connections from remote users.
+What we first and foremost want to do with our kibana.yml, is to edit the `server.host: "localhost"`and bind it to (all) interfaces by writing `server.host: "0.0.0.0"`. Editing this parameter from a non-loopback address enables connections from remote users, thus enables us to connect to Kibana through a web-browser.
 
-Restart (or start) your Kibana and go to http://ip-adress:5601 to check if it is up and running (choose No when asked if you want to import some data. Select 'Explore on your own', we'll get back to Kibana in a bit. Now we need some data to visualize, eg make PFSense send data to logstash.
+Restart (or start) your Kibana with `sudo systemctl start kibana` and go to http://ip-adress:5601 to check if it is up and running (choose No when asked if you want to import some data). Select 'Explore on your own', we'll get back to Kibana in a bit. Now we need some data to visualize, e.g. make pfSense send data to logstash.
 
-## Configuring PFSense for syslog
-Log on to your PFSense and go to Status > System logs > Settings. 
+## Configuring pfSense for syslog
+Log on to your pfSense and go to Status > System logs > Settings. 
 
 For content, we will for now log 'Firewall Events'.
 
-Enable Remote Logging and point one of the 'Remote log servers' to 'logstash-syslog-input-ip:and-port', e.g.: 192.168.4.100:5140. Syslog sends UDP datagrams to port 514 on the specified remote syslog server, unless another port is specified.
+Enable Remote Logging and point one of the 'Remote log servers' to 'logstash-syslog-input-ip:and-port', e.g.: 192.168.4.100:5140, as stated in `01-inputs.conf`. Syslog sends UDP datagrams to port 514 on the specified remote syslog server, unless another port is specified.
 
 ## Index patterns, discovers, dashboards and visualizations
 Index patterns tell Kibana which Elasticsearch indices you want to explore. An index pattern can match the name of a single index, or include a wildcard (*) to match multiple indices.
