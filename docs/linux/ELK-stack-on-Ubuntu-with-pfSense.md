@@ -405,20 +405,21 @@ elk@stack:/etc/logstash/conf.d$ tail -f /var/log/logstash/logstash-plain.log
 ```
 If you have tried to start logstash, you can now stop it by `sudo systemctl stop logstash.service`. Because we are referencing geoip and a different non-standard grok pattern in our logstash configs, which we haven't installed yet, you'll see through logstash-plain.log that the logstash will not boot well.  
 
-### Download and install MaxMind GeoIP database
+### MaxMind GeoIP database
+Download and extract the MaxMind GeoIP database:
 ```bash
 elk@stack:~$ cd /etc/logstash
-elk@stack:~$ sudo wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz
-elk@stack:~$ sudo gunzip GeoLite2-City.mmdb.gz
+elk@stack:/etc/logstash$ sudo wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz
+elk@stack:/etc/logstash$ sudo gunzip GeoLite2-City.mmdb.gz
 ```
 
 ### Grok
-Grok is a great way to parse unstructured log data into something structured and queryable. Sometimes logstash doesn’t have a pattern you need, so you'll have to make it yourself. Or download it.
+Grok is a great way to parse unstructured log data into something structured and queryable. Sometimes logstash doesn’t have a pattern you need, so you'll have to make it yourself. Or download it:
 ```bash
 elk@stack:~$ cd /etc/logstash/conf.d/
-elk@stack:~$ sudo mkdir patterns
-elk@stack:~$ cd patterns
-elk@stack:~$ sudo wget https://raw.githubusercontent.com/a3ilson/pfelk/master/pfsense_2_4_2.grok
+elkeson@stack:/etc/logstash$ sudo mkdir patterns
+elkeson@stack:/etc/logstash$ cd patterns
+elkeson@stack:/etc/logstash/patterns$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/patterns/pfsense_2_4_2.grok
 ```
 
 Now, go ahead and start logstash!
