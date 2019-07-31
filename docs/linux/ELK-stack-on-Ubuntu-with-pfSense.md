@@ -1,10 +1,10 @@
 ---
 layout: default
-title: ELK Stack with pfSense
+title: ELK Stack on Ubuntu with pfSense
 parent: Linux
 nav_order: 1
 ---
-*_WORK IN PROGRESS as of 2019-07-31_*
+*WORK IN PROGRESS as of 2019-07-31*
 # How to install the ELK Stack on Ubuntu for pfSense
 {: .no_toc }
 So, on a whim I googled syslog + pfsense, and I saw some images of some nice dashboards (Kibana) for the firewall logs from PFSense. The tutorials I found did not tell me exactly how this all works, particularly how Elasticsearch, Logstash and Kibana work together. 
@@ -97,7 +97,7 @@ elk@stack:~$ echo $PATH
 ```
 
 ## Installing Elasticsearch
-We'll install Elasticsearch first, because Logstash and Kibana are dependent on Elasticsearch. When you install each component of the stack, the install will automatically create service users for running the different service. 
+We'll install Elasticsearch first, because Logstash and Kibana are dependent on Elasticsearch. When you install each component of the stack, the install will automatically create service users for running the different components. 
 
 Import the Elasticsearch PGP key and install Elasticsearch from the APT repository by following this excellent guide; 
 * [https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html) (also make sure to install `wget` and `apt-transport-https`).
@@ -147,7 +147,7 @@ elk@stack:~$ curl -X GET http://localhost:9200
 ## Installing Logstash
 After Elasticsearch is installed, we'll go ahead and install Logstash.
 
-Follow this excellent guide in in order to install the Public Signing Key and save the repository definition so you can 'sudo apt-get install logstash' (APT):
+Follow this excellent guide in in order to install the Public Signing Key and save the repository definition so you can `sudo apt-get install logstash` (APT):
 * [https://www.elastic.co/guide/en/logstash/current/installing-logstash.html](https://www.elastic.co/guide/en/logstash/current/installing-logstash.html)
 
 After installing the package, you can enable and start up Logstash with:
