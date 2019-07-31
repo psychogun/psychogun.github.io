@@ -5,7 +5,7 @@ parent: Linux
 nav_order: 1
 ---
 
-# How to install Elastic Stack on Ubuntu 18.04 LTS and use it with PFSense 2.4.4
+# How to install Elastic Stack on Ubuntu 18.04 LTS and use it with pfSense 2.4.4
 {: .no_toc }
 So, on a whim I googled syslog + pfsense, and I saw some images of some nice dashboards (Kibana) for the firewall logs from PFSense. The tutorials I found did not tell me exactly how this all works, particularly how Elasticsearch, Logstash and Kibana work together. 
 
@@ -46,7 +46,7 @@ SHIELD has the following main features:
 
 SHIELD is a commercial product, so you'll have to pay for it. 
 
-### PFSense
+### pfSense
 pfSense is an open source firewall/router computer software distribution based on FreeBSD. It is installed on a physical computer or a virtual machine to make a dedicated firewall/router for a network. It can be configured and upgraded through a web-based interface, and requires no knowledge of the underlying FreeBSD system to manage.
 
 ## Disclaimer
@@ -123,11 +123,7 @@ To enable Elasticsearch to start when you boot, write:
 ```bash
 elkeson@elk:~$ sudo systemctl enable elasticsearch
 ```
-To see if Elasticsearch has started, curl it:
-```bash
-curl -X GET http://localhost:9200
-```
-If everything installed as it should, the output of curl will look something like this:
+To see if Elasticsearch has been started as it should, your curl output will look something like this:
 ```bash
 elk@stack:~$ curl -X GET http://localhost:9200
 {
