@@ -16,7 +16,7 @@
 remote_theme: pmarsceill/just-the-docs
 
 title: PSYCHOGUN
-description: A Jekyll theme for documentation
+description: Robotic servant Ben is Lady Armaroid
 baseurl: "/" # the subpath of your site, e.g. /blog
 url: "https://psychogun.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 
@@ -36,9 +36,8 @@ color_scheme: nil
 
 # Google Analytics Tracking (optional)
 # e.g, UA-1234567-89
-#ga_tracking: UA-2709176-10
+ga_tracking: UA-145014988-1
 
 plugins:
   - jekyll-seo-tag
-  
-#  title: PSYCHOGUN
+
