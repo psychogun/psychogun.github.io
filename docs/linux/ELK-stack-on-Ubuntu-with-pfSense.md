@@ -412,7 +412,7 @@ elk@stack:~$ sudo gunzip GeoLite2-City.mmdb.gz
 
 ### Grok
 Grok is a great way to parse unstructured log data into something structured and queryable. Sometimes logstash doesn’t have a pattern you need, so you'll have to make it yourself. Or download it.
-`~~~~
+~~~~
 elk@stack:~$ cd /etc/logstash/conf.d/
 elk@stack:~$ sudo mkdir patterns
 elk@stack:~$ cd patterns
