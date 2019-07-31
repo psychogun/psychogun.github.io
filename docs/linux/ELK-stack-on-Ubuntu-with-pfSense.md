@@ -464,11 +464,11 @@ Go to http://ip-adress:5601 and go to Management > Create Index Pattern (Kibana 
 
 With 'Saved Objects' you are able to import searches, dashboards and visualizations that has been made before. Let us do that.
 
-Go to Saved Objects > Import > and import 'Discover - Firewall and pfSense.json' and you might have to re-associate the object with your logstash* index pattern. You are successfull when you have imported 6 objects. 
+Go to Saved Objects > Import > and import 'Discover - Firewall and pfSense.json', you might have to re-associate the object with your logstash* index pattern. You are successfull when you have imported 6 objects. [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)).
 
-Now import 'Visualizations - Firewall and pfSense.json', and you might have to re-associate the object with your logstash* index pattern. You are successfull when you have imported 31 objects.
+Now import 'Visualizations - Firewall and pfSense.json', you might have to re-associate the object with your logstash* index pattern. You are successfull when you have imported 31 objects. [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Visualization](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Visualization).
 
-Now you can create your own dashboard and mix those visualizations in how you please. But, someone has luckily done this for us before ;) Import your chosen 'Dashboard - ******.json' dashboard files! 
+Now you can create your own dashboard and mix those visualizations in how you please. But, someone has luckily done this for us before ;) Import your chosen 'Dashboard - ******.json' dashboard files! [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Dashboard](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Dashboard).
 
 
 ## Configuring PFSense for NetFlow
@@ -489,25 +489,27 @@ Stop logstash.service:
 elk@stack:/usr/share/logstash$ sudo systemctl stop logstash.service
 ```
 
-For a first time use, run logstash with netflow and the --setup parameter:
+For a first time run, execute logstash with netflow and the --setup parameter:
 ```bash
 elk@stack:/usr/share/logstash$ sudo /usr/share/logstash/bin/logstash --modules netflow --setup 
 ```
-The --setup parameter will add additional Dashboards and vizualisations on your Kibana dashboard. If you run with parameter `--setup` one more time, it will override your (eventual) netflow dashboard edits. So run the above command only once. Let it run for some time before you Ctrl + C out of it (1-2 minutes?).
+The --setup parameter will add additional Dashboards and vizualisations on your Kibana dashboard for netflow. If you run with parameter `--setup` one more time, it will override your (eventual) netflow dashboard edits. Let it run for some time before you Ctrl + C out of it (1-2 minutes?).
 
 What I discovered when specifying netflow as a module in logstash.yml, was that _logstash is ignoring the 'pipelines.yml' file because modules or command line options are specified_. So the pfSense firewall logs broke.
 
 So what we want to do, is to edit the `/usr/share/logstash/modules/netflow/configuration/logstash/netflow.conf.erb` file to a conf file, like the ones you now have in `/etc/logstash/conf.d/`. 
 ```bash
 elk@stack:~$ cd /usr/share/logstash/modules/netflow/configuration/logstash
-elk@stack:/usr/share/logstash/modules/netflow/configuration/logstash$  cp netflow.conf.erb /etc/logstash/conf.d/netflow.conf
+elk@stack:/usr/share/logstash/modules/netflow/configuration/logstash$ sudo cp netflow.conf.erb /etc/logstash/conf.d/netflow.conf
 ```
 The config is an ERB template so there are sections that are overwritten, in between <%=, %>, with real values - replace these and you will have a netflow config. 
+
+You can do that by yourself, `sudo nano netflow.conf` or just download this netflow.conf; 
 ```bash
 elk@stack:/usr/share/logstash$ cd conf.d/
-elk@stack:/usr/share/logstash$ sudo wget 
+elk@stack:/usr/share/logstash$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/netflow.conf
 ```
-
+Let's start `logstash` and check in Kibana that both the netflow and pfSense dashboards are populating logdata (depending on how heavy the traffic is to your pfSense, this might take some minutes to confirm that all dashboards are working).
 ```bash
 elk@stack:/usr/share/logstash$ sudo systemctl start logstash
 ```
