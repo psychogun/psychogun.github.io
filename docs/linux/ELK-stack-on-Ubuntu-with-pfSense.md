@@ -169,7 +169,7 @@ Just stop it for now.
 
 ### Pipelines
 So.  Pipelines. 
-In order to specify how Logstash listens to incoming connections (ports/protocols) and where to send data (elasticsearch), and whether or not to apply a filter, we will have to create configuration files (input, output, filter) in the JSON-format. Where to put these configuration files ("pipelines"), are stated in `pipelines.yml`:
+In order to specify how Logstash listens to incoming connections (ports/protocols) and where to send data (Elasticsearch), and whether or not to apply a filter, we will have to create configuration files (input, output, filter) in the JSON-format. Where to put these configuration files ("pipelines"), are stated in `pipelines.yml`:
 ```bash
 elk@stack:~$ more /etc/logstash/pipelines.yml 
 # This file is where you define your pipelines. You can define multiple.
@@ -179,7 +179,7 @@ elk@stack:~$ more /etc/logstash/pipelines.yml
 - pipeline.id: main
   path.config: "/etc/logstash/conf.d/*.conf"
 ```
-You can have one 'big' .conf configuration file, or you can separate them in multiple .conf configuration files. You will see I have some separated, and one joined:
+You can have one "big" `.conf` configuration file, or you can separate the outputs, inputs and filters in multiple `.conf` configuration files. You will see I have some separated, and one joined:
 
 Input file: `/etc/logstash/conf.d/01-inputs.conf`
 ```bash
@@ -258,7 +258,7 @@ filter {
   }
 }
 ```
-I will not try to explain what the filter for syslog exactly does, because I have no experience with JSON. But you can see that it tags syslog traffic from my pfSense with both 'pfsense' and 'Ready', and adds some extra fields. The if [host] above (192.168.40.1) is the IP adress to my pfSense firewall, which address you'll probably have to change. And if you have another pfSense firewall, add it here as well (the one with 172.22.2.1 address).
+I will not try to explain what the filter for syslog exactly does, because I have no experience with JSON. But you can see that it tags syslog traffic from my pfSense with both 'pfsense' and 'Ready', and adds some extra fields. The `if [host] =~ /192\.168\.40\.1/ {` is the IP adresss (192.168.40.1) to my pfSense firewall, which address you'll probably have to change. And if you have another pfSense firewall, add it here as well (the `if [host]` with the 172.22.2.1 address).
 
 pfSense filter: `/etc/logstash/conf.d/11-pfsense.conf`
 ```bash
@@ -376,8 +376,9 @@ filter {
         }
 }
 ```
+PS: Remember to change your timezone to a correct zone `timezone => "Europe/Paris"` in `11-pfsense.conf`.
 
-Since we have the Elastic stack installed on the same machine, our Logstash would connect to Elasticsearch (30-outputs.conf) like this:
+Since we have the Elastic stack installed on the same machine, our Logstash would connect to Elasticsearch (`30-outputs.conf`) like this:
 ```bash
 elk@stack:/etc/logstash/conf.d$ sudo wget https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/blob/master/etc/logstash/conf.d/30-outputs.conf
 elk@stack:/etc/logstash/conf.d$ more 30-outputs.conf 
@@ -403,7 +404,7 @@ Use `tail -f` to see the status of the logstash service:
 ```bash
 elk@stack:/etc/logstash/conf.d$ tail -f /var/log/logstash/logstash-plain.log 
 ```
-If you have tried to start logstash, you can now stop it by `sudo systemctl stop logstash.service`. Because we are referencing geoip and a different non-standard grok pattern in our logstash configs, which we haven't installed yet, you'll see through logstash-plain.log that the logstash will not boot well.  
+If you have tried to start logstash, you can now stop it by `sudo systemctl stop logstash.service`. Because we are referencing `geoip` and a different non-standard grok pattern `match =>` in our logstash configs, which we haven't installed yet, you'll see in `/var/log/logstash/logstash-plain.log` that logstash will not boot well.  
 
 ### MaxMind GeoIP database
 Download and extract the MaxMind GeoIP database:
@@ -437,52 +438,62 @@ Follow this excellent guide to install Kibana and make it start automatically wh
 
 Kibana loads its configuration from the /etc/kibana/kibana.yml file by default. The format of this config file is explained in [https://www.elastic.co/guide/en/kibana/7.2/settings.html](https://www.elastic.co/guide/en/kibana/7.2/settings.html)
 
-If our Elasticsearch database is not on the same host as Kibana, you will have to tell where Elasticsearch is by specifying 'elasticsearch.hosts', e.g.: elasticsearch.hosts http://ip-adress:9200 in kibana.yml
+If our Elasticsearch database is not on the same host as Kibana, you will have to tell where Elasticsearch is by specifying `elasticsearch.hosts`, e.g.: `elasticsearch.hosts http://ip-adress:9200` in `kibana.yml`
 
-What we first and foremost want to do with our kibana.yml, is to edit the `server.host: "localhost"`and bind it to (all) interfaces by writing `server.host: "0.0.0.0"`. Editing this parameter from a non-loopback address enables connections from remote users, thus enables us to connect to Kibana through a web-browser.
+What we first and foremost want to do with our `kibana.yml`, is to edit the `server.host: "localhost"`and bind it to (all) interfaces by writing `server.host: "0.0.0.0"`. Editing this parameter from a non-loopback address enables connections from remote users, thus enables us to connect to Kibana through a web-browser from another client.
 
 Restart (or start) your Kibana with `sudo systemctl start kibana` and go to http://ip-adress:5601 to check if it is up and running (choose No when asked if you want to import some data). Select 'Explore on your own', we'll get back to Kibana in a bit. Now we need some data to visualize, e.g. make pfSense send data to logstash.
 
 ## Configuring pfSense for syslog
 Log on to your pfSense and go to Status > System logs > Settings. 
 
-For content, we will for now log 'Firewall Events'.
+For content, we will for now log "Firewall Events".
 
 Enable Remote Logging and point one of the 'Remote log servers' to 'logstash-syslog-input-ip:and-port', e.g.: 192.168.4.100:5140, as stated in `01-inputs.conf`. Syslog sends UDP datagrams to port 514 on the specified remote syslog server, unless another port is specified.
 
-## Index patterns, discovers, dashboards and visualizations
-*_Index patterns_* tell Kibana which Elasticsearch indices you want to explore. An index pattern can match the name of a single index, or include a wildcard (*) to match multiple indices.
+## Configuring Kibana 
+
+## Index patterns
+*Index patterns* tell Kibana which Elasticsearch indices you want to explore. An index pattern can match the name of a single index, or include a wildcard (*) to match multiple indices.
 
 For example, Logstash typically creates a series of indices in the format logstash-YYYY.MMM.DD. To explore all of the log data from May 2018, you could specify the index pattern logstash-2018.05*.
 
-*_Discover_* enables you to explore your data with Kibana’s data discovery functions. You have access to every document in every index that matches the selected index pattern. You can submit search queries, filter the search results, and view document data. Go to Discover to see your syslogs flowing in!
+## Discover
+*Discover* enables you to explore your data with Kibana’s data discovery functions. You have access to every document in every index that matches the selected index pattern. You can submit search queries, filter the search results, and view document data. Go to Discover to see your syslogs flowing in!
 
-Kibana *_visualizations_* are based on Elasticsearch queries. By using a series of Elasticsearch aggregations to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
+## Visualization
+Kibana *visualizations* are based on Elasticsearch queries. By using a series of Elasticsearch aggregations to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
-A Kibana *_dashboard_* displays a collection of visualizations, searches, and maps. You can arrange, resize, and edit the dashboard content and then save the dashboard so you can share it.
+## Dashboard
+A Kibana *dashboard* displays a collection of visualizations, searches, and maps. You can arrange, resize, and edit the dashboard content and then save the dashboard so you can share it.
 
 Go to http://ip-adress:5601 and go to Management > Create Index Pattern (Kibana Index Patterns) > and our logstash service which we started have enabled us to select that indicies, so write "logstash*". Press 'Next step'.  Under 'Time Filter field name' choose '@timestamp' and then hit 'Create Index pattern'. 
 
+## Saved Objects
 With 'Saved Objects' you are able to import searches, dashboards and visualizations that has been made before. Let us do that.
 
 Go to Saved Objects > Import > and import 'Discover - Firewall and pfSense.json', you might have to re-associate the object with your logstash* index pattern. You are successfull when you have imported 6 objects. [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)).
+PS: Use your favourite editor to (eventually) search + replace the external interface name from what I have, `re0`, to what your WAN interface on your pfSense is called (e.g. `em1`) before importing. 
 
 Now import 'Visualizations - Firewall and pfSense.json', you might have to re-associate the object with your logstash* index pattern. You are successfull when you have imported 31 objects. [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Visualization](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Visualization).
 
-Now you can create your own dashboard and mix those visualizations in how you please. But, someone has luckily done this for us before ;) Import your chosen 'Dashboard - ******.json' dashboard files! [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Dashboard](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Dashboard).
 
+Now you can create your own dashboard and mix those visualizations in how you please. Or import them. 
+Import "Dashboard - Firewall - External Block.json", "Dashboard - Firewall - External Pass.json" and "Dashboard - pfSense.json" from: [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Dashboard](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Dashboard).
+
+Hopefully now you have 3 dashboards. One which is showing blocked traffic, one which is showing traffic that is let through, and one "overall" dashboard with syslog events from your pfSense firewall. 
 
 ## Configuring PFSense for NetFlow
 Log on to your PFSense and go to System > Package Manager > Available Packages and install `softflowd`. Edit `softlowd` by navigating to Services > softlowd. A basic configuration looks like this:
 
 * Select which interfaces to monitor. I selected WAN.
-* Enter your ELK server IP address for Host.
+* Enter your logstash server IP address for Host.
 * Enter 2055 for Port.
 * Select Netflow version 9.
 * Set Flow Tracking Level to Full.
 * Click Save.
 
-Communication between PFSense and Logstash for Netflow is not encrypted. So make sure you are creating a good network design by using VLAN or something else to ensure your metadata of the communication on the monitored interface is not intentionally going where it should not go. 
+PS: Communication between PFSense and Logstash for Netflow is not encrypted. Make sure you are creating a good network design by using VLAN or something else to ensure the metadata of the communication on your monitored interfaces is not intentionally going where it should not go. 
 
 ### Configure Logstash for NetFlow
 Stop logstash.service:
@@ -494,42 +505,44 @@ For a first time run, execute logstash with netflow and the --setup parameter:
 ```bash
 elk@stack:/usr/share/logstash$ sudo /usr/share/logstash/bin/logstash --modules netflow --setup 
 ```
-The --setup parameter will add additional Dashboards and vizualisations on your Kibana dashboard for netflow. If you run with parameter `--setup` one more time, it will override your (eventual) netflow dashboard edits. Let it run for some time before you Ctrl + C out of it (1-2 minutes?).
+The `--setup` parameter will add searches, dashboards and vizualisations in Kibana for netflow. 
+PS: If you run `logstash` with parameter `--setup` one more time, it will override your (eventual) netflow dashboard edits. 
+Wait for a minute and check if the different netflow dashboards have been generated by `--setup`. 
 
-What I discovered when specifying netflow as a module in logstash.yml, was that _logstash is ignoring the 'pipelines.yml' file because modules or command line options are specified_. So the pfSense firewall logs broke.
+What I discovered when specifying netflow as a module in logstash.yml, was that _logstash is ignoring the 'pipelines.yml' file because modules or command line options are specified_. So the pfSense syslogs broke.
 
 So what we want to do, is to edit the `/usr/share/logstash/modules/netflow/configuration/logstash/netflow.conf.erb` file to a conf file, like the ones you now have in `/etc/logstash/conf.d/`. 
 ```bash
 elk@stack:~$ cd /usr/share/logstash/modules/netflow/configuration/logstash
 elk@stack:/usr/share/logstash/modules/netflow/configuration/logstash$ sudo cp netflow.conf.erb /etc/logstash/conf.d/netflow.conf
 ```
-The config is an ERB template so there are sections that are overwritten, in between <%=, %>, with real values - replace these and you will have a netflow config. 
+`netflow.conf.erb` is an ERB template so there are sections that are overwritten, in between <%=, %>, with real values - replace these and you will have a netflow config. 
 
-You can do that by yourself, `sudo nano netflow.conf` or just download this netflow.conf; 
+You can do that by yourself, `sudo nano /etc/logstash/conf.d/netflow.conf` or just download this netflow.conf; 
 ```bash
 elk@stack:/usr/share/logstash$ cd conf.d/
 elk@stack:/usr/share/logstash$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/netflow.conf
 ```
-Let's start `logstash` and check in Kibana that both the netflow and pfSense dashboards are populating logdata (depending on how heavy the traffic is to your pfSense, this might take some minutes to confirm that all dashboards are working).
+Let's start `logstash.service` and check in Kibana that both the netflow and pfSense dashboards are populating logdata (depending on how heavy the traffic is to your pfSense, this might take some minutes to confirm that all dashboards are working).
 ```bash
-elk@stack:/usr/share/logstash$ sudo systemctl start logstash
+elk@stack:/usr/share/logstash$ sudo systemctl start logstash.service
 ```
 
-
+Voilà. Netflow and syslogs in Kibana from pfSense.
 
 ### Enable HTTPS on Kibana
-You are able to access the Kibana interface via HTTPS by setting ```server.sssl.enable```to true in ```kibana.yml``` configuration file.To be able to do so, you have to create your certificates.
+You are able to access the Kibana interface via HTTPS by setting `server.sssl.enable` to true in `kibana.yml` configuration file. To be able to do so, you have to create your certificates.
 
 Generate a key with a pass-phrase:
 ```
-elkeson@elk:~$ cd /etc/kibana
-elkeson@elk:/etc/kibana$ sudo openssl genrsa -des3 -out server.key 2048
+elk@stack:~$ cd /etc/kibana
+elk@stack:/etc/kibana$ sudo openssl genrsa -des3 -out server.key 2048
 ```
 Now create the insecure key, the one without a passphrase, and shuffle the key names:
 ```
-elkeson@elk:/etc/kibana$ sudo openssl rsa -in server.key -out server.key.insecure
-elkeson@elk:/etc/kibana$ sudo mv server.key server.key.secure
-elkeson@elk:/etc/kibana$ sudo mv server.key.insecure server.key
+elk@stack:/etc/kibana$ sudo openssl rsa -in server.key -out server.key.insecure
+elk@stack:/etc/kibana$ sudo mv server.key server.key.secure
+elk@stack:/etc/kibana$ sudo mv server.key.insecure server.key
 ```
 The insecure key is now named server.key, and you can use this file to generate the CSR without passphrase. CSR stands for Certificate Signing Request. 
 
@@ -537,13 +550,13 @@ To create the CSR, run the following command at a terminal prompt:
 ```
 elk@stack:/etc/kibana$ sudo openssl req -new -key server.key -out server.csr
 ```
-This ```server.csr```file would normally go to a Certificate Authoriy (CA) for issuing a 'stamp' saying; hey- this is a legit site. Instead of sending this to a CA, we are making this 'stamp' our selves by creating a Self-Signed Certificate:
+This `server.csr` file would normally go to a Certificate Authoriy (CA) for issuing a "stamp" saying; hey- this is a legit site. Instead of sending this to a CA, we are making this "stamp" our selves by creating a Self-Signed Certificate:
 ```
 elk@stack:/etc/kibana$ sudo openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 ```
 Now you have server.crt and server.key. 
 
-In ```kibana.yml``` we point to these certifications:
+In `kibana.yml` we point to these certifications:
 
 ```
 # Enables SSL and paths to the PEM-format SSL certificate and SSL key files, respectively.
@@ -563,36 +576,12 @@ elk@stack:/etc/kibana$ sudo systemctl start kibana.service
 ```
 Now you are able to communicate with Kibana over an encrypted connection (https).
 
-
-
-```
-elk@stack:/usr/share/logstash$ sudo nano /etc/systemd/system/logstash.service 
-ExecStart=/usr/share/logstash/bin/logstash "--path.settings" "/etc/logstash" --modules netflow
-```
-Restart dameon for making edits take effect:
-```
-elk@stack:/usr/share/logstash$ sudo systemctl daemon-reload 
-```
-Start logstash:
-```
-elk@stack:/usr/share/logstash$ sudo systemctl start logstash.service 
-```
-Check status of logstash:
-```
-elk@stack:/usr/share/logstash$ sudo systemctl status logstash.service 
-```
-Now you are able to go in Kibana > Dashboard > and select different Dashboards provided from Kibana for different NetFlow charts!
-
-
 ## Configure Kibana to connect to Elasticsearch via HTTPS
 Even though we are using the Open Source version of Kibana, we are able to encrypt communication between Kibana and Elasticsearch. For further hardening of your Elastic Stack, go to https://www.elastic.co/subscriptions to see if you are willing to pay the dues. 
 
 Add the ```xpack.security.enabled: true``` in elasticsearch.yml 
 
 
-
-## HTTPS on Kibana
-Up until now, your communication with the Kibana interface has been on a HTTP connection. 
 
 
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
@@ -604,33 +593,17 @@ openssl req -sha256 -new -key server.key -out server.csr -subj '/CN=localhost'
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 Replace 'localhost' with your domain name. Run commands one by one because openssl will prompt you same values for certificate generation
 
-Edit ```logstash.service```:
-```
-elk@stack:/usr/share/logstash$ sudo nano /etc/systemd/system/logstash.service
-```
-Add  ```--modules netflow --setup -M netflow.var.input.udp.port=2055```:
-``` 
-ExecStart=/usr/share/logstash/bin/logstash "--path.settings" "/etc/logstash" --modules netflow --setup -M netflow.var.input.udp.port=2055
-```
-elkeson@elk:/usr/share/logstash$ systemctl daemon-reload
-elkeson@elk:/usr/share/logstash$ systemctl start logstash.service
-
-Change directory to logstash installation directory:
-```elk@stack:/$ cd /usr/share/logstash/```
-
-Run this command to install / enable the netflow module in logstash:
-```
-elkeson@elk:/usr/share/logstash$ bin/logstash --modules netflow --setup -M netflow.var.input.udp.port=2055
 ```
 
 For further information, go check out the excellent guide here: https://www.elastic.co/guide/en/logstash/current/netflow-module.html
 
 
-### Yellow cluster
+## Yellow cluster
+
 http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html
 
 
-#### Version
+### Version control
 To see which version of the program you have installed are, do:
 ```
 elkeson@elk:~$ /usr/share/logstash/bin/logstash --version
@@ -640,7 +613,7 @@ logstash 6.8.1
 Elastic produce a full range of log shippers known as ‘Beats’ which run as lightweight agents on the source devices and transmit data to a destination either running Elasticsearch or Logstash. If you are using Beats you can do this to make it use SSL to encrypt the communication between the Beat agent and Logstash:
 
 ```
-elkeson@elk:/etc/ssl$ sudo openssl req -x509 -nodes -newkey rsa:2048 -days 365 -keyout logstash-forwarder.key -out logstash-forwarder.crt -subj /CN=elk.h37b.local
+elkeson@elk:/etc/ssl$ sudo openssl req -x509 -nodes -newkey rsa:2048 -days 365 -keyout logstash-forwarder.key -out logstash-forwarder.crt -subj /CN=stack.hb.local
 
 sudo openssl pkcs8 -in logstash-forwarder.key  -topk8 -nocrypt -out logstash-forwarder.key.pem
 
@@ -695,38 +668,11 @@ stdout {
 }
 ```
 
-```
-sudo systemctl restart logstash
-sudo systemctl enable logstash
-```
-sudo cat /var/log/logstash/logstash-plain.log
 
-sudo apt install -y kibana
+## Logstash with just Netflow
+If you are not using syslogs, doing the grok patterns and everything above, do this to quick and dirty populate netflow in your Kibana. 
 
-Configure your kibana server;
-sudo nano /etc/kibana/kibana.yml
-
-
-server.host: "0.0.0.0"
-elasticsearch.hosts: "http://localhost:9200"
-
-elasticsearch.url: "http://localhost:9200"
-
-sudo systemctl restart kibana
-sudo systemctl enable kibana
-
-Logg inn på localhost:5601, click Create Index. 
-
-Management > Saved Objects > 
-
-
-
-
-PS: This is a fun read-through; https://www.elastic.co/elk-stack 
-
-
-
-Edit ```logstash.yml```:
+Edit `logstash.yml`:
 ```
 elk@stack:/usr/share/logstash$ sudo nano /etc/logstash/logstash.yml 
 
@@ -743,8 +689,9 @@ modules:
     
 ```
 
-### Mentions (in no particular order)
+### Acknowledgments (in no particular order)
 * https://arnaudloos.com/2019/enable-x-pack-security/
+* https://www.elastic.co/elk-stack 
 * https://extelligenceblog.it/2017/10/18/elasticstack-elk-and-pfsense-firewall-ip-traffic-statistics-with-netflow/
 * https://help.ubuntu.com/lts/serverguide/certificates-and-security.html
 * https://github.com/solvaholic/solvaholic.github.io/wiki/Netflow-with-pfSense-and-ELK
