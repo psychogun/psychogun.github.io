@@ -470,11 +470,11 @@ Now you can create your own dashboard and mix those visualizations in how you pl
 
 
 ## Configuring PFSense for NetFlow
-Log on to your PFSense and go to System > Package Manager > Available Packages and install ```softflowd```. Edit ```softlowd```by navigating to Services > softlowd. A basic configuration looks like this:
+Log on to your PFSense and go to System > Package Manager > Available Packages and install `softflowd`. Edit `softlowd` by navigating to Services > softlowd. A basic configuration looks like this:
 
 * Select which interfaces to monitor. I selected WAN.
 * Enter your ELK server IP address for Host.
-* Enter 2056 for Port.
+* Enter 2055 for Port.
 * Select Netflow version 9.
 * Set Flow Tracking Level to Full.
 * Click Save.
@@ -483,34 +483,32 @@ Communication between PFSense and Logstash for Netflow is not encrypted. So make
 
 ### Configure Logstash for NetFlow
 Stop logstash.service:
-```
+```bash
 elk@stack:/usr/share/logstash$ sudo systemctl stop logstash.service
 ```
 
 For a first time use, run logstash with netflow and the --setup parameter:
-```
+```bash
 elk@stack:/usr/share/logstash$ sudo /usr/share/logstash/bin/logstash --modules netflow --setup 
 ```
-The --setup parameter will add additional Dashboards and vizualisations on your Kibana dashboard. If you run with parameter ```--setup``` one more time, it will override your Dashboard edits. So run the above command only once. Let it run for some time before you Ctrl + C out of it (1-2 minutes?).
+The --setup parameter will add additional Dashboards and vizualisations on your Kibana dashboard. If you run with parameter `--setup` one more time, it will override your (eventual) netflow dashboard edits. So run the above command only once. Let it run for some time before you Ctrl + C out of it (1-2 minutes?).
 
-What I discovered, was that, logstash is ignoring the 'pipelines.yml' file because modules or command line options are specified. So what we want to do, is to edit the '/usr/share/logstash/modules/netflow/configuration/logstash/netflow.conf.erb' file to a conf file, like the ones you now have in '/etc/logstash/conf.d/'. 
-```
+What I discovered when specifying netflow as a module in logstash.yml, was that _logstash is ignoring the 'pipelines.yml' file because modules or command line options are specified_. So the pfSense firewall logs broke.
+
+So what we want to do, is to edit the `/usr/share/logstash/modules/netflow/configuration/logstash/netflow.conf.erb` file to a conf file, like the ones you now have in `/etc/logstash/conf.d/`. 
+```bash
 elk@stack:~$ cd /usr/share/logstash/modules/netflow/configuration/logstash
 elk@stack:/usr/share/logstash/modules/netflow/configuration/logstash$  cp netflow.conf.erb /etc/logstash/conf.d/netflow.conf
 ```
 The config is an ERB template so there are sections that are overwritten, in between <%=, %>, with real values - replace these and you will have a netflow config. 
-```
-elk@stack:/usr/share/logstash$ sudo nano netflow.conf
+```bash
+elk@stack:/usr/share/logstash$ cd conf.d/
+elk@stack:/usr/share/logstash$ sudo wget 
 ```
 
-
-```
+```bash
 elk@stack:/usr/share/logstash$ sudo systemctl start logstash
 ```
-Ignoring the 'pipelines.yml' file because modules or command line options are specified
-
-
-Our final logstash.service will boot with these parameters: (edit the ```logstash.service``` file and add --modules;
 
 
 
