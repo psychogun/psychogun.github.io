@@ -182,12 +182,14 @@ elk@stack:~$ more /etc/logstash/pipelines.yml
 You can have one 'big' .conf configuration file, or you can separate them in multiple .conf configuration files. You will see I have some separated, and one joined:
 
 Input file: `/etc/logstash/conf.d/01-inputs.conf`
-```
-elk@stack:~$ more /etc/logstash/conf.d/01-inputs.conf 
+```bash
+elk@stack:~$ cd /etc/logstash/conf.d/
+elk@stack:/etc/logstash/conf.d$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/01-inputs.conf
+elk@stack:/etc/logstash/conf.d$ more 01-inputs.conf 
 input {  
   tcp {
     type => "syslog"
-    port => 5120
+    port => 5140
   }
 }
 
@@ -198,12 +200,13 @@ input {
   }
 }
 ```
-This input file listens for syslog's on both TCP and UDP at port 5120 and 5140. 
+This input file listens for syslog's on both TCP and UDP at port 5140. 
 
 
 Syslog filter file: `/etc/logstash/conf.d/10-syslog.conf`
-```
-elk@stack:~$ more /etc/logstash/conf.d/10-syslog.conf 
+```bash
+elk@stack:/etc/logstash/conf.d$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/10-syslog.conf
+elk@stack:/etc/logstash/conf.d$ more 10-syslog.conf 
 filter {
   if [type] == "syslog" {
     if [host] =~ /192\.168\.40\.1/ {
@@ -259,7 +262,8 @@ I will not try to explain what the filter for syslog exactly does, because I hav
 
 pfSense filter: `/etc/logstash/conf.d/11-pfsense.conf`
 ```bash
-elk@stack:~$ more /etc/logstash/conf.d/11-pfsense.conf 
+elk@stack:/etc/logstash/conf.d$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/11-pfsense.conf
+elk@stack:/etc/logstash/conf.d$ more /etc/logstash/conf.d/11-pfsense.conf 
 filter {
   if "pfsense" in [tags] {
     grok {
@@ -375,7 +379,8 @@ filter {
 
 Since we have the Elastic stack installed on the same machine, our Logstash would connect to Elasticsearch (30-outputs.conf) like this:
 ```bash
-elkn@stack:~$ more /etc/logstash/conf.d/30-outputs.conf 
+elk@stack:/etc/logstash/conf.d$ sudo wget https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/blob/master/etc/logstash/conf.d/30-outputs.conf
+elk@stack:/etc/logstash/conf.d$ more 30-outputs.conf 
 output {
         elasticsearch {
                 hosts => ["http://localhost:9200"]
