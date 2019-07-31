@@ -1,11 +1,11 @@
 ---
 layout: default
-title: How to install Elastic Stack on Ubuntu 18.04 LTS and use it with pfSense 2.4.4
+title: How to install Elastic Stack 7.2 on Ubuntu 18.04 LTS and use it with pfSense 2.4.4
 parent: Linux
 nav_order: 1
 ---
 
-# How to install Elastic Stack on Ubuntu 18.04 LTS and use it with pfSense 2.4.4
+# How to install Elastic Stack 7.2 on Ubuntu 18.04 LTS and use it with pfSense 2.4.4
 {: .no_toc }
 So, on a whim I googled syslog + pfsense, and I saw some images of some nice dashboards (Kibana) for the firewall logs from PFSense. The tutorials I found did not tell me exactly how this all works, particularly how Elasticsearch, Logstash and Kibana work together. 
 
@@ -53,12 +53,11 @@ pfSense is an open source firewall/router computer software distribution based o
 As with every how-to's, read through the entire thing before starting. 
 
 ### Prerequisites
-* Internet connection?
-* Clean Ubuntu 18.04 LTS install
-* Java
-* Elasticsearch 
-* Logstash
-* Kibana
+* Clean Ubuntu 18.04 LTS 
+* Java 8
+* Elasticsearch 7.2 
+* Logstash 7.2
+* Kibana 7.2
 * PFSene 2.4.4
 
 ## Installlation
