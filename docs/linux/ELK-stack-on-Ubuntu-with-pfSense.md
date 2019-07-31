@@ -444,32 +444,32 @@ What we first and foremost want to do with our `kibana.yml`, is to edit the `ser
 
 Restart (or start) your Kibana with `sudo systemctl start kibana` and go to http://ip-adress:5601 to check if it is up and running (choose No when asked if you want to import some data). Select 'Explore on your own', we'll get back to Kibana in a bit. Now we need some data to visualize, e.g. make pfSense send data to logstash.
 
-## Configuring pfSense for syslog
+## Configure pfSense for syslog
 Log on to your pfSense and go to Status > System logs > Settings. 
 
 For content, we will for now log "Firewall Events".
 
 Enable Remote Logging and point one of the 'Remote log servers' to 'logstash-syslog-input-ip:and-port', e.g.: 192.168.4.100:5140, as stated in `01-inputs.conf`. Syslog sends UDP datagrams to port 514 on the specified remote syslog server, unless another port is specified.
 
-## Configuring Kibana 
+## Kibana configuration 
 
-## Index patterns
+### Index patterns
 *Index patterns* tell Kibana which Elasticsearch indices you want to explore. An index pattern can match the name of a single index, or include a wildcard (*) to match multiple indices.
 
 For example, Logstash typically creates a series of indices in the format logstash-YYYY.MMM.DD. To explore all of the log data from May 2018, you could specify the index pattern logstash-2018.05*.
 
-## Discover
+### Discover
 *Discover* enables you to explore your data with Kibana’s data discovery functions. You have access to every document in every index that matches the selected index pattern. You can submit search queries, filter the search results, and view document data. Go to Discover to see your syslogs flowing in!
 
-## Visualization
+### Visualization
 Kibana *visualizations* are based on Elasticsearch queries. By using a series of Elasticsearch aggregations to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
-## Dashboard
+### Dashboard
 A Kibana *dashboard* displays a collection of visualizations, searches, and maps. You can arrange, resize, and edit the dashboard content and then save the dashboard so you can share it.
 
 Go to http://ip-adress:5601 and go to Management > Create Index Pattern (Kibana Index Patterns) > and our logstash service which we started have enabled us to select that indicies, so write "logstash*". Press 'Next step'.  Under 'Time Filter field name' choose '@timestamp' and then hit 'Create Index pattern'. 
 
-## Saved Objects
+### Saved Objects
 With 'Saved Objects' you are able to import searches, dashboards and visualizations that has been made before. Let us do that.
 
 Go to Saved Objects > Import > and import 'Discover - Firewall and pfSense.json', you might have to re-associate the object with your logstash* index pattern. You are successfull when you have imported 6 objects. [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)).
@@ -483,7 +483,7 @@ Import "Dashboard - Firewall - External Block.json", "Dashboard - Firewall - Ext
 
 Hopefully now you have 3 dashboards. One which is showing blocked traffic, one which is showing traffic that is let through, and one "overall" dashboard with syslog events from your pfSense firewall. 
 
-## Configuring PFSense for NetFlow
+## Configure0 pfSense for NetFlow
 Log on to your PFSense and go to System > Package Manager > Available Packages and install `softflowd`. Edit `softlowd` by navigating to Services > softlowd. A basic configuration looks like this:
 
 * Select which interfaces to monitor. I selected WAN.
@@ -495,7 +495,7 @@ Log on to your PFSense and go to System > Package Manager > Available Packages a
 
 PS: Communication between PFSense and Logstash for Netflow is not encrypted. Make sure you are creating a good network design by using VLAN or something else to ensure the metadata of the communication on your monitored interfaces is not intentionally going where it should not go. 
 
-### Configure Logstash for NetFlow
+## Configure Logstash for NetFlow
 Stop logstash.service:
 ```bash
 elk@stack:/usr/share/logstash$ sudo systemctl stop logstash.service
@@ -530,7 +530,7 @@ elk@stack:/usr/share/logstash$ sudo systemctl start logstash.service
 
 Voilà. Netflow and syslogs in Kibana from pfSense.
 
-### Enable HTTPS on Kibana
+## Enable HTTPS on Kibana
 You are able to access the Kibana interface via HTTPS by setting `server.sssl.enable` to true in `kibana.yml` configuration file. To be able to do so, you have to create your certificates.
 
 Generate a key with a pass-phrase:
@@ -576,14 +576,14 @@ elk@stack:/etc/kibana$ sudo systemctl start kibana.service
 ```
 Now you are able to communicate with Kibana over an encrypted connection (https).
 
-## Configure Kibana to connect to Elasticsearch via HTTPS
+## Enable Elasticsearch via HTTPS
 Even though we are using the Open Source version of Kibana, we are able to encrypt communication between Kibana and Elasticsearch. For further hardening of your Elastic Stack, go to https://www.elastic.co/subscriptions to see if you are willing to pay the dues. 
 
 Add the ```xpack.security.enabled: true``` in elasticsearch.yml 
 
 
 
-
+```
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 
 
