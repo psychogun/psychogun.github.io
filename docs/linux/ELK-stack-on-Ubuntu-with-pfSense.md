@@ -1,6 +1,6 @@
 ---
 layout: default
-title: ELK Stack on Ubuntu with pfSense
+title: ELK Stack on Ubuntu for pfSense
 parent: Linux
 nav_order: 1
 ---
