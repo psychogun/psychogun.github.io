@@ -576,7 +576,7 @@ elk@stack:/etc/kibana$ sudo systemctl start kibana.service
 ```
 Now you are able to communicate with Kibana over an encrypted connection (https).
 
-## Enable Elasticsearch via HTTPS
+## Enable Elasticsearch via SSL
 Even though we are using the Open Source version of Kibana, we are able to encrypt communication between Kibana and Elasticsearch. For further hardening of your Elastic Stack, go to https://www.elastic.co/subscriptions to see if you are willing to pay the dues. 
 
 Add the ```xpack.security.enabled: true``` in elasticsearch.yml 
@@ -603,11 +603,12 @@ For further information, go check out the excellent guide here: https://www.elas
 http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html
 
 
-### Version control
-To see which version of the program you have installed are, do:
+## Version control
+To see which version of ELK Stack you have installed are, do:
 ```
-elkeson@elk:~$ /usr/share/logstash/bin/logstash --version
-logstash 6.8.1
+elk@stack:~$ sudo /usr/share/logstash/bin/logstash --version
+logstash 7.2.0
+elk@stack:~$ su -i
 ```
 
 Elastic produce a full range of log shippers known as ‘Beats’ which run as lightweight agents on the source devices and transmit data to a destination either running Elasticsearch or Logstash. If you are using Beats you can do this to make it use SSL to encrypt the communication between the Beat agent and Logstash:
