@@ -10,7 +10,7 @@ nav_order: 1
 So, on a whim I googled syslog + pfsense, and I saw some images of some nice dashboards (Kibana) for the firewall logs from PFSense. The tutorials I found did not tell me exactly how this all works, particularly how Elasticsearch, Logstash and Kibana work together. 
 
 
-These instructions will tell you what I have learned and how I installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beats and SHIELD) on Ubuntu with encrypted communication, so that I could have a nice visualization of my PFSense firewall logs with syslogs and netflow.
+These instructions will tell you what I have learned and how I installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beats and SHIELD) on Ubuntu with encrypted communication, so that I could have a nice visualization of my pfSense firewall logs with syslogs and netflow.
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -64,7 +64,7 @@ As with every how-to's, read through the entire thing before starting.
 
 ## Installlation
 First and foremost, update and upgrade our Ubuntu installation:
-```
+```bash
 elk@stack:~$ sudo apt-get update
 elk@stack:~$ sudo apt-get upgrade
 ```
@@ -495,7 +495,7 @@ Log on to your PFSense and go to System > Package Manager > Available Packages a
 * Set Flow Tracking Level to Full.
 * Click Save.
 
-PS: Communication between PFSense and Logstash for Netflow is not encrypted. Make sure you are creating a good network design by using VLAN or something else to ensure the metadata of the communication on your monitored interfaces is not intentionally going where it should not go. 
+PS: Communication between pfSense and Logstash for Netflow is not encrypted. Make sure you are creating a good network design by using VLAN or something else to ensure the metadata of the communication on your monitored interfaces is not intentionally going where it should not go. 
 
 ### Logstash and netflow
 Stop logstash.service:
@@ -583,38 +583,19 @@ Even though we are using the Open Source version of Kibana, we are able to encry
 
 Add the ```xpack.security.enabled: true``` in elasticsearch.yml 
 
-
-
 ```
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
-
 
 openssl genrsa -des3 -out server.key 2048
 openssl rsa -in server.key -out server.key
 openssl req -sha256 -new -key server.key -out server.csr -subj '/CN=localhost'
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 Replace 'localhost' with your domain name. Run commands one by one because openssl will prompt you same values for certificate generation
-
 ```
 
-For further information, go check out the excellent guide here: https://www.elastic.co/guide/en/logstash/current/netflow-module.html
+For further information, go check out the excellent guide here: [https://www.elastic.co/guide/en/logstash/current/netflow-module.html](https://www.elastic.co/guide/en/logstash/current/netflow-module.html)
 
-
-## Fault finding
-More should come
-### Yellow cluster
-More should come
-http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html
-
-
-### Version control
-To see which version of ELK Stack you have installed are, do:
-```bash
-elk@stack:~$ sudo /usr/share/logstash/bin/logstash --version
-logstash 7.2.0
-elk@stack:~$ su -i
-```
-
+### BEATS
 Elastic produce a full range of log shippers known as ‘Beats’ which run as lightweight agents on the source devices and transmit data to a destination either running Elasticsearch or Logstash. If you are using Beats you can do this to make it use SSL to encrypt the communication between the Beat agent and Logstash:
 
 ```bash
@@ -673,6 +654,21 @@ stdout {
 }
 ```
 
+## Fault finding
+(...) More should come
+### Yellow cluster
+
+[http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html](http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html)
+
+
+### Version control
+To see which version of ELK Stack you have installed are, do:
+```bash
+elk@stack:~$ sudo /usr/share/logstash/bin/logstash --version
+logstash 7.2.0
+elk@stack:~$ su -i
+```
+
 
 ### Logstash with just netflow
 If you are not using syslogs, doing the grok patterns and everything above, do this to quick and dirty populate netflow in your Kibana. 
@@ -699,19 +695,18 @@ modules:
 Start with `sudo systemctl start logstash.service`
 
 ## Acknowledgments 
-* https://arnaudloos.com/2019/enable-x-pack-security/
-* https://www.elastic.co/elk-stack 
-* https://extelligenceblog.it/2017/10/18/elasticstack-elk-and-pfsense-firewall-ip-traffic-statistics-with-netflow/
-* https://help.ubuntu.com/lts/serverguide/certificates-and-security.html
-* https://github.com/solvaholic/solvaholic.github.io/wiki/Netflow-with-pfSense-and-ELK
-* https://www.elastic.co/elk-stack
-* https://github.com/patrickjennings/logstash-pfsense
-* https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-elasticsearch-logstash-and-kibana-elk-stack-on-ubuntu-18-04-ubuntu-16-04.html
-* https://logz.io/blog/elk-stack-raspberry-pi/
-* https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-elasticsearch-logstash-and-kibana-elk-stack-on-ubuntu-18-04-ubuntu-16-04.html
-* http://extelligenceblog.it/2017/07/11/elastic-stack-suricata-idps-and-pfsense-firewall-part-1/
-* https://forum.netgate.com/topic/107735/elk-pfsense-2-3-working/2
-* http://pfelk.3ilson.com
-* https://vitux.com/how-to-setup-java_home-path-in-ubuntu/
-* http://secretwafflelabs.com/2015/11/06/pfsense-elk/
-* https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html#plugins-filters-grok-patterns_dir
+* [http://pfelk.3ilson.com](http://pfelk.3ilson.com)
+* [https://arnaudloos.com/2019/enable-x-pack-security/](https://arnaudloos.com/2019/enable-x-pack-security/)
+* [https://www.elastic.co/elk-stack](https://www.elastic.co/elk-stack)
+* [https://extelligenceblog.it/2017/10/18/elasticstack-elk-and-pfsense-firewall-ip-traffic-statistics-with-netflow/](https://extelligenceblog.it/2017/10/18/elasticstack-elk-and-pfsense-firewall-ip-traffic-statistics-with-netflow/)
+* [https://help.ubuntu.com/lts/serverguide/certificates-and-security.html](https://help.ubuntu.com/lts/serverguide/certificates-and-security.html)
+* [https://github.com/solvaholic/solvaholic.github.io/wiki/Netflow-with-pfSense-and-ELK](https://github.com/solvaholic/solvaholic.github.io/wiki/Netflow-with-pfSense-and-ELK)
+* [https://www.elastic.co/elk-stack](https://www.elastic.co/elk-stack)
+* [https://github.com/patrickjennings/logstash-pfsense](https://github.com/patrickjennings/logstash-pfsense)
+* [https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-elasticsearch-logstash-and-kibana-elk-stack-on-ubuntu-18-04-ubuntu-16-04.html](https://www.itzgeek.com/how-tos/linux/ubuntu-how-tos/how-to-install-elasticsearch-logstash-and-kibana-elk-stack-on-ubuntu-18-04-ubuntu-16-04.html)
+* [https://logz.io/blog/elk-stack-raspberry-pi/](https://logz.io/blog/elk-stack-raspberry-pi/)
+* [http://extelligenceblog.it/2017/07/11/elastic-stack-suricata-idps-and-pfsense-firewall-part-1/](http://extelligenceblog.it/2017/07/11/elastic-stack-suricata-idps-and-pfsense-firewall-part-1/)
+* [https://forum.netgate.com/topic/107735/elk-pfsense-2-3-working/2](https://forum.netgate.com/topic/107735/elk-pfsense-2-3-working/2)
+* [https://vitux.com/how-to-setup-java_home-path-in-ubuntu/](https://vitux.com/how-to-setup-java_home-path-in-ubuntu/)
+* [http://secretwafflelabs.com/2015/11/06/pfsense-elk/](http://secretwafflelabs.com/2015/11/06/pfsense-elk/)
+* [https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html#plugins-filters-grok-patterns_dir](https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html#plugins-filters-grok-patterns_dir)
