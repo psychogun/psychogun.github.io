@@ -10,7 +10,7 @@ nav_order: 1
 So, on a whim I googled syslog + pfsense, and I saw some images of some nice dashboards (Kibana) for the firewall logs from PFSense. The tutorials I found did not tell me exactly how this all works, particularly how Elasticsearch, Logstash and Kibana work together. 
 
 
-These instructions will tell you what I have learned and how I installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beats and SHIELD) on Ubuntu 18.04 LTS with encrypted communication, so that I could have a nice visualization of my PFSense firewall logs with syslogs and netflow.
+These instructions will tell you what I have learned and how I installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beats and SHIELD) on Ubuntu with encrypted communication, so that I could have a nice visualization of my PFSense firewall logs with syslogs and netflow.
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -100,9 +100,9 @@ elk@stack:~$ echo $PATH
 We'll install Elasticsearch first, because Logstash and Kibana are dependent on Elasticsearch. When you install each component of the stack, the install will automatically create service users for running the different service. 
 
 Import the Elasticsearch PGP key and install Elasticsearch from the APT repository by following this excellent guide; 
-* [https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html) (remember to install wget and apt-transport-https)
+* [https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html) (also make sure to install `wget` and `apt-transport-https`).
 
-In order for Elasticsearch to function optimally, you should increase the number of files the (service) user 'elasticsearch' is allowed to open at the same time. Edit ```limits.conf``` and add the following:
+In order for Elasticsearch to function optimally, you should increase the number of files the (service) user 'elasticsearch' is allowed to open at the same time. Edit `limits.conf` and add the following:
 ```bash
 elk@stack:~$ nano /etc/security/limits.conf 
 elasticsearch soft nofile 32000
@@ -112,7 +112,7 @@ Also edit /etc/sysctl.conf and add the following:
 ```bash
 fs.file-max = 300000
 ```
-For some more information about file handling, read; [https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d](https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d)
+For some more information about file handling, read [https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d](https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d).
 
 To start Elasticsearch, write:
 ```bash
