@@ -536,12 +536,12 @@ Voilà. Netflow and syslogs in Kibana from pfSense.
 You are able to access the Kibana interface via HTTPS by setting `server.sssl.enable` to true in `kibana.yml` configuration file. To be able to do so, you have to create your certificates.
 
 Generate a key with a pass-phrase:
-```
+```bash
 elk@stack:~$ cd /etc/kibana
 elk@stack:/etc/kibana$ sudo openssl genrsa -des3 -out server.key 2048
 ```
 Now create the insecure key, the one without a passphrase, and shuffle the key names:
-```
+```bash
 elk@stack:/etc/kibana$ sudo openssl rsa -in server.key -out server.key.insecure
 elk@stack:/etc/kibana$ sudo mv server.key server.key.secure
 elk@stack:/etc/kibana$ sudo mv server.key.insecure server.key
@@ -549,18 +549,18 @@ elk@stack:/etc/kibana$ sudo mv server.key.insecure server.key
 The insecure key is now named server.key, and you can use this file to generate the CSR without passphrase. CSR stands for Certificate Signing Request. 
 
 To create the CSR, run the following command at a terminal prompt:
-```
+```bash
 elk@stack:/etc/kibana$ sudo openssl req -new -key server.key -out server.csr
 ```
 This `server.csr` file would normally go to a Certificate Authoriy (CA) for issuing a "stamp" saying; hey- this is a legit site. Instead of sending this to a CA, we are making this "stamp" our selves by creating a Self-Signed Certificate:
-```
+```bash
 elk@stack:/etc/kibana$ sudo openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 ```
 Now you have server.crt and server.key. 
 
 In `kibana.yml` we point to these certifications:
 
-```
+```bash
 # Enables SSL and paths to the PEM-format SSL certificate and SSL key files, respectively.
 # These settings enable SSL for outgoing requests from the Kibana server to the browser.
 server.ssl.enabled: true
@@ -609,7 +609,7 @@ http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html
 
 ### Version control
 To see which version of ELK Stack you have installed are, do:
-```
+```bash
 elk@stack:~$ sudo /usr/share/logstash/bin/logstash --version
 logstash 7.2.0
 elk@stack:~$ su -i
@@ -617,7 +617,7 @@ elk@stack:~$ su -i
 
 Elastic produce a full range of log shippers known as ‘Beats’ which run as lightweight agents on the source devices and transmit data to a destination either running Elasticsearch or Logstash. If you are using Beats you can do this to make it use SSL to encrypt the communication between the Beat agent and Logstash:
 
-```
+```bash
 elkeson@elk:/etc/ssl$ sudo openssl req -x509 -nodes -newkey rsa:2048 -days 365 -keyout logstash-forwarder.key -out logstash-forwarder.crt -subj /CN=stack.hb.local
 
 sudo openssl pkcs8 -in logstash-forwarder.key  -topk8 -nocrypt -out logstash-forwarder.key.pem
@@ -625,7 +625,7 @@ sudo openssl pkcs8 -in logstash-forwarder.key  -topk8 -nocrypt -out logstash-for
 sudo chmod 644 /etc/ssl/logstash-forwarder.key.pem
 ```
 
-```
+```bash
 elkeson@elk:/etc/logstash$ more pipelines.yml 
 # This file is where you define your pipelines. You can define multiple.
 # For more information on multiple pipelines, see the documentation:
@@ -635,7 +635,7 @@ elkeson@elk:/etc/logstash$ more pipelines.yml
   path.config: "/etc/logstash/conf.d/*.conf"
 ```  
   
-```
+```bash
 sudo nano /etc/logstash/conf.d/logstash.conf
 
 input {
@@ -681,7 +681,7 @@ Stop logstash. Start with `--modules netflow --setup``
 Stop logstash.
 
 Edit `logstash.yml`:
-```
+```bash
 elk@stack:/usr/share/logstash$ sudo nano /etc/logstash/logstash.yml 
 
 (...)
