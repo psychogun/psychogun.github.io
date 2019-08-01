@@ -5,9 +5,11 @@ parent: Linux
 nav_order: 2
 ---
 *WORK IN PROGRESS as of 2019-08-01*
-# How to set up dedicated Quake 3 Arena server(s) with different mods on Ubuntu Server 16.04
+## How to set up dedicated Quake 3 Arena server(s) with different mods on Ubuntu Server 16.04
 {: .no_toc }
 I used to play Quake III: Arena with my friends when I grew up (way back in 2003). I wanted to introduce Q3 to my kid and the easiest solution would be to just go online and download Quake Live from Steam (I remember trying QL when it was playable through the browser). However, since I am using macOS and QL is now only available on Windows, I had to think of alternatives.
+
+
 I took the challenge of trying to host my own dedicated Q3 server with the latest mod(s) so I could bring some QUAD POWER, DENIED and M-M-M-MMULTIKILL and show my kid how a proper KILLING-SPREE is done.
 
 ## Table of contents
