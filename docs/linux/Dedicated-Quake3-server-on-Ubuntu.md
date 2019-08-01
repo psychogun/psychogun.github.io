@@ -20,13 +20,11 @@ I took the challenge of trying to host my own dedicated Q3 server with the lates
 ---
 
 ## Getting started
-
 Googling ‘how to set up a dedicated quake 3 server’ only got my that far.. I wanted to run multiple dedicated Q3 servers (Free For All/Duel/Team Death Match on a single box, with proper server settings, with the latest and best mods with an emphasis on security (if/when I am opening up the servers to the internet, I want to make sure things are safe as milk). 
 
 Read on to learn how I was able to host multiple Q3 servers with different mods on a single virtualized Ubuntu Server 16.04 installation. 
 
 ### Prerequsites
-
 Some basic knowledge of UNIX commands (and using SSH) and FileZilla (or any other program) for easy transfering of files
 
 * Ubuntu Server 16.04 - http://releases.ubuntu.com/16.04/ (64-bit PC (AMD64) server install image)
@@ -36,7 +34,6 @@ Some basic knowledge of UNIX commands (and using SSH) and FileZilla (or any othe
 I am running Q3 server instances on a Ubuntu Server 16.04 installation as a virtual machine (bhyve). This game is now almost 20 years old, so the system requirements I needed to allocate for my virtual machine are pretty low - https://www.systemrequirementslab.com/cyri/requirements/quake-iii-arena/11592. I have allocated 1 CPU and 2GB of RAM. 
 
 ### Disclaimer
-
 If you don’t write 
 ```
 sudo rm -rf / 
@@ -47,7 +44,6 @@ And as with every guide, I recommend to read through all of it before you begin.
 
 
 ## Installation of Ubuntu Server 16.04
-
 If you do not have a dedicated machine to use for the installation of Ubuntu, you could download VirtualBox from Oracle (https://www.virtualbox.org) or use (any) another hypervisor for your platform (https://en.wikipedia.org/wiki/Hypervisor).
 
 Ubuntu tutorials has an excellent guide for installing Ubuntu Server 16.04; https://tutorials.ubuntu.com/tutorial/tutorial-install-ubuntu-server-1604
@@ -59,61 +55,62 @@ sarge@quake3server:~$ sudo apt-get update && sudo apt-get upgrade
 ```
 
 ## Configuration
-
-I thought it would be an easy quest of just importing some Q3 binaries from my old ripped up CD and do some tweaking and voilà- I have some executables to configure into a server. But it quickly came to my attention that the Q3 scene has gone (in many directions). The latest official engine/point release for Q3 from id Software is 1.32c, released all the way back in 200x. But thankfully to the Open Source Community, updates have been made making us able able to enjoy Q3 on the latest and greatest hardware. 
+I thought it would be an easy quest of just importing some Q3 binaries from my old ripped up CD and do some tweaking and voilà- I have some executables to configure into a server. But it quickly came to my attention that the Q3 scene has gone (in many directions). 
+The latest official engine/point release for Q3 from id Software is 1.32c, released all the way back in 200x. But thankfully to the Open Source Community, updates have been made making us able able to enjoy Q3 on the latest and greatest hardware. 
 
 
 ### Your preferred engine? Say what?
-
-What I (think I) found out, is that there are several engines out there which can start your Q3 server slash game these days. id Software stopped fixing bugs, security issues, and adding features to Q3 more than a decade ago. Now you have something called Quake3 1.32e (http://edawn-mod.org/forum/viewtopic.php?f=5&t=7), Quake III Kenny Edition (https://github.com/kennyalive/Quake-III-Arena-Kenny-Edition), CNQ3 1.50 (https://playmorepromode.com/downloads), a quake3-server package from Ubuntu (https://packages.ubuntu.com/trusty/games/quake3-server) and a bit further Googling sent me to the project ioquake3 which is a free software FPS game engine based on Q3 for Windows, Linux and macOs. 
+What I (think I) found out, is that there are several engines out there which can start your Q3 server slash game these days. id Software stopped fixing bugs, security issues, and adding features to Q3 more than a decade ago. 
+Now you have something called Quake3 1.32e (http://edawn-mod.org/forum/viewtopic.php?f=5&t=7), Quake III Kenny Edition (https://github.com/kennyalive/Quake-III-Arena-Kenny-Edition), CNQ3 1.50 (https://playmorepromode.com/downloads), a quake3-server package from Ubuntu (https://packages.ubuntu.com/trusty/games/quake3-server) and a bit further Googling sent me to the project ioquake3 which is a free software FPS game engine based on Q3 for Windows, Linux and macOs. 
 
 I chose to base my server on the ioquake3 project because they had a SysAdmin Guide for Linux, it is compatible with mods, is available under Linux, Windows and macOS and ioquake3 have added many features and fixed “too many bugs to count” . Go have a look at the project here: https://ioquake3.org/
 
 What I did next, is that I  followed the Sys Admin Guide over at ioquake3 http://wiki.ioquake3.org/Sys_Admin_Guide - you should use that for references when you start.
 
 This build script we are downloading in just a second, requires 'git', 'make' and ‘gcc’ to be installed, so we do that now after we have upgraded and updated our Ubuntu installation (+ we are installing the screen utility):
-```
+```bash
 sarge@quake3server:~$ sudo apt-get install git && sudo apt-get install make && sudo apt-get install gcc && sudo apt-get install screen
 ```
 Create a new user (ioq3srv) for your ioquake3 server to run as:
-```
+```bash
 sarge@quake3server:~$ sudo adduser ioq3srv 
 ```
 Change our current user to the newly created user: 
-```
+```bash
 sarge@quake3server:~$ su ioq3srv 
 ```
 Change directory to the newly created user’s home folder:
-```
+```bash
 ioq3srv@quake3server:~/home/sarge$ cd /home/ioq3srv
 ioq3srv@quake3server:~$ pwd
 /home/ioq3srv
 ```
 Download server_compile.sh:
-```
+```bash
 ioq3srv@quake3server:~$ wget https://raw.githubusercontent.com/ioquake/ioq3/master/misc/linux/server_compile.sh
 ```
 Run the .sh and compile ioquake3:
-```
+```bash
 ioq3srv@quake3server:~$ sh server_compile.sh
 ```
 Answer yes and press enter when asked “Are you ready to compile ioquake3 from https://github.com/ioquake/ioq3.git, and have it installed into ~/ioquake3? “ 
 
-After ioquake3 has been compiled, open up FileZilla which we are going to use for the transfer of our pak0.pk3 file. Create a new site in FileZilla with Protocol: SFTP - SSH File Transfer Protocol and put in your credentials for the ioq3srv user (and obviosly the IP address of the Ubuntu Server 16.04 installation- default port for SSH is 22). When you are connected, transfer pak0.pk3 to the baseq3 sub-directory of ioquak3.
+After ioquake3 has been compiled, open up FileZilla which we are going to use for the transfer of our pak0.pk3 file. Create a new site in FileZilla with Protocol: SFTP - SSH File Transfer Protocol and put in your credentials for the ioq3srv user (and obviosly the IP address of the Ubuntu Server 16.04 installation- default port for SSH is 22).
+When you are connected, transfer pak0.pk3 to the baseq3 sub-directory of ioquak3.
 
 The pak0.pk3 file resides inside your baseq3 folder on your original Quake III: Arena installation media.
 
 When that is done, you need to transfer some more files. Download the patch zip file from https://ioquake3.org/extras/patch-data/ and unzip the contents into your baseq3 and missionpack sub-directories of ioquake3. 
 
 Go back to your Ubuntu installation to download (wget) start_server.sh; 
-```
+```bash
 ioq3srv@quake3server:~$ wget https://raw.githubusercontent.com/ioquake/ioq3/master/misc/linux/start_server.sh
 ```
 ### Command line arguments
 
 Take a look at the start_server.sh file by using the command ‘more’:
 
-```
+```bash
 ioq3srv@quake3server:~$ more start_server.sh 
 #!/bin/sh
 echo "Edit this script to change the path to ioquake3's dedicated server executable and which binary if you aren't on x86_64.
@@ -122,58 +119,56 @@ echo "Set the sv_dlURL setting to a url like http://yoursite.com/ioquake3_path f
 # sv_dlURL needs to have quotes escaped like \"http://yoursite.com/ioquake3_path\" or it will be set to "http:" in-game.
 ~/ioquake3/ioq3ded.x86_64 +set dedicated 2 +set sv_allowDownload 1 +set sv_dlURL \"\" +set com_hunkmegs 64 "$@"
 ```
-What we want to edit right now is the ‘+set dedicated 2’ parameter.  +set dedicated 2 is public Internet, 1 is LAN/connect by IP (the default), 0 is non-dedicated (client binary only). It must be set in the command line arguments (which means after ~/ioquake3/ioq3ded.x8664 in the startserver.sh file). For now we do not want to broadcast our server to the world, so we change that to 1. Use your favourite text editor (‘nano’ is a good and easy choice), and alter it to 1. 
+What we want to edit right now is the `+set dedicated 2` parameter.  `+set dedicated 2` is public Internet, 1 is LAN/connect by IP (the default), 0 is non-dedicated (client binary only). It must be set in the command line arguments (which means after ~/ioquake3/ioq3ded.x8664 in the `startserver.sh` file). For now we do not want to broadcast our server to the world, so we change that to 1. Use your favourite text editor (‘nano’ is a good and easy choice), and alter it to 1. 
 
-‘sv_allowDownload 1’ means that players connected to your server are able to download missing maps automatically, thats good. The +set svdlURL enables those downloads through http, but we wont use that, so we’ll remove it. com_hunkmegs sets the amount of memory you want ioq3ded.x86_64 to reserve for game play dedicated server memory optimizations. We’ll change it to 128.
+`sv_allowDownload 1` means that players connected to your server are able to download missing maps automatically, thats good. The `+set svdlURL` enables those downloads through http, but we wont use that, so we’ll remove it. `com_hunkmegs` sets the amount of memory you want ioq3ded.x86_64 to reserve for game play dedicated server memory optimizations. We’ll change it to 128.
 
-Use ‘nano’ or any other text editor to alter the start_server.sh file:
-```
+Use `nano` or any other text editor to alter the start_server.sh file:
+```bash
 ioq3srv@quake3server:~$ nano start_server.sh 
 ~/ioquake3/ioq3ded.x86_64 +set dedicated 1 +set sv_allowDownload 1 +set com_hunkmegs 128 "$@"
 ```
 To start a server, you go
-```
+```bash
 ioq3srv@quake3server:~$ sh start_server.sh 
 ```
-and then you can write ‘map q3dm17’ in your server’s console. To stop the server, press ctrl + c within that window. Now you have created a Q3 server with default server configuration settings, and started a game on q3dm17 where players can join.
+and then you can write `map q3dm17` in your server’s console. To stop the server, press ctrl + c within that window. Now you have created a Q3 server with default server configuration settings, and started a game on q3dm17 where players can join.
 
 ### Configuration files
+The first time you start your server, a q3config_server.cfg is being created. This server config is a default one and it is created in `/home/ioq3srv/.q3a/baseq3/`. 
 
-The first time you start your server, a q3config_server.cfg is being created. This server config is a default one and it is created in ‘/home/ioq3srv/.q3a/baseq3/’. 
-
-You can check out the default Q3 server settings by changing directory and use the ‘more’ command:
-```
+You can check out the default Q3 server settings by changing directory and use the `more` command:
+```bash
 ioq3srv@quake3server:~$ cd .q3a/baseq3/
 ioq3srv@quake3server:~/.q3a/baseq3$ more q3config_server.cfg 
 ```
 Because I wanted proper server settings, I searched online and looked for some “official” server settings from big tournaments such as QuakeCon, ESWC or CPL, but I was unsuccessfull. The closest thing I found was a guy (http://www.esreality.com/post/2848596/new-q3-pro-osp-configs/) who had some server config files stored in a shared dropbox amongst config files from pro players (https://www.dropbox.com/s/6z2iz4ugd0zket6/configs.zip?dl=0&filesubpath=%2Fquake3). But, are those server configs valid? Now 10+ years after it presumably dates from? And is that config for Q3 or does it include settings for osp_mod/CPMA? Or any other mods? Read on. .
 
 ## All your mods are belongs to us
-
 Correct me if I am mistaken,
 
-with Quake III: Arena, id Software allowed you to modify the game. When I was playing back in 2003, there were several different mods I played. There was a mod called osp_mod from Orange Smoothie Production (http://www.orangesmoothie.org), Challenge ProMode Arena (CPMA) (https://en.wikipedia.org/wiki/Challenge_ProMode_Arena), I remember I played Rocket Arena as well (https://en.wikipedia.org/wiki/Rocket_Arena) (that was awesome) and I had a couple of hours trickjumping in DeFrag too (https://en.wikipedia.org/wiki/DeFRaG). Writing this how-to, I discovered there’s many more mods that have come out since then; Open Arena (https://en.wikipedia.org/wiki/OpenArena), Smokin Guns (https://en.wikipedia.org/wiki/Smokin%27_Guns), Quake 3 Fortress (https://www.moddb.com/mods/q3f) and Tremulos (https://en.wikipedia.org/wiki/Tremulous). It might even be many more.
+with Quake III: Arena, id Software allowed you to modify the game. When I was playing back in 2003, there were several different mods I played. There was a mod called osp_mod from Orange Smoothie Production (http://www.orangesmoothie.org), Challenge ProMode Arena (CPMA) (https://en.wikipedia.org/wiki/Challenge_ProMode_Arena), I remember I played Rocket Arena as well (https://en.wikipedia.org/wiki/Rocket_Arena) (that was awesome) and I had a couple of hours trickjumping in DeFrag too (https://en.wikipedia.org/wiki/DeFRaG).
+Writing this how-to, I discovered there’s many more mods that have come out since then; Open Arena (https://en.wikipedia.org/wiki/OpenArena), Smokin Guns (https://en.wikipedia.org/wiki/Smokin%27_Guns), Quake 3 Fortress (https://www.moddb.com/mods/q3f) and Tremulos (https://en.wikipedia.org/wiki/Tremulous). It might even be many more.
 
 I don’t really know what the latest mods the Quake scene/pro gamers/compos have been using are. Is the Q3 scene completely dead, everyone is either playing QL or have they all shifted over to Quake Champions? (QC is unfortnuately not playable on macOS either).
 
 ## The Contest
-
-Scouring through various sites, what I found out was that the CPMA scene was fairly active (https://twitter.com/playmorepromode). The CPMA 1.50 mod was released 7th of January 2018. Back when I played CPMA, coming from osp_mod, I did not get familiar with the air-control in the gameplay that much (and I honestly do not remember if I liked it or not). But I see that you are able to have the CPMA graphical user interface with VQ3 gameplay (VQ3 is what people refer to as ‘vanilla quake’ -  meaning normal gameplay with no alteriations to physics or jumping). Also, with CPMA, you are able to have all the typical game modes such as FFA, TDM, DUEL and you are also able to play a style of ‘Rocket Arena’ with a game mode CPMA calls Clan Arena. Really cool! More information can be found here; https://esreality.com/post/1151879/re-cpl-chooses-cpma-vq3/, http://www.esreality.com/?a=post&id=1155489 and https://forum.lowyat.net/topic/332890/all.
+Scouring through various sites, what I found out was that the CPMA scene was fairly active (https://twitter.com/playmorepromode). The CPMA 1.50 mod was released 7th of January 2018. Back when I played CPMA, coming from osp_mod, I did not get familiar with the air-control in the gameplay that much (and I honestly do not remember if I liked it or not). But I see that you are able to have the CPMA graphical user interface with VQ3 gameplay (VQ3 is what people refer to as ‘vanilla quake’ -  meaning normal gameplay with no alteriations to physics or jumping). 
+Also, with CPMA, you are able to have all the typical game modes such as FFA, TDM, DUEL and you are also able to play a style of ‘Rocket Arena’ with a game mode CPMA calls Clan Arena. Really cool! More information can be found here; https://esreality.com/post/1151879/re-cpl-chooses-cpma-vq3/, http://www.esreality.com/?a=post&id=1155489 and https://forum.lowyat.net/topic/332890/all.
 
 ### ioquake3 with Challenge ProMode mod
-
 Follow this guide here https://playmorepromode.com/guides/cpma-cnq3-installation and download https://cdn.playmorepromode.com/files/cpma-mappack-full.zip and https://playmorepromode.com/files/latest/cpma and place those files in their respective folders with FileZilla. 
 
 The folks over at CPMA has been kind enough to give us some examples of a proper server config: https://playmorepromode.com/guides/cnq3-dedicated-server-guide (Yay! I finally found it), 
 
 After you have downloaded the files nessecary for running the CPMA mod, we are going to make ourself a “start_server.sh” file to make ioquake3 start a server with the CPMA mod:
-```
+```bash
 ioq3srv@quake3server:~$ nano start_CPMA_duelserver.sh
 ```
 #### Duel server with VQ3 physics on CPMA with ioquake3
 
 I am first setting up a duel server. The content of my start_CPMA_duelserver.sh file looks like this:
-```
+```bash
 #!/bin/sh
 ip="192.168.5.129"
 port="27961"
@@ -239,14 +234,14 @@ set vote_allow_map          "1"
 set vote_allow_gameplay     "vq3" // only vq3 is allowed
 ```
 We are going to display a custom MOTD (message of today) with server_motdfile and it has to be placed in our /home/ioq3srv/.q3a/cpma/ folder
-```
+```bash
 ioq3srv@quake3server:~$ nano .q3a/cpma/duelservermotd.txt 
 Welcome to Dallas' (FR) DUEL (VQ3) server
 This server runs on regular tourney settings 
 Enjoy your stay here at Fhloston Paradise!
 ```
 To start this server, you just write 
-```
+```bash
 ioq3srv@quake3server:~$ sh start_CPMA_duelserver.sh
 ```
 #### Team Death Match server with VQ3 physics in CPMA on ioquake3
@@ -264,7 +259,9 @@ echo running $name on $ip:$port
         +set developer 0 \
         +exec CPMA_tdmserver.cfg \
         +map pro-q3dm6
-        
+```
+
+```bash
 ioq3srv@quake3server:~$ more ioquake3/cpma/CPMA_tdmserver.cfg 
 // make sure to update these!
 sets .admin.        "SARGE"      // server browser info
@@ -311,7 +308,7 @@ set vote_allow_map          "1"
 set vote_allow_gameplay     "tdm"
 ```
 We are going to display a custom MOTD (message of today) with server_motdfile and it has to be placed in our /home/ioq3srv/.q3a/cpma/ folder
-```
+```bash
 ioq3srv@quake3server:~$ nano .q3a/cpma/tdmservermotd.txt 
 Welcome to Dallas' (FR) TDM (VQ3) server
 This server runs on regular TDM settings 
@@ -322,11 +319,12 @@ To start this CPMA TDM server, you just write
 ioq3srv@quake3server:~$ sh start_CPMA_tdmserver.sh
 ```
 #### Clan Arena (Rocket Arena 3) with VQ3 physics on CPMA with ioquake3
+In order to play the classic RA3 games in CPMA with gametype CA, you have to copy over the ra3map.pk3 to ioquake3/baseq3 folder. The latest version I found released of RA3 is 1.80; http://www.esreality.com/?a=post&id=1651776 / https://www.quake3.fr/index.php?f_id_contenu=1156&f_id_type=13 / https://games.square-r00t.net/downloads/quake/quakeIII/arena/readme.txt. 
+Also, I recommend reading this post http://levelsofdetail.net/2010/07/this-is-a-post-about-rocket-arena-3/ 
 
-In order to play the classic RA3 games in CPMA with gametype CA, you have to copy over the ra3map.pk3 to ioquake3/baseq3 folder. The latest version I found released of RA3 is 1.80; http://www.esreality.com/?a=post&id=1651776 / https://www.quake3.fr/index.php?f_id_contenu=1156&f_id_type=13 / https://games.square-r00t.net/downloads/quake/quakeIII/arena/readme.txt. Also, I recommend reading this post http://levelsofdetail.net/2010/07/this-is-a-post-about-rocket-arena-3/ 
-
-Download RA3 and in its folder “arena” you’ll find files called ra3map1.pk3 up to ra3map20.pk3. Copy all those files over to /home/ioq3srv/ioquake3/baseq3. If you would like to set up a server as a pure RA3 mod, just copy the ‘arena’ folder to /home/ioq3srv/ioquake3/ (just as you did with cpma - and then it will be just to alter ‘+set fs_game arena’.. .. I’ll show you later. 
-```
+Download RA3 and in its folder “arena” you’ll find files called ra3map1.pk3 up to ra3map20.pk3. Copy all those files over to /home/ioq3srv/ioquake3/baseq3. 
+If you would like to set up a server as a pure RA3 mod, just copy the ‘arena’ folder to `/home/ioq3srv/ioquake3/` (just as you did with cpma - and then it will be just to alter `+set fs_game arena`.. .. I’ll show you later. 
+```bash
 ioq3srv@quake3server:~$ more start_CPMA_caserver.sh 
 #!/bin/sh
 ip="192.168.5.129"
@@ -343,7 +341,7 @@ echo running $name on $ip:$port
 ```
 https://r3dux.org/2010/05/how-to-fix-missing-bots-in-ioquake3-in-linux/
 
-Reading this guide here, https://playmorepromode.com/guides/cpma-custom-modes, to get a feel of the ‘old’ RA3 behavoir in CA - you should create a file called RA3.cfg and save it in this folder ~/ioquake3/cpma/modes/, or copy modes/sample/RA3.cfg to the modes/ folder.
+Reading this guide here, https://playmorepromode.com/guides/cpma-custom-modes, to get a feel of the ‘old’ RA3 behavoir in CA - you should create a file called RA3.cfg and save it in this folder `~/ioquake3/cpma/modes/`, or copy modes/sample/RA3.cfg to the modes/ folder.
 ```bash
 ioq3srv@quake3server:~/home/ioq3srv/ioquake3/cpma/modes$ nano RA3.cfg
 type 5                    # Clan Arena derivative
@@ -356,7 +354,8 @@ startrespawn 0
 selfdamage 2
 teamdamage 0                # no team damage in spamfests
 ```
-Looking through server.cfg from RA3 1.80, I found some inconsistency to the provided RA3.cfg from CPMA. For instance, server.cfg says RA3 does not use fraglimit, only timelimit.  And looking through demos of guys playing RA3 on youtube, I found out you start with 100 health and 100 armor, with no team damage or self damage and no falling damage. The ammos in the provided config was correct.
+Looking through server.cfg from RA3 1.80, I found some inconsistency to the provided RA3.cfg from CPMA. For instance, server.cfg says RA3 does not use fraglimit, only timelimit.  And looking through demos of guys playing RA3 on youtube, I found out you start with 100 health and 100 armor, with no team damage or self damage and no falling damage. 
+The ammos in the provided config was correct.
 
 Our final custome mode aka RA3.cfg looks like this:
 ```bash
@@ -370,7 +369,7 @@ selfdamage 0
 teamdamage 0
 items -BFG
 ```
-In our CPMAra3server.cfg we point to RA3.cfg under mode_start and server_availmodes.
+In our CPMAra3server.cfg we point to RA3.cfg under `mode_start` and `server_availmodes`.
 ```bash
 ioq3srv@quake3server:~/ioquake3/cpma$ nano CPMA_ra3server.cfg 
 // make sure to update these!
@@ -463,19 +462,16 @@ To start this server, you just write
 ioq3srv@quake3server:~$ sh start_CPMA_ra3server.sh
 ```
 ### Maps
+If you are looking for special maps, such as ztn3tourney1 (https://lvlworld.com/review/id:800), you have to place those maps in the `ioquake3/baseq3/folder` on your server. A really cool map for TDM play is ospdm5 (http://ws.q3df.org/map/ospdm5) - just place the whole shebang (ospmaps0.pk3 from previous link) in you baseq3 folder. 
 
-If you are looking for special maps, such as ztn3tourney1 (https://lvlworld.com/review/id:800), you have to place those maps in the ioquake3/baseq3/folder on your server. A really cool map for TDM play is ospdm5 (http://ws.q3df.org/map/ospdm5) - just place the whole shebang (ospmaps0.pk3 from previous link) in you baseq3 folder. 
-
-If sv_downloadAllow is set to 1, clients connecting to the server will be allowed to download missing maps. 
+If `sv_downloadAllow` is set to 1, clients connecting to the server will be allowed to download missing maps. 
 
 PS: Remember that your client has to enable Automatic download (SETUP > GAME OPTIONS > Automatic Downloading “on”), or type /cl_allowdownload 1 in console from the mod to fully allow downloads to the client. 
 
 ## Using screen to start the Q3 servers
-
 Read this guide for a good practise on how to start and monitor your Q3 server: https://playmorepromode.com/guides/cnq3-dedicated-server-guide.
 
 ## Securing our server
-
 With our sudo user, we will issue a command called netstat (https://en.wikipedia.org/wiki/Netstat), which shows us our open ports and current connections. 
 ```bash
 sarge@quake3server:~$ netstat -an | more
