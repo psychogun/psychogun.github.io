@@ -143,7 +143,7 @@ ioq3srv@quake3server:~/.q3a/baseq3$ more q3config_server.cfg
 ```
 Because I wanted proper server settings, I searched online and looked for some “official” server settings from big tournaments such as QuakeCon, ESWC or CPL, but I was unsuccessfull. The closest thing I found was a guy ([http://www.esreality.com/post/2848596/new-q3-pro-osp-configs/](http://www.esreality.com/post/2848596/new-q3-pro-osp-configs/) who had some server config files stored in a shared dropbox amongst config files from pro players ([https://www.dropbox.com/s/6z2iz4ugd0zket6/configs.zip?dl=0&filesubpath=%2Fquake3](https://www.dropbox.com/s/6z2iz4ugd0zket6/configs.zip?dl=0&filesubpath=%2Fquake3). But, are those server configs valid? Now 10+ years after it presumably dates from? And is that config for Q3 or does it include settings for osp_mod/CPMA? Or any other mods? Read on. .
 
-## All your mods are belongs to us
+## The Contest
 Correct me if I am mistaken,
 
 with Quake III: Arena, id Software allowed you to modify the game. When I was playing back in 2003, there were several different mods I played. There was a mod called osp_mod from Orange Smoothie Production ([http://www.orangesmoothie.org](http://www.orangesmoothie.org)), Challenge ProMode Arena (CPMA) ([https://en.wikipedia.org/wiki/Challenge_ProMode_Arena)](https://en.wikipedia.org/wiki/Challenge_ProMode_Arena)), I remember I played Rocket Arena as well ([https://en.wikipedia.org/wiki/Rocket_Arena](https://en.wikipedia.org/wiki/Rocket_Arena)) (that was awesome) and I had a couple of hours trickjumping in DeFrag too ([https://en.wikipedia.org/wiki/DeFRaG](https://en.wikipedia.org/wiki/DeFRaG)).
@@ -151,7 +151,7 @@ Writing this how-to, I discovered there’s many more mods that have come out si
 
 I don’t really know what the latest mods the Quake scene/pro gamers/compos have been using are. Is the Q3 scene completely dead, everyone is either playing QL or have they all shifted over to Quake Champions? (QC is unfortnuately not playable on macOS either).
 
-## The Contest
+### All your mods are belongs to us
 Scouring through various sites, what I found out was that the CPMA scene was fairly active ([https://twitter.com/playmorepromode](https://twitter.com/playmorepromode). The CPMA 1.50 mod was released 7th of January 2018. Back when I played CPMA, coming from osp_mod, I did not get familiar with the air-control in the gameplay that much (and I honestly do not remember if I liked it or not). But I see that you are able to have the CPMA graphical user interface with VQ3 gameplay (VQ3 is what people refer to as ‘vanilla quake’ -  meaning normal gameplay with no alteriations to physics or jumping). 
 Also, with CPMA, you are able to have all the typical game modes such as FFA, TDM, DUEL and you are also able to play a style of ‘Rocket Arena’ with a game mode CPMA calls Clan Arena. Really cool! More information can be found here; [https://esreality.com/post/1151879/re-cpl-chooses-cpma-vq3/](https://esreality.com/post/1151879/re-cpl-chooses-cpma-vq3/), [http://www.esreality.com/?a=post&id=1155489](http://www.esreality.com/?a=post&id=1155489) and [https://forum.lowyat.net/topic/332890/all](https://forum.lowyat.net/topic/332890/all).
 
