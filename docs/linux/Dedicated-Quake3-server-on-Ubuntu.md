@@ -167,7 +167,7 @@ ioq3srv@quake3server:~$ nano start_CPMA_duelserver.sh
 #### Duel server with VQ3 physics on CPMA with ioquake3
 
 I am first setting up a duel server. The content of my `start_CPMA_duelserver.sh` file looks like this:
-```bash
+```sh
 #!/bin/sh
 ip="192.168.5.129"
 port="27961"
@@ -183,7 +183,7 @@ echo running $name on $ip:$port
         +map cpm3a
 ```
 Now we have to create our server config which is executed, `CPMA_duelserver.cfg`. The server configs for CPMA is loaded from `/ioquake3/cpma/` folder and not from the `.q3a/baseq3/` folder.
-```bash
+```sh
 ioq3srv@quake3server:~$ cd ioquake3/cpma/
 ioq3srv@quake3server:~/ioquake3/cpma$ nano CPMA_duelserver.cfg 
 // make sure to update these!
@@ -206,7 +206,7 @@ set server_gameplay         "VQ3"       // change between VQ3, CPM, PMC, CQ3 or 
 set server_maxpacketsmin    "100"       // ideally cl_maxPackets 125, but allow a bit lower
 set server_maxpacketsmax    "125"       // ideally cl_maxPackets 125
 set server_ratemin          "25000"     // good range for players is 25k to 30k
-set server_optimisebw       "1"         // reduces bandwidth a lot but can't see players through portals
+set server_optimisebw       "1"         // reduces bandwidth a lot, but cannot see players through portals
 set log_pergame             "0"         // opens a new timestamped log file for each game
 set match_readypercent      "100"       // min. % of players that must be ready for a match to start
 set g_gametype              "1"         // 1 is duel
