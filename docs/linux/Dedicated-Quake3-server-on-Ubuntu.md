@@ -461,11 +461,11 @@ To start this server, you just write
 ioq3srv@quake3server:~$ sh start_CPMA_ra3server.sh
 ```
 ### Maps
-If you are looking for special maps, such as ztn3tourney1 ([https://lvlworld.com/review/id:800](https://lvlworld.com/review/id:800)), you have to place those maps in the `ioquake3/baseq3/folder` on your server. A really cool map for TDM play is ospdm5 ([http://ws.q3df.org/map/ospdm5)](http://ws.q3df.org/map/ospdm5)) - just place the whole shebang (`ospmaps0.pk3` from previous link) in you baseq3 folder. 
+If you are looking for special maps, such as ztn3tourney1 ([https://lvlworld.com/review/id:800](https://lvlworld.com/review/id:800)), you have to place those maps in the `ioquake3/baseq3/` folder on your server. A really cool map for TDM play is ospdm5 ([http://ws.q3df.org/map/ospdm5)](http://ws.q3df.org/map/ospdm5)) - just place the whole shebang (`ospmaps0.pk3` from previous link) in you baseq3 folder. 
 
-If `sv_downloadAllow` is set to 1, clients connecting to the server will be allowed to download missing maps. 
+If `sv_downloadAllow` is set to `1`, clients connecting to the server will be allowed to download missing maps. 
 
-PS: Remember that your client has to enable Automatic download (SETUP > GAME OPTIONS > Automatic Downloading “on”), or type `/cl_allowdownload 1` in Q3 console from the loaded _mod_  to fully allow downloads to the Q3 client. 
+PS: Remember that your client has to enable Automatic download (SETUP > GAME OPTIONS > Automatic Downloading “on”), or type `/cl_allowdownload 1` in the Q3 console from the loaded _mod_  to fully allow downloads of missing maps. 
 
 ## Using screen to start the Q3 servers
 Read this guide for a good practise on how to start and monitor your Q3 server: [https://playmorepromode.com/guides/cnq3-dedicated-server-guide](https://playmorepromode.com/guides/cnq3-dedicated-server-guide).
