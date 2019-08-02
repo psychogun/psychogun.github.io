@@ -6,5 +6,5 @@ Wielding a cybernetic arm-laser gun, fighting monsters and meddling in the Pirat
 
 Jokes aside, just trying to learn new things.
 
-[https://github.com/psychogun/psychogun.github.io](https://github.com/psychogun/psychogun.github.io)
+[https://psychogun.github.io](https://psychogun.github.io)
 
