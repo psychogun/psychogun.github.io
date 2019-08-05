@@ -124,7 +124,7 @@ elk@stack:~$ sudo systemctl start elasticsearch
 ```
 To enable Elasticsearch to start when you boot, write:
 ```bash
-elkeson@elk:~$ sudo systemctl enable elasticsearch
+elk@stack:~$ sudo systemctl enable elasticsearch
 ```
 To see if Elasticsearch has been started as it should, your curl output will look something like this:
 ```bash
@@ -392,7 +392,7 @@ output {
 ```
 The index statement dictates that a rotating of the database file with a date stamp will occour. If you want to view the Logstash output realtime, you could also send output to console by adding stdout:
 ```bash
-elkeson@elk:~$ more /etc/logstash/conf.d/30-outputs.conf 
+elk@stack:~$ more /etc/logstash/conf.d/30-outputs.conf 
 output {
         elasticsearch {
                 hosts => ["http://localhost:9200"]
@@ -421,9 +421,9 @@ Grok is a great way to parse unstructured log data into something structured and
 Or download it:
 ```bash
 elk@stack:~$ cd /etc/logstash/conf.d/
-elkeson@stack:/etc/logstash$ sudo mkdir patterns
-elkeson@stack:/etc/logstash$ cd patterns
-elkeson@stack:/etc/logstash/patterns$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/patterns/pfsense_2_4_2.grok
+elk@stack:/etc/logstash$ sudo mkdir patterns
+elk@stack:/etc/logstash$ cd patterns
+elk@stack:/etc/logstash/patterns$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/patterns/pfsense_2_4_2.grok
 ```
 
 Now, go ahead and start logstash!
@@ -604,7 +604,7 @@ For further information, go check out the excellent guide here: [https://www.ela
 Elastic produce a full range of log shippers known as ‘Beats’ which run as lightweight agents on the source devices and transmit data to a destination either running Elasticsearch or Logstash. If you are using Beats you can do this to make it use SSL to encrypt the communication between the Beat agent and Logstash:
 
 ```bash
-elkeson@elk:/etc/ssl$ sudo openssl req -x509 -nodes -newkey rsa:2048 -days 365 -keyout logstash-forwarder.key -out logstash-forwarder.crt -subj /CN=stack.hb.local
+elk@stack:/etc/ssl$ sudo openssl req -x509 -nodes -newkey rsa:2048 -days 365 -keyout logstash-forwarder.key -out logstash-forwarder.crt -subj /CN=stack.hb.local
 
 sudo openssl pkcs8 -in logstash-forwarder.key  -topk8 -nocrypt -out logstash-forwarder.key.pem
 
@@ -612,7 +612,7 @@ sudo chmod 644 /etc/ssl/logstash-forwarder.key.pem
 ```
 
 ```bash
-elkeson@elk:/etc/logstash$ more pipelines.yml 
+elk@stack:/etc/logstash$ more pipelines.yml 
 # This file is where you define your pipelines. You can define multiple.
 # For more information on multiple pipelines, see the documentation:
 #   https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
