@@ -21,6 +21,8 @@ These instructions will tell you what I have learned and how I installed the Ela
 ## Getting started
 The repository can be found here: [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense).
 
+<img src="{{site.url}}/docs/linux/img/ELK-stack-on-Ubuntu-with-pfSense-1.png" style="display: block; margin: auto;" />
+
 Logstash combines logdata from different sources to a joint Java Script Object Notation (JSON)-format. Elasticsearch indexes and saves JSON-logdata in a central database. Kibana graphically presents logdata to the user in a webbrowser. 
 
 ### Logstash
