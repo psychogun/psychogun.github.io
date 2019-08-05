@@ -10,7 +10,7 @@ nav_order: 1
 So, on a whim I googled syslog + pfsense, and I saw some images of some nice dashboards (Kibana) for the firewall logs from PFSense. The tutorials I found did not tell me exactly how this all works, particularly how Elasticsearch, Logstash and Kibana work together. 
 
 
-These instructions will tell you what I have learned and how I installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beats and SHIELD) on Ubuntu with encrypted communication, so that I could have a nice visualization of my pfSense firewall logs with syslogs and netflow.
+These instructions will tell you what I have learned and how I installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beats and SHIELD) on Ubuntu with encrypted communication, so that I could have a nice visualization of my pfSense firewall logs with syslog and netflow.
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -532,7 +532,10 @@ Let's start `logstash.service` and check in Kibana that both the netflow and pfS
 elk@stack:/usr/share/logstash$ sudo systemctl start logstash.service
 ```
 
-Voilà. Netflow and syslogs in Kibana from pfSense.
+Voilà. Netflow and syslogs in Kibana from pfSense. 
+
+<img src="{{site.url}}/docs/linux/img/ELK-stack-on-Ubuntu-with-pfSense-2.png" style="display: block; margin: auto;" />
+
 
 ### Enable HTTPS on Kibana
 You are able to access the Kibana interface via HTTPS by setting `server.sssl.enable` to true in `kibana.yml` configuration file. To be able to do so, you have to create your certificates.
