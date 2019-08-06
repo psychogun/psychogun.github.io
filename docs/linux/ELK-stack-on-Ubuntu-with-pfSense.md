@@ -665,6 +665,8 @@ stdout {
 
 [http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html](http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html)
 
+### Safari Can't Open the Page
+When trying to export Netflow data, in Safari, you'll get an error _"Safari can't open the page "blob:https:// (...) WebKitBlobResource error 1.)"_ -- just use Google Chrome. 
 
 ### Version control
 To see which version of ELK Stack you have installed are, do:
