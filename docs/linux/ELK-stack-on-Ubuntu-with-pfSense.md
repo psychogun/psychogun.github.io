@@ -563,7 +563,7 @@ elk@stack:/etc/kibana$ sudo openssl x509 -req -days 365 -in server.csr -signkey 
 ```
 Now you have server.crt and server.key. 
 
-In `kibana.yml` we point to these certifications:
+In `kibana.yml` we point to these certifications, `elk@stack:~$ sudo nano /etc/kibana/kibana.yml`:
 
 ```bash
 # Enables SSL and paths to the PEM-format SSL certificate and SSL key files, respectively.
@@ -583,8 +583,169 @@ elk@stack:/etc/kibana$ sudo systemctl start kibana.service
 ```
 Now you are able to communicate with Kibana over an encrypted connection (https).
 
-### Enable Elasticsearch via SSL
-Even though we are using the Open Source version of Kibana, we are able to encrypt communication between Kibana and Elasticsearch. For further hardening of your Elastic Stack, go to https://www.elastic.co/subscriptions to see if you are willing to pay the dues. 
+### TLS on Elasticsearch
+Starting with Elastic Stack 6.8 and 7.1, security features like TLS encrypted communication, role-based access control (RBAC), and more are available for free within the default distribution. For further hardening of your Elastic Stack, go to [https://www.elastic.co/subscriptions](https://www.elastic.co/subscriptions) to see if you are willing to pay the dues. 
+
+The simplest way that Kibana and/or application servers can authenticate to an Elasticsearch cluster is by embedding a username and password in their configuration files or source code.
+Elasticsearch has two levels of communications, transport communications and http communications. The transport protocol is used for internal communications between Elasticsearch nodes, and the http protocol is used for communications from clients (Kibana) to the Elasticsearch cluster.
+The transport protocol is used for communication between nodes within an Elasticsearch cluster, which we only have one of. 
+
+#### Generate certificates
+```bash
+elk@stack:~$ cd /usr/share/elasticsearch/
+elk@stack:/usr/share/elasticsearch$ sudo bin/elasticsearch-certutil ca
+[PRESS ENTER TWICE]
+elk@stack:/usr/share/elasticsearch$ sudo bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12
+
+elk@stack:/usr/share/elasticsearch$ sudo bin/elasticsearch-certutil cert -out certs/elastic-certificates.p12 -pass ""
+```
+Once the above commands have been executed, we will have TLS/ SSL certificates that can be used for encrypting communications.
+We want to move `elastic-certificates.p12` folder to `/etc/elasticsearch/certs`:
+```bash
+elk@stack:/usr/share/elasticsearch$ sudo -i 
+root@stack:~# mv /usr/share/elasticsearch/elastic-certificates.p12 /etc/elasticsearch/certs/
+```
+Make it readable for elasticsearch.service:
+```bash
+root@stack:~# cd /etc/elasticsearch/
+root@stack:/etc/elasticsearch# chown -R root:elasticsearch certs/
+root@stack:/etc/elasticsearch# cd certs/
+root@stack:/etc/elasticsearch/certs# chmod 660 elastic-certificates.p12 
+```
+The certificates will then be specified in the elasticsearch.yml file as follows (add it to the bottom):
+#### Enable TLS in Elasticsearch
+```bash
+root@stack:~# nano /etc/elasticsearch/elasticsearch.yml 
+xpack.security.enabled: true
+xpack.security.transport.ssl.enabled: true
+xpack.security.transport.ssl.verification_mode: certificate
+xpack.security.transport.ssl.keystore.path: certs/elastic-certificates.p12
+xpack.security.transport.ssl.truststore.path: certs/elastic-certificates.p12
+```
+Now restart our Elasticsearch for the above changes to take effect.
+```bash
+root@stack:~# exit
+logout
+elk@stack:/usr/share/elasticsearch$ sudo systemctl stop elasticsearch.service 
+elk@stack:/usr/share/elasticsearch$ sudo systemctl start elasticsearch.service 
+```
+
+We must now define passwords for the built-in users (defining built-in user’s passwords should be completed before we enable TLS/SSL for http communications, as the command to set passwords will communicate with the cluster via unsecured http). Using `auto`, the passwords will be randomly generated and printed to the console. To set them yourself, use `interactive`. 
+```bash
+elk@stack:/usr/share/elasticsearch$ sudo -i
+root@stack:~# cd /usr/share/elasticsearch/
+root@stack:/usr/share/elasticsearch# bin/elasticsearch-setup-passwords auto
+```
+Be sure to remember the passwords that we have assigned for each of the built-in users. We will make use of the elastic superuser to help configure PKI authentication later in this blog.
+
+We’ll use the same certificates for http communications as we have already used for the transport communications. These are specified in the elasticsearch.yml file as follows:
+```bash
+root@stack:/usr/share/elasticsearch# nano /etc/elasticsearch/elasticsearch.yml 
+xpack.security.http.ssl.enabled: true
+xpack.security.http.ssl.keystore.path: certs/elastic-certificates.p12
+xpack.security.http.ssl.truststore.path: certs/elastic-certificates.p12
+xpack.security.http.ssl.client_authentication: optional
+
+#xpack.security.authc.realms.pki1.type: pki
+```
+Once the above changes have been made to our elasticsearch.yml file, we will have to restart Elasticsearch:
+```bash
+root@stack:/usr/share/elasticsearch# exit
+logout
+elk@stack:/usr/share/elasticsearch$ sudo systemctl stop elasticsearch
+elk@stack:/usr/share/elasticsearch$ sudo systemctl start elasticsearch
+```
+Certificates that will be used for PKI authentication must be signed by the same CA as the certificates that are used for encrypting http communications. Normally, these would be signed by an official CA within an organization. However, because we have already used a self signed CA, we also sign our http client certificates with that same self-signed CA which we previously saved as `elastic-stack-ca.p12`. We can create a certificate for client authentication as follows:
+```bash
+elk@stack:/usr/share/elasticsearch$ sudo -i
+root@stack:~# cd /usr/share/elasticsearch/
+root@stack:/usr/share/elasticsearch# bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12 -name "CN=localhost,OU=Space Adventure,DC=cobra,DC=com" 
+[PRESS ENTER TWICE]
+Please enter the desired output file [CN=Space,OU=Adventure Cobra,DC=koprulu,DC=com.p12]: client.p12 
+[PRESS ENTER TWICE]
+```
+The above will create a file called client.p12, which contains all of the information required for PKI authentication to our Elasticsearch cluster. However, in order to use this certificate it is helpful to break it into its private key, public certificate, and CA certificate. This can be done with the following commands:
+Private Key:
+```bash
+root@stack:/usr/share/elasticsearch# openssl pkcs12 -in client.p12 -nocerts -nodes > client.key
+```
+Public Certificate:
+```bash
+root@stack:/usr/share/elasticsearch# openssl pkcs12 -in client.p12 -clcerts -nokeys  > client.cer
+```
+CA Certificate:
+```bash
+root@stack:/usr/share/elasticsearch# openssl pkcs12 -in client.p12 -cacerts -nokeys -chain > client-ca.cer
+```
+Which should produce three files:
+* client.key — The private key
+* client.cer — The public certificate
+* client-ca.cer — The CA that signed the public certificate
+
+Create a directory called certs in the Kibana config directory, and move all of the client certificates there.
+```bash
+root@stack:/usr/share/elasticsearch# exit
+logout
+elk@stack:/usr/share/elasticsearch$ sudo mkdir /etc/kibana/certs/
+elk@stack:/usr/share/elasticsearch$ sudo mv client.key /etc/kibana/certs/
+elk@stack:/usr/share/elasticsearch$ sudo mv client.cer /etc/kibana/certs/
+elk@stack:/usr/share/elasticsearch$ sudo mv client-ca.cer /etc/kibana/certs/
+```
+
+## Configure Kibana to authenticate to elasticsearch
+Now that we have enabled security on Elasticsearch, communications to Elasticsearch must be authenticated. Therefore, if we plan on using Kibana to interact with Elasticsearch, then we must enable security and configure Kibana to authenticate to Elasticsearch as the kibana user over https. 
+As we have not yet fully setup PKI authentication from Kibana to Elasticsearch, authentication must initially be done with the kibana user and password. This can be accomplished with the following lines in the kibana.yml file:
+```bash
+elk@stack:/etc/kibana$ sudo nano /etc/kibana/kibana.yml 
+elasticsearch.hosts: "https://localhost:9200"
+elasticsearch.username: "kibana"
+elasticsearch.password: "2UpGDAJrLfd1xgazeqTq"
+elasticsearch.ssl.certificateAuthorities: "/etc/kibana/certs/client-ca.cer"
+elasticsearch.ssl.verificationMode: certificate
+```
+Restart Kibana;
+```bash
+elk@stack:/etc/kibana$ sudo systemctl stop kibana.service 
+elk@stack:/etc/kibana$ sudo systemctl start kibana.service 
+```
+Log in to your Kibana with the user "elastic" and with the random password generated above.
+Go Management > Security > Users > "Create user"
+Make it a superuser. 
+
+Now that we have made communication with Elasticsearch encrypted, we are no longer receiving logs from logstash. So we'll have to make sure logstash is working as well. 
+```bash
+elk@stack:/etc/kibana/certs$ cd /etc/logstash/conf.d/
+elk@stack:/etc/logstash/conf.d$ sudo mkdir certs
+elk@stack:/etc/logstash/conf.d$ sudo cp /etc/kibana/certs/client-ca.cer /etc/logstash/conf.d/certs/
+elk@stack:/etc/logstash/conf.d$ sudo nano 30-outputs.conf 
+elk@stack:/etc/logstash/conf.d$ sudo nano netflow.conf
+```
+Change `hosts => ["http://localhost:9200"]` to `hosts => ["https://localhost:9200"]` and add:
+```bash
+                ssl => true
+                cacert => '/etc/logstash/conf.d/certs/client-ca.cer'
+```
+```bash
+elk@stack:/etc/logstash/conf.d$ more 30-outputs.conf 
+output {
+        elasticsearch {
+                hosts => ["https://localhost:9200"]
+                ssl => true
+                cacert => '/etc/logstash/conf.d/certs/client-ca.cer'
+                index => "logstash-%{+YYYY.MM.dd}" 
+                      }
+}
+```
+
+
+Restart Logstash:
+
+
+
+root@stack:/usr/share/elasticsearch# bin/elasticsearch-certutil cert --ca \
+
+
+https://www.elastic.co/blog/getting-started-with-elasticsearch-security
 
 Add the ```xpack.security.enabled: true``` in elasticsearch.yml 
 
@@ -717,3 +878,5 @@ Start with `sudo systemctl start logstash.service`
 * [https://vitux.com/how-to-setup-java_home-path-in-ubuntu/](https://vitux.com/how-to-setup-java_home-path-in-ubuntu/)
 * [http://secretwafflelabs.com/2015/11/06/pfsense-elk/](http://secretwafflelabs.com/2015/11/06/pfsense-elk/)
 * [https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html#plugins-filters-grok-patterns_dir](https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html#plugins-filters-grok-patterns_dir)
+* [https://www.elastic.co/blog/elasticsearch-security-configure-tls-ssl-pki-authentication](https://www.elastic.co/blog/elasticsearch-security-configure-tls-ssl-pki-authentication)
+* [https://www.elastic.co/blog/getting-started-with-elasticsearch-security](https://www.elastic.co/blog/getting-started-with-elasticsearch-security)
