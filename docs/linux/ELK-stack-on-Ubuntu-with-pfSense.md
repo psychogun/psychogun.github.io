@@ -717,7 +717,7 @@ elk@stack:/usr/share/elasticsearch$ sudo mv client.cer /etc/kibana/certs/
 elk@stack:/usr/share/elasticsearch$ sudo mv client-ca.cer /etc/kibana/certs/
 ```
 
-## Configure Kibana to authenticate to elasticsearch
+### Configure Kibana to authenticate to Elasticsearch
 Now that we have enabled security on Elasticsearch, communications to Elasticsearch must be authenticated. Therefore, if we plan on using Kibana to interact with Elasticsearch, then we must enable security and configure Kibana to authenticate to Elasticsearch as the kibana user over https. 
 As we have not yet fully setup PKI authentication from Kibana to Elasticsearch, authentication must initially be done with the kibana user and password. This can be accomplished with the following lines in the kibana.yml file:
 
@@ -741,6 +741,7 @@ You should now have a username and password prompt in Kibana. Log in with the us
 Go to Management > Security > Users > "Create user"
 Make it a superuser, and use this one for login further on. 
 
+### Configure Logstash to authenticate to Elasticsearch
 Now that we have made communication with Elasticsearch encrypted, we are no longer receiving logs from Logstash. So we'll have to make sure logstash is working as well. 
 
 Use the the Management > Roles UI in Kibana or the role API to create a `logstash_writer` Role. 
@@ -773,7 +774,7 @@ output {
   }
 }
 ```
-
+#### Generate certificates
 Also, for logstash pipeline output to elasticsearch, what should we put in for "cacert =>"?
 You need to set the CA cert file that you have created with certutil. However, Elasticsearch output Logstash plugin doesn't support PKCS#12 format so you would need to export the CA certificate in PEM format as such :
 
@@ -799,7 +800,7 @@ client
 sudo apt-get install unzip
 unzip client.zip
 ```
-
+#### Configure outputs
 Our outputs; 
 elk@stack:/etc/logstash/conf.d/certs$ sudo nano 30-outputs.conf 
 elk@stack:/etc/logstash/conf.d/certs$ sudo nano netflow.conf
@@ -831,7 +832,7 @@ elk@stack:/etc/logstash/conf.d$ sudo systemctl stop logstash.service
 elk@stack:/etc/logstash/conf.d$ sudo systemctl start logstash.service
 ```
 
-
+Hopefully, both netflow and logstash are working again in your Dashboards.
 ```
 
 root@stack:/usr/share/elasticsearch# bin/elasticsearch-certutil cert --ca \
