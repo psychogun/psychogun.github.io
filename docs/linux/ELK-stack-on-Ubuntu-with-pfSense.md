@@ -787,9 +787,9 @@ elk@stack:/etc/logstash/conf.d$ sudo mkdir certs
 elk@stack:/etc/logstash/conf.d$ cd /usr/share/elasticsearc
 elkeson@stack:/usr/share/elasticsearch$ sudo openssl pkcs12 -in elastic-stack-ca.p12 -clcerts -nokeys -chain -out ca.pem
 elkeson@stack:/usr/share/elasticsearch$ sudo cp ca.pem /etc/logstash/conf.d/certs/ca.pem
-
 elkeson@stack:/etc/logstash/conf.d/certs$ sudo chmod 644 /etc/logstash/conf.d/certs/ca.pem
 ```
+
 
 
 _PEM (??)_
@@ -802,6 +802,7 @@ unzip client.zip
 ```
 #### Configure outputs
 Our outputs; 
+```bash
 elk@stack:/etc/logstash/conf.d/certs$ sudo nano 30-outputs.conf 
 elk@stack:/etc/logstash/conf.d/certs$ sudo nano netflow.conf
 ```
@@ -824,7 +825,6 @@ output {
                       }
 }
 ```
-
 
 Restart Logstash:
 ```bash
