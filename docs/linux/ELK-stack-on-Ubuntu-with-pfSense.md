@@ -454,7 +454,7 @@ If our Elasticsearch database is not on the same host as Kibana, you will have t
 
 `restart` or `start` your Kibana with `sudo systemctl start kibana` and go to http://ip-adress:5601 to check if it is up and running (choose No when asked if you want to import some data). Select 'Explore on your own', we'll get back to Kibana in a bit. Now we need some data to visualize, e.g. make pfSense send data to logstash.
 ## Configuration
-### pfSense and syslog
+### pfSense and Syslog
 Log on to your pfSense and go to Status > System logs > Settings. 
 
 For content, we will log "Firewall Events". 
@@ -496,7 +496,7 @@ Import "Dashboard - Firewall - External Block.json", "Dashboard - Firewall - Ext
 
 Hopefully you have 3 dashboards now. One which is showing blocked traffic, one which is showing traffic that is let through, and one "overall" dashboard with syslog events from your pfSense firewall. Congratulations :)
 
-### pfSense and netflow
+### pfSense and Netflow
 Log on to your PFSense and go to System > Package Manager > Available Packages and install `softflowd`. Edit `softlowd` by navigating to Services > softlowd. A basic configuration looks like this:
 
 * Select which interfaces to monitor. I selected WAN.
@@ -508,7 +508,7 @@ Log on to your PFSense and go to System > Package Manager > Available Packages a
 
 PS: Communication between softflowd and Logstash for Netflow is not encrypted. Make sure you are creating a good network design by using VLAN or something else to ensure the metadata of the communication on your monitored interfaces is not intentionally going where it should not go. 
 
-### Logstash and netflow
+### Logstash and Netflow
 Stop logstash.service:
 ```bash
 elk@stack:/usr/share/logstash$ sudo systemctl stop logstash.service
@@ -833,26 +833,30 @@ elk@stack:/etc/logstash/conf.d$ sudo systemctl start logstash.service
 ```
 
 Hopefully, both netflow and logstash are working again in your Dashboards.
-```
 
+
+
+
+```bash
 root@stack:/usr/share/elasticsearch# bin/elasticsearch-certutil cert --ca \
-
-
-https://www.elastic.co/blog/getting-started-with-elasticsearch-security
-
+```
+[https://www.elastic.co/blog/getting-started-with-elasticsearch-security](https://www.elastic.co/blog/getting-started-with-elasticsearch-security)
 Add the ```xpack.security.enabled: true``` in elasticsearch.yml 
 
-```
+```bash
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 
 openssl genrsa -des3 -out server.key 2048
 openssl rsa -in server.key -out server.key
 openssl req -sha256 -new -key server.key -out server.csr -subj '/CN=localhost'
 openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
-Replace 'localhost' with your domain name. Run commands one by one because openssl will prompt you same values for certificate generation
 ```
 
+Replace 'localhost' with your domain name. Run commands one by one because openssl will prompt you same values for certificate generation.
+
 For further information, go check out the excellent guide here: [https://www.elastic.co/guide/en/logstash/current/netflow-module.html](https://www.elastic.co/guide/en/logstash/current/netflow-module.html)
+
+
 
 ### BEATS
 Elastic produce a full range of log shippers known as ‘Beats’ which run as lightweight agents on the source devices and transmit data to a destination either running Elasticsearch or Logstash. If you are using Beats you can do this to make it use SSL to encrypt the communication between the Beat agent and Logstash:
@@ -929,7 +933,7 @@ logstash 7.2.0
 elk@stack:~$ su -i
 ```
 
-## Logstash with just netflow
+## Logstash with just Netflow
 If you are not using syslogs, doing the grok patterns and everything above, do this to quick and dirty populate netflow in your Kibana. 
 
 Stop logstash. Start with `--modules netflow --setup``
