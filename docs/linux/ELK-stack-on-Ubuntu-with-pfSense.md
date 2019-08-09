@@ -99,6 +99,7 @@ Check your PATH variable:
 elk@stack:~$ echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/lib/jvm/java-8-openjdk-amd64/bin
 ```
+Ok, continue.
 
 ### Installing Elasticsearch
 We'll install Elasticsearch first, because Logstash and Kibana are dependent on Elasticsearch. When you install each component of the stack, the install will automatically create service users for running the different components. 
@@ -106,17 +107,17 @@ We'll install Elasticsearch first, because Logstash and Kibana are dependent on 
 Import the Elasticsearch PGP key and install Elasticsearch from the APT repository by following this excellent guide; 
 * [https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/deb.html) (also make sure to install `wget` and `apt-transport-https`).
 
-In order for Elasticsearch to function optimally, you should increase the number of files the (service) user 'elasticsearch' is allowed to open at the same time. Edit `limits.conf` and add the following:
+In order for Elasticsearch to function optimally, you should increase the number of files the (service) user `elasticsearch` is allowed to open at the same time. Edit `limits.conf` and add the following:
 ```bash
 elk@stack:~$ nano /etc/security/limits.conf 
 elasticsearch soft nofile 32000
 elasticsearch hard nofile 32000
 ```
-Also edit /etc/sysctl.conf and add the following:
+Also edit `/etc/sysctl.conf` and add the following:
 ```bash
 fs.file-max = 300000
 ```
-For some more information about file handling, read [https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d](https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d).
+(For some more information about file handling, read [https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d](https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d)).
 
 To start Elasticsearch, write:
 ```bash
@@ -126,7 +127,7 @@ To enable Elasticsearch to start when you boot, write:
 ```bash
 elk@stack:~$ sudo systemctl enable elasticsearch
 ```
-To see if Elasticsearch has been started as it should, your curl output will look something like this:
+To see if Elasticsearch has been started as it should, your `curl` output should look something like this:
 ```bash
 elk@stack:~$ curl -X GET http://localhost:9200
 {
@@ -171,7 +172,7 @@ Just stop it for now.
 
 #### Pipelines
 So.  Pipelines. 
-In order to specify how Logstash listens to incoming connections (ports/protocols) and where to send data (Elasticsearch), and whether or not to apply a filter, we will have to create configuration files (input, output, filter) in the JSON-format. Where to put these configuration files ("pipelines"), are stated in `pipelines.yml`:
+In order to specify how Logstash listens to incoming connections (ports/protocols) and where to send data (Elasticsearch), and whether or not to apply a filter, we will have to create configuration files (input, output, filter) in the JSON-format. Where to put these configuration files ("pipelines"), are stated in `/etc/logstash/pipelines.yml`:
 ```bash
 elk@stack:~$ more /etc/logstash/pipelines.yml 
 # This file is where you define your pipelines. You can define multiple.
@@ -181,9 +182,9 @@ elk@stack:~$ more /etc/logstash/pipelines.yml
 - pipeline.id: main
   path.config: "/etc/logstash/conf.d/*.conf"
 ```
-You can have one "big" `.conf` configuration file, or you can separate the outputs, inputs and filters in multiple `.conf` configuration files. You will see I have some separated, and one joined:
+You can have one "big" `.conf` configuration file, or you can separate the outputs, inputs and filters in multiple `.conf` configuration files. You will see I have some separated (syslog), and one joined (netflow):
 
-Input file: `/etc/logstash/conf.d/01-inputs.conf`
+Download and configure the input file `/etc/logstash/conf.d/01-inputs.conf`:
 ```bash
 elk@stack:~$ cd /etc/logstash/conf.d/
 elk@stack:/etc/logstash/conf.d$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/01-inputs.conf
@@ -205,7 +206,7 @@ input {
 This input file listens for syslog's on both TCP and UDP at port 5140. 
 
 
-Syslog filter file: `/etc/logstash/conf.d/10-syslog.conf`
+Download and configure the syslog filter file `/etc/logstash/conf.d/10-syslog.conf`:
 ```bash
 elk@stack:/etc/logstash/conf.d$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/10-syslog.conf
 elk@stack:/etc/logstash/conf.d$ more 10-syslog.conf 
@@ -260,9 +261,9 @@ filter {
   }
 }
 ```
-I will not try to explain what the filter for syslog exactly does, because I have no experience with JSON. But you can see that it tags syslog traffic from my pfSense with both 'pfsense' and 'Ready', and adds some extra fields. The `if [host] =~ /192\.168\.40\.1/ {` is the IP adresss (192.168.40.1) to my pfSense firewall, which address you'll probably have to change. And if you have another pfSense firewall, add it here as well (the `if [host]` with the 172.22.2.1 address).
+I will not try to explain what the filter for syslog exactly does (because I have no experience with JSON). But, to my knowledge, you can see that it tags syslog traffic from my pfSense with both `pfsense` and `Ready`, and adds some extra fields. The `if [host] =~ /192\.168\.40\.1/ {` is the IP adresss (192.168.40.1) to my pfSense firewall, which address you'll probably want to change. And if you have another pfSense firewall, add it here as well (the `if [host]` with the `172.22.2.1` address).
 
-pfSense filter: `/etc/logstash/conf.d/11-pfsense.conf`
+Download and configure the pfSense filter `/etc/logstash/conf.d/11-pfsense.conf`:
 ```bash
 elk@stack:/etc/logstash/conf.d$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/11-pfsense.conf
 elk@stack:/etc/logstash/conf.d$ more /etc/logstash/conf.d/11-pfsense.conf 
@@ -390,7 +391,9 @@ output {
                 index => "logstash-%{+YYYY.MM.dd}" }
 }
 ```
-The index statement dictates that a rotating of the database file with a date stamp will occour. If you want to view the Logstash output realtime, you could also send output to console by adding stdout:
+The index statement dictates that a rotating of the database file with a date stamp will occour. 
+
+If you want to view the Logstash output realtime, you could also send output to console by adding stdout:
 ```bash
 elk@stack:~$ more /etc/logstash/conf.d/30-outputs.conf 
 output {
@@ -402,11 +405,12 @@ output {
 ```
 **Disclaimer: I have to investigate why that is not working (stdout)
 
-Use `tail -f` to see the status of the logstash service: 
+If you have Logstash running, stop it; `sudo systemctl stop logstash.service` (because we are referencing `geoip` and a different non-standard grok pattern `match =>` in our logstash configs, which we haven't installed yet, you'll see in `/var/log/logstash/logstash-plain.log` that logstash will not boot well with our current configured pipelines).
+
+Use `tail -f` to tail the log for Logstash:
 ```bash
 elk@stack:/etc/logstash/conf.d$ tail -f /var/log/logstash/logstash-plain.log 
 ```
-If you have tried to start logstash, you can now stop it by `sudo systemctl stop logstash.service`. Because we are referencing `geoip` and a different non-standard grok pattern `match =>` in our logstash configs, which we haven't installed yet, you'll see in `/var/log/logstash/logstash-plain.log` that logstash will not boot well.  
 
 #### MaxMind GeoIP database
 Download and extract the MaxMind GeoIP database:
@@ -426,37 +430,41 @@ elk@stack:/etc/logstash$ cd patterns
 elk@stack:/etc/logstash/patterns$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/patterns/pfsense_2_4_2.grok
 ```
 
-Now, go ahead and start logstash!
+Now, go ahead and start Logstash!
 ```bash
-elkn@stack:~$ sudo systemctl start logstash
+elk@stack:~$ sudo systemctl start logstash
 ```
 Hopefully it started succesfully:
 ```bash
-elkn@stack:~$ sudo tail -f /var/log/logstash/logstash-plain.log 
+elk@stack:~$ sudo systemctl status logstash.service
 ```
-
 ### Installing Kibana 
 Follow this excellent guide to install Kibana and make it start automatically when the system boots :
 * [https://www.elastic.co/guide/en/kibana/current/deb.html](https://www.elastic.co/guide/en/kibana/current/deb.html)
 
-Kibana loads its configuration from the /etc/kibana/kibana.yml file by default. The format of this config file is explained in [https://www.elastic.co/guide/en/kibana/7.2/settings.html](https://www.elastic.co/guide/en/kibana/7.2/settings.html)
+Kibana loads its configuration from the `/etc/kibana/kibana.yml` file by default. The format of this config file is explained in [https://www.elastic.co/guide/en/kibana/7.2/settings.html](https://www.elastic.co/guide/en/kibana/7.2/settings.html)
+
+What we first and foremost want to do with our `kibana.yml`, is to edit the `server.host: "localhost"`and bind it to (all) interfaces by writing `server.host: "0.0.0.0"`. 
+```bash
+elk@stack:~$ sudo nano /etc/kibana/kibana.yml
+```
+Editing this parameter from a non-loopback address enables connections from remote users, thus enables us to connect to Kibana through a web-browser from another client.
 
 If our Elasticsearch database is not on the same host as Kibana, you will have to tell where Elasticsearch is by specifying `elasticsearch.hosts`, e.g.: `elasticsearch.hosts http://ip-adress:9200` in `kibana.yml`
 
-What we first and foremost want to do with our `kibana.yml`, is to edit the `server.host: "localhost"`and bind it to (all) interfaces by writing `server.host: "0.0.0.0"`. Editing this parameter from a non-loopback address enables connections from remote users, thus enables us to connect to Kibana through a web-browser from another client.
-
-Restart (or start) your Kibana with `sudo systemctl start kibana` and go to http://ip-adress:5601 to check if it is up and running (choose No when asked if you want to import some data). Select 'Explore on your own', we'll get back to Kibana in a bit. Now we need some data to visualize, e.g. make pfSense send data to logstash.
-
+`restart` or `start` your Kibana with `sudo systemctl start kibana` and go to http://ip-adress:5601 to check if it is up and running (choose No when asked if you want to import some data). Select 'Explore on your own', we'll get back to Kibana in a bit. Now we need some data to visualize, e.g. make pfSense send data to logstash.
 ## Configuration
 ### pfSense and syslog
 Log on to your pfSense and go to Status > System logs > Settings. 
 
-For content, we will for now log "Firewall Events".
+For content, we will log "Firewall Events". 
 
-Enable Remote Logging and point one of the 'Remote log servers' to 'logstash-syslog-input-ip:and-port', e.g.: 192.168.4.100:5140, as stated in `01-inputs.conf`. Syslog sends UDP datagrams to port 514 on the specified remote syslog server, unless another port is specified.
+Enable Remote Logging and point one of the 'Remote log servers' to 'ip:port', e.g.: 192.168.4.100:5140, as stated in `01-inputs.conf`. Syslog sends UDP datagrams to port 514 on the specified remote syslog server, unless another port is specified.
+
+PS: Be sure to remember to enable logging in your firewall rules, 'Log packets that are handled by this rule'. For instance, all the rulesets on my WAN interface has logging enabled.
+
 
 ### Kibana configuration 
-
 #### Index patterns
 *Index patterns* tell Kibana which Elasticsearch indices you want to explore. An index pattern can match the name of a single index, or include a wildcard (*) to match multiple indices.
 
@@ -469,23 +477,24 @@ For example, Logstash typically creates a series of indices in the format logsta
 Kibana *visualizations* are based on Elasticsearch queries. By using a series of Elasticsearch aggregations to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
 
 #### Dashboard
-A Kibana *dashboard* displays a collection of visualizations, searches, and maps. You can arrange, resize, and edit the dashboard content and then save the dashboard so you can share it.
+A Kibana *dashboard* displays a collection of visualizations, searches, and maps. You can arrange, resize, and edit the dashboard content and then export the dashboard so you can share it.
 
 Go to http://ip-adress:5601 and go to Management > Create Index Pattern (Kibana Index Patterns) > and our logstash service which we started have enabled us to select that indicies, so write "logstash*". Press 'Next step'.  Under 'Time Filter field name' choose '@timestamp' and then hit 'Create Index pattern'. 
 
 #### Saved Objects
 With 'Saved Objects' you are able to import searches, dashboards and visualizations that has been made before. Let us do that.
 
-Go to Saved Objects > Import > and import 'Discover - Firewall and pfSense.json', you might have to re-associate the object with your logstash* index pattern. You are successfull when you have imported 6 objects. [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)).
+Go to Saved Objects > Import > and import 'Discover - Firewall and pfSense.json' (you might have to re-associate the object with your logstash* index pattern). You are successfull when you have imported 6 objects. [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Discover%20(search)).
+
 PS: Use your favourite editor to (eventually) search + replace the external interface name from what I have, `re0`, to what your WAN interface on your pfSense is called (e.g. `em1`) before importing. 
 
-Now import 'Visualizations - Firewall and pfSense.json', you might have to re-associate the object with your logstash* index pattern. You are successfull when you have imported 31 objects. [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Visualization](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Visualization).
+Now import 'Visualizations - Firewall and pfSense.json' (you might have to re-associate the object with your logstash* index pattern). You are successfull when you have imported 31 objects. [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Visualization](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Visualization).
 
 
 Now you can create your own dashboard and mix those visualizations in how you please. Or import them. 
 Import "Dashboard - Firewall - External Block.json", "Dashboard - Firewall - External Pass.json" and "Dashboard - pfSense.json" from: [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Dashboard](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/tree/master/Dashboard).
 
-Hopefully now you have 3 dashboards. One which is showing blocked traffic, one which is showing traffic that is let through, and one "overall" dashboard with syslog events from your pfSense firewall. 
+Hopefully you have 3 dashboards now. One which is showing blocked traffic, one which is showing traffic that is let through, and one "overall" dashboard with syslog events from your pfSense firewall. Congratulations :)
 
 ### pfSense and netflow
 Log on to your PFSense and go to System > Package Manager > Available Packages and install `softflowd`. Edit `softlowd` by navigating to Services > softlowd. A basic configuration looks like this:
@@ -497,7 +506,7 @@ Log on to your PFSense and go to System > Package Manager > Available Packages a
 * Set Flow Tracking Level to Full.
 * Click Save.
 
-PS: Communication between pfSense and Logstash for Netflow is not encrypted. Make sure you are creating a good network design by using VLAN or something else to ensure the metadata of the communication on your monitored interfaces is not intentionally going where it should not go. 
+PS: Communication between softflowd and Logstash for Netflow is not encrypted. Make sure you are creating a good network design by using VLAN or something else to ensure the metadata of the communication on your monitored interfaces is not intentionally going where it should not go. 
 
 ### Logstash and netflow
 Stop logstash.service:
@@ -505,15 +514,15 @@ Stop logstash.service:
 elk@stack:/usr/share/logstash$ sudo systemctl stop logstash.service
 ```
 
-For a first time run, execute logstash with netflow and the --setup parameter:
+For a one-time run, execute logstash with netflow and the --setup parameter:
 ```bash
 elk@stack:/usr/share/logstash$ sudo /usr/share/logstash/bin/logstash --modules netflow --setup 
 ```
-The `--setup` parameter will add searches, dashboards and vizualisations in Kibana for netflow. 
-PS: If you run `logstash` with parameter `--setup` one more time, it will override your (eventual) netflow dashboard edits. 
-Wait for a minute and check if the different netflow dashboards have been generated by `--setup`. 
+The `--setup` parameter will add searches, dashboards and vizualisations in Kibana for `netflow` module. 
+PS: If you run `logstash` with parameter `--setup` one more time, it will override your (eventual) dashboard edits concerning Netflow. 
+Wait a minute and check if the different netflow dashboards have been generated by `--setup` in Kibana from your webbrowser.
 
-What I discovered when specifying netflow as a module in logstash.yml, was that _logstash is ignoring the 'pipelines.yml' file because modules or command line options are specified_. So the pfSense syslogs broke.
+What I discovered when specifying netflow as a module in `logstash.yml`, was that _logstash is ignoring the 'pipelines.yml' file because modules or command line options are specified_. So the pfSense syslogs broke.
 
 So what we want to do, is to edit the `/usr/share/logstash/modules/netflow/configuration/logstash/netflow.conf.erb` file to a conf file, like the ones you now have in `/etc/logstash/conf.d/`. 
 ```bash
@@ -522,7 +531,9 @@ elk@stack:/usr/share/logstash/modules/netflow/configuration/logstash$ sudo cp ne
 ```
 `netflow.conf.erb` is an ERB template so there are sections that are overwritten, in between <%=, %>, with real values - replace these and you will have a netflow config. 
 
-You can do that by yourself, `sudo nano /etc/logstash/conf.d/netflow.conf` or just download this netflow.conf; 
+You can do that by yourself, `sudo nano /etc/logstash/conf.d/netflow.conf` or just wget this `netflow.conf`; 
+
+PS: Remember to edit the output section of `netflow.conf` so it matches your network. 
 ```bash
 elk@stack:/usr/share/logstash$ cd conf.d/
 elk@stack:/usr/share/logstash$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/netflow.conf
@@ -532,13 +543,13 @@ Let's start `logstash.service` and check in Kibana that both the netflow and pfS
 elk@stack:/usr/share/logstash$ sudo systemctl start logstash.service
 ```
 
-Voilà. Netflow and syslogs in Kibana from pfSense. 
+Voilà. Netflow and syslogs in Kibana from pfSense. Another congratulations is in order! :)
 
 <img src="{{site.url}}/docs/linux/img/ELK-stack-on-Ubuntu-with-pfSense-2.png" style="display: block; margin: auto;" />
 
-
+## Securing our Elastic Stack
 ### Enable HTTPS on Kibana
-You are able to access the Kibana interface via HTTPS by setting `server.sssl.enable` to true in `kibana.yml` configuration file. To be able to do so, you have to create your certificates.
+You are able to access the Kibana interface via https by setting `server.sssl.enable` to true in `kibana.yml` configuration file. To be able to do so, you have to create your certificates.
 
 Generate a key with a pass-phrase:
 ```bash
@@ -551,7 +562,7 @@ elk@stack:/etc/kibana$ sudo openssl rsa -in server.key -out server.key.insecure
 elk@stack:/etc/kibana$ sudo mv server.key server.key.secure
 elk@stack:/etc/kibana$ sudo mv server.key.insecure server.key
 ```
-The insecure key is now named server.key, and you can use this file to generate the CSR without passphrase. CSR stands for Certificate Signing Request. 
+The insecure key is now named `server.key`, and you can use this file to generate the CSR without passphrase. CSR stands for Certificate Signing Request. 
 
 To create the CSR, run the following command at a terminal prompt:
 ```bash
@@ -581,26 +592,33 @@ Stop and start kibana:
 elk@stack:/etc/kibana$ sudo systemctl stop kibana.service 
 elk@stack:/etc/kibana$ sudo systemctl start kibana.service 
 ```
-Now you are able to communicate with Kibana over an encrypted connection (https).
+Now you are able to communicate with Kibana over an encrypted connection (https) from your webbrowser. Hooray!
 
 ### TLS on Elasticsearch
 Starting with Elastic Stack 6.8 and 7.1, security features like TLS encrypted communication, role-based access control (RBAC), and more are available for free within the default distribution. For further hardening of your Elastic Stack, go to [https://www.elastic.co/subscriptions](https://www.elastic.co/subscriptions) to see if you are willing to pay the dues. 
 
 The simplest way that Kibana and/or application servers can authenticate to an Elasticsearch cluster is by embedding a username and password in their configuration files or source code.
-Elasticsearch has two levels of communications, transport communications and http communications. The transport protocol is used for internal communications between Elasticsearch nodes, and the http protocol is used for communications from clients (Kibana) to the Elasticsearch cluster.
-The transport protocol is used for communication between nodes within an Elasticsearch cluster, which we only have one of. 
+
+Elasticsearch has two levels of communications, transport communications and http communications. 
+The transport protocol is used for internal communications between Elasticsearch nodes, and the http protocol is used for communications from clients (Logstash, Kibana, etc.) to the Elasticsearch cluster.
 
 #### Generate certificates
 ```bash
 elk@stack:~$ cd /usr/share/elasticsearch/
 elk@stack:/usr/share/elasticsearch$ sudo bin/elasticsearch-certutil ca
 [PRESS ENTER TWICE]
+```
+You have now created you elastic-stack-ca.p12 [Certificate Authority].
+From this CA, we can create a certificate; 
+```bash
 elk@stack:/usr/share/elasticsearch$ sudo bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12
+[PRESS ENTER THREE]
+```
+elastic-certificates.p12
 
-elk@stack:/usr/share/elasticsearch$ sudo bin/elasticsearch-certutil cert -out certs/elastic-certificates.p12 -pass ""
 ```
 Once the above commands have been executed, we will have TLS/ SSL certificates that can be used for encrypting communications.
-We want to move `elastic-certificates.p12` folder to `/etc/elasticsearch/certs`:
+We want to move the `elastic-certificates.p12` file to folder `/etc/elasticsearch/certs/`:
 ```bash
 elk@stack:/usr/share/elasticsearch$ sudo -i 
 root@stack:~# mv /usr/share/elasticsearch/elastic-certificates.p12 /etc/elasticsearch/certs/
@@ -612,7 +630,7 @@ root@stack:/etc/elasticsearch# chown -R root:elasticsearch certs/
 root@stack:/etc/elasticsearch# cd certs/
 root@stack:/etc/elasticsearch/certs# chmod 660 elastic-certificates.p12 
 ```
-The certificates will then be specified in the elasticsearch.yml file as follows (add it to the bottom):
+The certificates for transport communication will then be specified in the `elasticsearch.yml` file as follows (just add it to the bottom of the file):
 #### Enable TLS in Elasticsearch
 ```bash
 root@stack:~# nano /etc/elasticsearch/elasticsearch.yml 
@@ -622,7 +640,7 @@ xpack.security.transport.ssl.verification_mode: certificate
 xpack.security.transport.ssl.keystore.path: certs/elastic-certificates.p12
 xpack.security.transport.ssl.truststore.path: certs/elastic-certificates.p12
 ```
-Now restart our Elasticsearch for the above changes to take effect.
+Now restart our Elasticsearch for the above changes to take effect:
 ```bash
 root@stack:~# exit
 logout
@@ -630,17 +648,21 @@ elk@stack:/usr/share/elasticsearch$ sudo systemctl stop elasticsearch.service
 elk@stack:/usr/share/elasticsearch$ sudo systemctl start elasticsearch.service 
 ```
 
-We must now define passwords for the built-in users (defining built-in user’s passwords should be completed before we enable TLS/SSL for http communications, as the command to set passwords will communicate with the cluster via unsecured http). Using `auto`, the passwords will be randomly generated and printed to the console. To set them yourself, use `interactive`. 
+We must now define passwords for the built-in users (defining built-in user’s passwords should be completed before we enable TLS/SSL for http communications, as the command to set passwords will communicate with the cluster via unsecured http). 
+
+This command is intended for use only during the initial configuration of the Elasticsearch security features. It uses the elastic bootstrap password to run user management API requests. After you set a password for the elastic user, the bootstrap password is no longer active and you cannot use this command (instead, you can change passwords by using the Management > Users UI in Kibana or the Change Password API).
+
+Using `auto`, the passwords will be randomly generated and printed to the console. To set them yourself, use `interactive`. 
 ```bash
 elk@stack:/usr/share/elasticsearch$ sudo -i
 root@stack:~# cd /usr/share/elasticsearch/
 root@stack:/usr/share/elasticsearch# bin/elasticsearch-setup-passwords auto
 ```
-Be sure to remember the passwords that we have assigned for each of the built-in users. We will make use of the elastic superuser to help configure PKI authentication later in this blog.
+Be sure to remember the passwords that we have assigned for each of the built-in users. We will make use of the elastic superuser to help configure PKI authentication later on.
 
-We’ll use the same certificates for http communications as we have already used for the transport communications. These are specified in the elasticsearch.yml file as follows:
+We’ll use the same certificates for http communications as we have already used for the transport communications. These are specified in the `elasticsearch.yml` file as follows for the http communication:
 ```bash
-root@stack:/usr/share/elasticsearch# nano /etc/elasticsearch/elasticsearch.yml 
+root@stack:/usr/share/elasticsearch# sudo nano /etc/elasticsearch/elasticsearch.yml 
 xpack.security.http.ssl.enabled: true
 xpack.security.http.ssl.keystore.path: certs/elastic-certificates.p12
 xpack.security.http.ssl.truststore.path: certs/elastic-certificates.p12
@@ -648,7 +670,7 @@ xpack.security.http.ssl.client_authentication: optional
 
 #xpack.security.authc.realms.pki1.type: pki
 ```
-Once the above changes have been made to our elasticsearch.yml file, we will have to restart Elasticsearch:
+Once the above changes have been made to our `elasticsearch.yml` file, we will have to restart Elasticsearch:
 ```bash
 root@stack:/usr/share/elasticsearch# exit
 logout
@@ -657,25 +679,28 @@ elk@stack:/usr/share/elasticsearch$ sudo systemctl start elasticsearch
 ```
 Certificates that will be used for PKI authentication must be signed by the same CA as the certificates that are used for encrypting http communications. Normally, these would be signed by an official CA within an organization. However, because we have already used a self signed CA, we also sign our http client certificates with that same self-signed CA which we previously saved as `elastic-stack-ca.p12`. We can create a certificate for client authentication as follows:
 ```bash
-elk@stack:/usr/share/elasticsearch$ sudo -i
-root@stack:~# cd /usr/share/elasticsearch/
-root@stack:/usr/share/elasticsearch# bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12 -name "CN=localhost,OU=Space Adventure,DC=cobra,DC=com" 
+elk@stack:/usr/share/elasticsearch$ sudo bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12 -name "CN=localhost,OU=Space Adventure,DC=cobra,DC=com" 
 [PRESS ENTER TWICE]
-Please enter the desired output file [CN=Space,OU=Adventure Cobra,DC=koprulu,DC=com.p12]: client.p12 
+Please enter the desired output file [CN=localhost,OU=Space Adventure,DC=cobra,DC=com.p12]: client.p12 
 [PRESS ENTER TWICE]
 ```
+_For any given connection, the SSL/TLS certificates must have a subject that matches the value specified for hosts, or the SSL handshake fails. For example, if you specify hosts: ["foobar:9200"], the certificate MUST include foobar in the subject (CN=foobar) or as a subject alternative name (SAN). Make sure the hostname resolves to the correct IP address. If no DNS is available, then you can associate the IP address with your hostname in /etc/hosts (on Unix) or C:\Windows\System32\drivers\etc\hosts (on Windows)._
+
 The above will create a file called client.p12, which contains all of the information required for PKI authentication to our Elasticsearch cluster. However, in order to use this certificate it is helpful to break it into its private key, public certificate, and CA certificate. This can be done with the following commands:
 Private Key:
 ```bash
 root@stack:/usr/share/elasticsearch# openssl pkcs12 -in client.p12 -nocerts -nodes > client.key
+[PRESS ENTER TWICE]
 ```
 Public Certificate:
 ```bash
 root@stack:/usr/share/elasticsearch# openssl pkcs12 -in client.p12 -clcerts -nokeys  > client.cer
+[PRESS ENTER TWICE]
 ```
 CA Certificate:
 ```bash
 root@stack:/usr/share/elasticsearch# openssl pkcs12 -in client.p12 -cacerts -nokeys -chain > client-ca.cer
+[PRESS ENTER TWICE]
 ```
 Which should produce three files:
 * client.key — The private key
@@ -695,11 +720,14 @@ elk@stack:/usr/share/elasticsearch$ sudo mv client-ca.cer /etc/kibana/certs/
 ## Configure Kibana to authenticate to elasticsearch
 Now that we have enabled security on Elasticsearch, communications to Elasticsearch must be authenticated. Therefore, if we plan on using Kibana to interact with Elasticsearch, then we must enable security and configure Kibana to authenticate to Elasticsearch as the kibana user over https. 
 As we have not yet fully setup PKI authentication from Kibana to Elasticsearch, authentication must initially be done with the kibana user and password. This can be accomplished with the following lines in the kibana.yml file:
+
+WHAT IS PKI?? Is it for user / pass to be encrypted in a file??
+
 ```bash
 elk@stack:/etc/kibana$ sudo nano /etc/kibana/kibana.yml 
 elasticsearch.hosts: "https://localhost:9200"
 elasticsearch.username: "kibana"
-elasticsearch.password: "2UpGDAJrLfd1xgazeqTq"
+elasticsearch.password: "2UpGDAJrLfd1xgazeqTw"
 elasticsearch.ssl.certificateAuthorities: "/etc/kibana/certs/client-ca.cer"
 elasticsearch.ssl.verificationMode: certificate
 ```
@@ -708,39 +736,103 @@ Restart Kibana;
 elk@stack:/etc/kibana$ sudo systemctl stop kibana.service 
 elk@stack:/etc/kibana$ sudo systemctl start kibana.service 
 ```
-Log in to your Kibana with the user "elastic" and with the random password generated above.
-Go Management > Security > Users > "Create user"
-Make it a superuser. 
+You should now have a username and password prompt in Kibana. Log in with the user "elastic" and the random password generated above.
 
-Now that we have made communication with Elasticsearch encrypted, we are no longer receiving logs from logstash. So we'll have to make sure logstash is working as well. 
+Go to Management > Security > Users > "Create user"
+Make it a superuser, and use this one for login further on. 
+
+Now that we have made communication with Elasticsearch encrypted, we are no longer receiving logs from Logstash. So we'll have to make sure logstash is working as well. 
+
+Use the the Management > Roles UI in Kibana or the role API to create a `logstash_writer` Role. 
+For cluster privileges, add `manage_index_templates`, `manage_ilm` and `monitor`. For indices privileges, add `write`, `delete`, `manage`, `manage_ilm` and `create_index`. Select both your indicies, `netflow*` and `timealksdf*`
+
+Create a `logstash_internal` User and assign it the `logstash_writer` Role. You can create users from the Management > Users UI in Kibana
+
+Configure Logstash to authenticate as the `logstash_internal` user you just created. You configure credentials separately for each of the Elasticsearch plugins in your Logstash .conf file(s). For example:
+
+```
+input {
+  elasticsearch {
+    ...
+    user => logstash_internal
+    password => x-pack-test-password
+  }
+}
+filter {
+  elasticsearch {
+    ...
+    user => logstash_internal
+    password => x-pack-test-password
+  }
+}
+output {
+  elasticsearch {
+    ...
+    user => logstash_internal
+    password => x-pack-test-password
+  }
+}
+```
+
+Also, for logstash pipeline output to elasticsearch, what should we put in for "cacert =>"?
+You need to set the CA cert file that you have created with certutil. However, Elasticsearch output Logstash plugin doesn't support PKCS#12 format so you would need to export the CA certificate in PEM format as such :
+
+openssl pkcs12 -in elastic-stack-ca.p12 -clcerts -nokeys -chain -out ca.pem
+and use that as the value of cacert.
+
 ```bash
 elk@stack:/etc/kibana/certs$ cd /etc/logstash/conf.d/
 elk@stack:/etc/logstash/conf.d$ sudo mkdir certs
-elk@stack:/etc/logstash/conf.d$ sudo cp /etc/kibana/certs/client-ca.cer /etc/logstash/conf.d/certs/
-elk@stack:/etc/logstash/conf.d$ sudo nano 30-outputs.conf 
-elk@stack:/etc/logstash/conf.d$ sudo nano netflow.conf
+elk@stack:/etc/logstash/conf.d$ cd /usr/share/elasticsearc
+elkeson@stack:/usr/share/elasticsearch$ sudo openssl pkcs12 -in elastic-stack-ca.p12 -clcerts -nokeys -chain -out ca.pem
+elkeson@stack:/usr/share/elasticsearch$ sudo cp ca.pem /etc/logstash/conf.d/certs/ca.pem
+
+elkeson@stack:/etc/logstash/conf.d/certs$ sudo chmod 644 /etc/logstash/conf.d/certs/ca.pem
+```
+
+
+_PEM (??)_
+```bash
+elk@stack:/etc/logstash/conf.d/certs$ sudo /usr/share/elasticsearchbin/elasticsearch-certutil cert --ca elastic-stack-ca.p12 -name "CN=localhost,OU=Space Adventure,DC=cobra,DC=com" -pem
+[PRESS ENTER]
+client
+sudo apt-get install unzip
+unzip client.zip
+```
+
+Our outputs; 
+elk@stack:/etc/logstash/conf.d/certs$ sudo nano 30-outputs.conf 
+elk@stack:/etc/logstash/conf.d/certs$ sudo nano netflow.conf
 ```
 Change `hosts => ["http://localhost:9200"]` to `hosts => ["https://localhost:9200"]` and add:
 ```bash
                 ssl => true
-                cacert => '/etc/logstash/conf.d/certs/client-ca.cer'
+                cacert => '/etc/logstash/conf.d/certs/client-ca.crt'
 ```
+So our outputs will look like this:
 ```bash
 elk@stack:/etc/logstash/conf.d$ more 30-outputs.conf 
 output {
         elasticsearch {
                 hosts => ["https://localhost:9200"]
                 ssl => true
-                cacert => '/etc/logstash/conf.d/certs/client-ca.cer'
+                cacert => '/etc/logstash/conf.d/certs/client-ca.crt'
                 index => "logstash-%{+YYYY.MM.dd}" 
+                user => logstash_internal
+                password => alsMn43k76guzo
                       }
 }
 ```
 
 
 Restart Logstash:
+```bash
+elk@stack:/etc/logstash/conf.d$ sudo systemctl stop logstash.service
+elk@stack:/etc/logstash/conf.d$ sudo systemctl start logstash.service
+```
 
 
+```
 
 root@stack:/usr/share/elasticsearch# bin/elasticsearch-certutil cert --ca \
 
@@ -823,12 +915,11 @@ stdout {
 ## Fault finding
 (...) More should come
 ### Yellow cluster
-
 [http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html](http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html)
-
 ### Safari Can't Open the Page
 When trying to export Netflow data, in Safari, you'll get an error _"Safari can't open the page "blob:https:// (...) WebKitBlobResource error 1.)"_ -- just use Google Chrome. 
-
+### Certificates
+`lk@stack:/usr/share/elasticsearch$ sudo bin/elasticsearch-certutil cert -out certs/elastic-certificates.p12 -pass ""`
 ### Version control
 To see which version of ELK Stack you have installed are, do:
 ```bash
@@ -836,7 +927,6 @@ elk@stack:~$ sudo /usr/share/logstash/bin/logstash --version
 logstash 7.2.0
 elk@stack:~$ su -i
 ```
-
 
 ### Logstash with just netflow
 If you are not using syslogs, doing the grok patterns and everything above, do this to quick and dirty populate netflow in your Kibana. 
@@ -880,3 +970,6 @@ Start with `sudo systemctl start logstash.service`
 * [https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html#plugins-filters-grok-patterns_dir](https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html#plugins-filters-grok-patterns_dir)
 * [https://www.elastic.co/blog/elasticsearch-security-configure-tls-ssl-pki-authentication](https://www.elastic.co/blog/elasticsearch-security-configure-tls-ssl-pki-authentication)
 * [https://www.elastic.co/blog/getting-started-with-elasticsearch-security](https://www.elastic.co/blog/getting-started-with-elasticsearch-security)
+* [https://www.elastic.co/guide/en/logstash/7.2/ls-security.html](https://www.elastic.co/guide/en/logstash/7.2/ls-security.html)
+* [https://discuss.elastic.co/t/using-logstash-elasticsearch-output-over-https/51319](https://discuss.elastic.co/t/using-logstash-elasticsearch-output-over-https/51319) 
+* [https://discuss.elastic.co/t/certificates-and-keys-for-kibana-and-logstash-with-x-pack/150390/2](https://discuss.elastic.co/t/certificates-and-keys-for-kibana-and-logstash-with-x-pack/150390/2)
