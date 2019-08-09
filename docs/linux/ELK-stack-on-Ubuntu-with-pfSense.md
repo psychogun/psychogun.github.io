@@ -929,7 +929,7 @@ logstash 7.2.0
 elk@stack:~$ su -i
 ```
 
-### Logstash with just netflow
+## Logstash with just netflow
 If you are not using syslogs, doing the grok patterns and everything above, do this to quick and dirty populate netflow in your Kibana. 
 
 Stop logstash. Start with `--modules netflow --setup``
