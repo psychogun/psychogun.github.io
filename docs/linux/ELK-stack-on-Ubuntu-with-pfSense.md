@@ -731,6 +731,11 @@ elasticsearch.password: "2UpGDAJrLfd1xgazeqTw"
 elasticsearch.ssl.certificateAuthorities: "/etc/kibana/certs/client-ca.cer"
 elasticsearch.ssl.verificationMode: certificate
 ```
+
+PS: `xpack.security.sessionTimeout` sets the session duration (in milliseconds). By default, sessions stay active until the browser is closed. When this is set to an explicit timeout, closing the browser still requires the user to log back in to Kibana.
+
+`xpack.security.sessionTimeout: 6000` for 6 minutes. 
+
 Restart Kibana;
 ```bash
 elk@stack:/etc/kibana$ sudo systemctl stop kibana.service 
