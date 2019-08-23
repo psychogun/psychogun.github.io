@@ -15,9 +15,10 @@ This are useful commands I have found managing FreeNAS.
 {:toc}
 ---
 
-## Getting started
+## Find
 
 | Command  | Explanation |
 | ------------- | ------------- |
 | `find /mnt/directory1/ -name "Absurd Superpowers*" -type f -exec mv {} /mnt/directory1/moved \;`  | Find files located in `/mnt/directory1` named `"Absurd Superpowers*"` and move those files to `/mnt/directory1/moved` |
 | `find /mnt/directory1/ | grep Pool | xargs -I@ mv @ mnt/directory1/moved/`  | Find files located in `/mnt/directory1` named `"Pool"` and move those files to `/mnt/directory1/moved`  |
+| `find . -type f -size -3M -delete` | Find and delete files located in current directory that is under 3MB in size |
