@@ -938,12 +938,9 @@ logstash 7.2.0
 elk@stack:~$ su -i
 ```
 ### Read-only index
-https://www.elastic.co/guide/en/elasticsearch/reference/6.5/disk-allocator.html
-https://stackoverflow.com/questions/54027888/forbidden-12-index-read-only-allow-delete-api-problem
-https://github.com/elastic/kibana/issues/13685
 If suddenly Kibana stops showing input from Elasticsearch in your graphs, check your `logstash-plain.log` file.
 
-In your logstash-plain.log file, it might show:
+In your `logstash-plain.log` file, it might show:
 ```bash
 elk@stack:~$ tail -f /var/log/logstash/logstash-plain.log 
 [2019-03-25T03:25:24,837][INFO ][logstash.outputs.elasticsearch] retrying failed action with response code: 403 ({"type"=>"cluster_block_exception", "reason"=>"index [netflow-2018.11.01] blocked by: [FORBIDDEN/12/index read-only / allow delete (api)];"})
@@ -954,11 +951,10 @@ And in Kibana, go to Management > Index Management and look for "1 Index has lif
 
 ```bash
 elk@stack:~$curl -u Johnson:Password -X GET "https://localhost:9200/logstash/_ilm/explain?pretty" -k
-
 (...)
      "failed_step" : "check-rollover-ready",
 ```
-The error appears after your index is locked and changes to read only. Reason for that is because of not enough storage on your machine hard drive.
+The error appears after your index is locked and changes to read only. Reason for that is because of not enough storage on your machine hard drive. So, delete some files, delete some indexes - free up your space.
 
 Go to Management > Index Lifecycle Policies and select logstash-policy. 
 Make sure Enable rollover is selected and reduse your Maximum index size [from 50GB to 4GB or something equivalent].
@@ -986,6 +982,7 @@ On the right side, it should say:
 Then verify from `logstash-plain.log` that it is able to send logs again (you might have to do it with all of your indexes, e.g. `PUT netflow-*/_settings`).
 
 Index Management and select logstash and then press Manage index > Retry Lifecycle policy. 
+
 ## Logstash with just Netflow
 If you are not using syslogs, doing the grok patterns and everything above, do this to quick and dirty populate netflow in your Kibana. 
 
@@ -1031,3 +1028,6 @@ Start with `sudo systemctl start logstash.service`
 * [https://www.elastic.co/guide/en/logstash/7.2/ls-security.html](https://www.elastic.co/guide/en/logstash/7.2/ls-security.html)
 * [https://discuss.elastic.co/t/using-logstash-elasticsearch-output-over-https/51319](https://discuss.elastic.co/t/using-logstash-elasticsearch-output-over-https/51319) 
 * [https://discuss.elastic.co/t/certificates-and-keys-for-kibana-and-logstash-with-x-pack/150390/2](https://discuss.elastic.co/t/certificates-and-keys-for-kibana-and-logstash-with-x-pack/150390/2)
+* [https://www.elastic.co/guide/en/elasticsearch/reference/6.5/disk-allocator.html](https://www.elastic.co/guide/en/elasticsearch/reference/6.5/disk-allocator.html)
+* [https://stackoverflow.com/questions/54027888/forbidden-12-index-read-only-allow-delete-api-problem](https://stackoverflow.com/questions/54027888/forbidden-12-index-read-only-allow-delete-api-problem)
+* [https://github.com/elastic/kibana/issues/13685](https://github.com/elastic/kibana/issues/13685)
