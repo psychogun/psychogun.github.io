@@ -608,15 +608,16 @@ elk@stack:~$ cd /usr/share/elasticsearch/
 elk@stack:/usr/share/elasticsearch$ sudo bin/elasticsearch-certutil ca
 [PRESS ENTER TWICE]
 ```
-You have now created you elastic-stack-ca.p12 [Certificate Authority].
+You have now created a CA (Certificate Authority) called `elastic-stack-ca.p12`.
 From this CA, we can create a certificate; 
 ```bash
 elk@stack:/usr/share/elasticsearch$ sudo bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12
-[PRESS ENTER THREE]
+[PRESS ENTER THREE TIMES]
 ```
+```bash
 elastic-certificates.p12
-
 ```
+
 Once the above commands have been executed, we will have TLS/ SSL certificates that can be used for encrypting communications.
 We want to move the `elastic-certificates.p12` file to folder `/etc/elasticsearch/certs/`:
 ```bash
@@ -630,7 +631,7 @@ root@stack:/etc/elasticsearch# chown -R root:elasticsearch certs/
 root@stack:/etc/elasticsearch# cd certs/
 root@stack:/etc/elasticsearch/certs# chmod 660 elastic-certificates.p12 
 ```
-The certificates for transport communication will then be specified in the `elasticsearch.yml` file as follows (just add it to the bottom of the file):
+The certificates for _transport_ communication will then be enabled in `elasticsearch.yml` file as follows (just add it to the bottom of the file):
 #### Enable TLS in Elasticsearch
 ```bash
 root@stack:~# nano /etc/elasticsearch/elasticsearch.yml 
