@@ -781,11 +781,11 @@ output {
 }
 ```
 #### Generate certificates
-Also, for logstash pipeline output to elasticsearch, what should we put in for "cacert =>"?
-You need to set the CA cert file that you have created with certutil. However, Elasticsearch output Logstash plugin doesn't support PKCS#12 format so you would need to export the CA certificate in PEM format as such :
+Also, for logstash pipeline output to elasticsearch, what should we put in for `cacert =>`?
+You need to set the CA cert file that you have created with `certutil`. However, Elasticsearch output Logstash plugin doesn't support PKCS#12 format so you would need to export the CA certificate in PEM format as such :
 
-openssl pkcs12 -in elastic-stack-ca.p12 -clcerts -nokeys -chain -out ca.pem
-and use that as the value of cacert.
+`openssl pkcs12 -in elastic-stack-ca.p12 -clcerts -nokeys -chain -out ca.pem`
+and use that as the value of cacert (`ca.pem`).
 
 ```bash
 elk@stack:/etc/kibana/certs$ cd /etc/logstash/conf.d/
@@ -795,8 +795,6 @@ elkeson@stack:/usr/share/elasticsearch$ sudo openssl pkcs12 -in elastic-stack-ca
 elkeson@stack:/usr/share/elasticsearch$ sudo cp ca.pem /etc/logstash/conf.d/certs/ca.pem
 elkeson@stack:/etc/logstash/conf.d/certs$ sudo chmod 644 /etc/logstash/conf.d/certs/ca.pem
 ```
-
-
 
 _PEM (??)_
 ```bash
