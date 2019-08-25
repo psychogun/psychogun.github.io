@@ -744,7 +744,7 @@ elk@stack:/etc/kibana$ sudo systemctl start kibana.service
 You should now have a username and password prompt in Kibana. Log in with the user "elastic" and the random password generated above.
 
 Go to Management > Security > Users > "Create user"
-Make it a superuser, and use this one for login further on. 
+Make it a superuser, 'Johnson', and use this one for login further on. 
 
 ### Configure Logstash to authenticate to Elasticsearch
 Now that we have made communication with Elasticsearch encrypted, we are no longer receiving logs from Logstash. So we'll have to make sure logstash is working as well. 
@@ -937,7 +937,55 @@ elk@stack:~$ sudo /usr/share/logstash/bin/logstash --version
 logstash 7.2.0
 elk@stack:~$ su -i
 ```
+### Read-only index
+https://www.elastic.co/guide/en/elasticsearch/reference/6.5/disk-allocator.html
+https://stackoverflow.com/questions/54027888/forbidden-12-index-read-only-allow-delete-api-problem
+https://github.com/elastic/kibana/issues/13685
+If suddenly Kibana stops showing input from Elasticsearch in your graphs, check your `logstash-plain.log` file.
 
+In your logstash-plain.log file, it might show:
+```bash
+elk@stack:~$ tail -f /var/log/logstash/logstash-plain.log 
+[2019-03-25T03:25:24,837][INFO ][logstash.outputs.elasticsearch] retrying failed action with response code: 403 ({"type"=>"cluster_block_exception", "reason"=>"index [netflow-2018.11.01] blocked by: [FORBIDDEN/12/index read-only / allow delete (api)];"})
+```
+And in Kibana, go to Management > Index Management and look for "1 Index has lifecycle errors" and press 'Show errors'.
+
+.. And if `ilm.step:ERROR` shows, on for example index `logstash-2019.07.27-000001`, go to terminal and make it explain itself (Johnson is the name of my superuser, which is a user you should have created earlier):
+
+```bash
+elk@stack:~$curl -u Johnson:Password -X GET "https://localhost:9200/logstash/_ilm/explain?pretty" -k
+
+(...)
+     "failed_step" : "check-rollover-ready",
+```
+The error appears after your index is locked and changes to read only. Reason for that is because of not enough storage on your machine hard drive.
+
+Go to Management > Index Lifecycle Policies and select logstash-policy. 
+Make sure Enable rollover is selected and reduse your Maximum index size [from 50GB to 4GB or something equivalent].
+Save policy.
+
+Go to Management > Dev Tools and on the left side, Console - insert:
+```bash
+PUT logstash/_settings
+{
+ "index": {
+   "blocks": {
+     "read_only_allow_delete": "false"
+    }
+  }
+}
+```
+
+On the right side, it should say:
+```bash
+{
+  "acknowledged" : true
+}
+```
+
+Then verify from `logstash-plain.log` that it is able to send logs again (you might have to do it with all of your indexes, e.g. `PUT netflow-*/_settings`).
+
+Index Management and select logstash and then press Manage index > Retry Lifecycle policy. 
 ## Logstash with just Netflow
 If you are not using syslogs, doing the grok patterns and everything above, do this to quick and dirty populate netflow in your Kibana. 
 
