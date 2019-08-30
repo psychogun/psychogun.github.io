@@ -953,7 +953,7 @@ elk@stack:~$curl -u Johnson:Password -X GET "https://localhost:9200/logstash/_il
 (...)
      "failed_step" : "check-rollover-ready",
 ```
-The error appears after your index is locked and changes to read only. Reason for that is because of not enough storage on your machine hard drive. So, delete some files, delete some indexes - free up your space.
+The error, `check-rollover-ready`, appears after your index is locked and changes to read only. Reason for that is because of not enough storage on your machine hard drive. So, delete some files, delete some indexes - free up your space.
 
 Go to Management > Index Lifecycle Policies and select logstash-policy. 
 Make sure Enable rollover is selected and reduse your Maximum index size [from 50GB to 4GB or something equivalent].
