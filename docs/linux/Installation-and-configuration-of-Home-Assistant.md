@@ -41,7 +41,7 @@ Some basic knowledge of UNIX commands (and using SSH).
 ## Allocating a VM in ESXi 6.7
 Log in to your ESXi in a web-browser. Press `Virtual Machines` and then `Create / Register VM`.
 
-_Select creation type_
+_Select creation type_:
 Create a new virtual machine > Next
 
 _Select a name and guest OS_
