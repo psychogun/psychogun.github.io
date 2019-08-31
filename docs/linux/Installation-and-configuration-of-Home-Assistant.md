@@ -5,7 +5,7 @@ parent: Linux
 nav_order: 3
 ---
 *WORK IN PROGRESS as of 2019-08-30*
-## Installation and configuration of Home Assistant
+# Installation and configuration of Home Assistant
 {: .no_toc }
 This is how I used Home Assistant to send me events through Apple's Home app, with the help of an Ubuntu installation allocated on a VM in ESXi 6.7 with USB devices passed through the host. 
 I have some lights, a smartlock, some devices to measure temperature and, hm, what else, a motion detector that triggers the light if it is dark. Read on. ..
