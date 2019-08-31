@@ -41,23 +41,23 @@ Some basic knowledge of UNIX commands (and using SSH).
 ## Allocating a VM in ESXi 6.7
 Log in to your ESXi in a web-browser. Press `Virtual Machines` and then `Create / Register VM`.
 
-_Select creation type_:
+***Select creation type***:
 Create a new virtual machine > Next
 
-_Select a name and guest OS_
+***Select a name and guest OS***
 Name: goodgold
 Compatibility: ESXi 6.7 Virtual Machine
 Guest OS family: Linux
 Guest OS version: Ubuntu Linux (64-bit)
 
-_Select storage_
+***Select storage***
 Standard
 Select a fitting datastore for the virtual machine's configuration files and all of it's virtual disks > Next
 
-_Customize settings_
+***Customize settings***
 I recommend 20GB for harddrive size, rest default, that is OK for now > Next
 
-_Ready to complete_ 
+***Ready to complete***
 Press Finish and you have created the VM which we are installing Ubuntu 18.04 on.
 
 Right click on your newly created Virtual machine. Select `Edit settings`. Scroll down to CD/DVD Drive 1 and select `Datastore ISO file`. Navigate to your `ubuntu-18.04.1-live-server-amd64.iso` file`.  Select > Save. 
