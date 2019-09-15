@@ -8,17 +8,21 @@ nav_order: 5
 I wanted to create a better WiFi network for my self, thus setting my 802.11 wireless card in monitor mode I can discover the number of WiFi devices currently being used in my area.
 
 This helped me reduce interference with other WiFi devices by choosing the least used WiFi channel for my Access Points. 
+
 ## Table of contents
 {: .no_toc .text-delta }
 
 1. TOC
 {:toc}
 ---
+
 # Getting started
 You would need to have a computer running a flavour of linux and have a WiFi card (chipset) that supports monitor mode. 
+
 # Prerequisites
 * TP-Link Archer T9UH v2.0
 * Linux parrot 5.2.0-2parrot1-amd64 #1 SMP Debian 5.2.9-2parrot1 (2019-08-25) x86_64 GNU/Linux
+
 # Does your card support monitoring mode?
 Look after `monitor` under `Supported interface modes:`:
 ```bash
@@ -95,6 +99,7 @@ lo        no wireless extensions.
 ┌─[black@mamba]─[/etc]
 └──╼ $
 ```
+
 # Acknowledgments
 * [https://unix.stackexchange.com/questions/162088/why-airmon-ng-does-not-create-a-monitoring-interface](https://unix.stackexchange.com/questions/162088/why-airmon-ng-does-not-create-a-monitoring-interface)
 * [https://superuser.com/questions/592296/using-iw-to-add-a-virtual-wireless-interface-getting-the-error-no-such-device](https://superuser.com/questions/592296/using-iw-to-add-a-virtual-wireless-interface-getting-the-error-no-such-device)
