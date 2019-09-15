@@ -15,7 +15,6 @@ This helped me reduce interference with other WiFi devices by choosing the least
 1. TOC
 {:toc}
 ---
-
 ## Getting started
 You would need to have a computer running a flavour of linux and have a WiFi card (chipset) that supports monitor mode. 
 
