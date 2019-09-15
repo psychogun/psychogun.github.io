@@ -2,7 +2,7 @@
 layout: default
 title: Enable monitor mode on wlan interface
 parent: Linux
-nav_order: 5
+nav_order: 4
 ---
 # How to enable monitor mode on wlan interface
 I wanted to create a better WiFi network for my self, thus setting my 802.11 wireless card in monitor mode I can discover the number of WiFi devices currently being used in my area.
