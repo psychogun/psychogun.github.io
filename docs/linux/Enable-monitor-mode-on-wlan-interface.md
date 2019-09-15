@@ -20,7 +20,7 @@ You would need to have a computer running a flavour of linux and have a WiFi car
 
 ### Prerequisites
 * TP-Link Archer T9UH v2.0
-* Linux parrot 5.2.0-2parrot1-amd64 #1 SMP Debian 5.2.9-2parrot1 (2019-08-25) x86_64 GNU/Linux
+* Linux parrot 5.2.0-2parrot1-amd64 SMP Debian 5.2.9-2parrot1 (2019-08-25) x86_64 GNU/Linux
 
 ## Does your card support monitoring mode?
 Look after `monitor` under `Supported interface modes:`:
