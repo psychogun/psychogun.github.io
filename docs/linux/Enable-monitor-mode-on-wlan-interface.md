@@ -15,7 +15,7 @@ This helped me reduce interference with other WiFi devices by choosing the least
 {:toc}
 ---
 # Getting started
-You would need to have a computer able to run a WiFi card that supports monitor mode. 
+You would need to have a computer running a flavour of linux and have a WiFi card (chipset) that supports monitor mode. 
 # Prerequisites
 * TP-Link Archer T9UH v2.0
 * Linux parrot 5.2.0-2parrot1-amd64 #1 SMP Debian 5.2.9-2parrot1 (2019-08-25) x86_64 GNU/Linux
