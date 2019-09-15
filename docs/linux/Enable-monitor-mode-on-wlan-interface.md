@@ -12,12 +12,12 @@ I wanted to create a better WiFi network for my self, thus setting my 802.11 wir
 1. TOC
 {:toc}
 ---
-## Getting started
+# Getting started
 You would need to have a computer able to run a WiFi card that supports monitor mode. 
-## Prerequisites
+# Prerequisites
 * TP-Link Archer T9UH v2.0
 * Linux parrot 5.2.0-2parrot1-amd64 #1 SMP Debian 5.2.9-2parrot1 (2019-08-25) x86_64 GNU/Linux
-## Does your card support monitoring mode?
+# Does your card support monitoring mode?
 Look after `monitor` under `Supported interface modes:`:
 ```bash
 ┌─[black@mamba]─[/etc]
@@ -58,7 +58,7 @@ phy1	wlan1		88XXau		TP-Link 802.11ac NIC
 ```
 Our `phy1` interface is `wlan1`. Smooth sailing. 
 
-## Enable monitor mode
+# Enable monitor mode
 ```bash
 ┌─[✗]─[black@mamba]─[/etc]
 └──╼ $sudo ifconfig wlan1 down
@@ -93,6 +93,6 @@ lo        no wireless extensions.
 ┌─[black@mamba]─[/etc]
 └──╼ $
 ```
-## Acknowledgments
+# Acknowledgments
 * [https://unix.stackexchange.com/questions/162088/why-airmon-ng-does-not-create-a-monitoring-interface](https://unix.stackexchange.com/questions/162088/why-airmon-ng-does-not-create-a-monitoring-interface)
 * [https://superuser.com/questions/592296/using-iw-to-add-a-virtual-wireless-interface-getting-the-error-no-such-device](https://superuser.com/questions/592296/using-iw-to-add-a-virtual-wireless-interface-getting-the-error-no-such-device)
