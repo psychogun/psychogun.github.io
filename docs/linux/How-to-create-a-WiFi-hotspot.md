@@ -4,6 +4,7 @@ title: How to create a WiFi hotspot
 parent: Linux
 nav_order: 5
 ---
+
 # How to create a WiFi hotspot
 {: .no_toc }
 I wanted to use a Raspberry Pi 3+ to create a WiFi hotspot. 
@@ -14,6 +15,7 @@ I wanted to use a Raspberry Pi 3+ to create a WiFi hotspot.
 1. TOC
 {:toc}
 ---
+
 ## Getting started
 This is how I created a WiFi hotspot on my `wlan0` interface with a DHCP server and DNS, that would send internet traffic out on interface `eth0`.
 
