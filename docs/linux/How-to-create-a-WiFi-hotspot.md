@@ -2,12 +2,12 @@
 layout: default
 title: How to create a WiFi hotspot
 parent: Linux
-nav_order: 5
+nav_order: 6
 ---
 
 # How to create a WiFi hotspot
 {: .no_toc }
-I wanted to use a Raspberry Pi 3+ to create a WiFi hotspot. 
+I wanted to use a Raspberry Pi 3 Model B to create a WiFi hotspot. 
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -21,7 +21,7 @@ This is how I created a WiFi hotspot on my `wlan0` interface with a DHCP server 
 
 ### Prerequisites
 * Kali Linux 4.19.66-Re4son-v7+
-* Raspberry Pi 3+
+* Raspberry Pi 3 Model B
 
 ## Installation
 Install hostapd (hotspot server) and dnsmasq (dns and dhcp server):
