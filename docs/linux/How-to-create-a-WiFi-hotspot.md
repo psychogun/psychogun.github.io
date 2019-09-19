@@ -20,8 +20,8 @@ I wanted to use a Raspberry Pi 3+ to create a WiFi hotspot.
 This is how I created a WiFi hotspot on my `wlan0` interface with a DHCP server and DNS, that would send internet traffic out on interface `eth0`.
 
 ### Prerequisites
-* Kali Linux 4.19.66-Re4son-v7+
-* Raspberry Pi 3+
+* Kali Linux 4.19.66-Re4son-v7
+* Raspberry Pi 3
 
 ## Installation
 Install hostapd (hotspot server) and dnsmasq (dns and dhcp server):
