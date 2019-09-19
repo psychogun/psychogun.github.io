@@ -5,6 +5,7 @@ parent: Linux
 nav_order: 5
 ---
 # How to create a WiFi hotspot
+{: .no_toc }
 I wanted to use a Raspberry Pi 3+ to create a WiFi hotspot. 
 
 ## Table of contents
