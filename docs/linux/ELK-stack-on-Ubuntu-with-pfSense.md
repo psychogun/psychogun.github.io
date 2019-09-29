@@ -981,7 +981,7 @@ On the right side, it should say:
 
 Then verify from `logstash-plain.log` that it is able to send logs again (you might have to do it with all of your indexes, e.g. `PUT netflow-*/_settings`).
 
-Index Management and select logstash and then press Manage index > Retry Lifecycle policy. 
+Index Management and select logstash and then press Manage index > Retry Lifecycle cycle. 
 
 ## Logstash with just Netflow
 If you are not using syslogs, doing the grok patterns and everything above, do this to quick and dirty populate netflow in your Kibana. 
