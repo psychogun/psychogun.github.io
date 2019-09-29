@@ -959,7 +959,7 @@ Go to Management > Index Lifecycle Policies and select logstash-policy.
 Make sure Enable rollover is selected and reduse your Maximum index size [from 50GB to 4GB or something equivalent].
 Save policy.
 
-Go to Management > Dev Tools and on the left side, Console - insert:
+Go to Dev Tools on the left side of the menubar, select Console and insert on the left side:
 ```bash
 PUT logstash/_settings
 {
@@ -970,6 +970,7 @@ PUT logstash/_settings
   }
 }
 ```
+Press the play button.
 
 On the right side, it should say:
 ```bash
