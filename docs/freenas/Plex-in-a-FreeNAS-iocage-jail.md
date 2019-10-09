@@ -308,7 +308,8 @@ epair0b: flags=8843<UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST> metric 0 mtu 1500
 	groups: epair 
 root@Plex:~ # 
 ```
-Use a webbrowser and go to https://192.168.200.180:32400. Remember to update your DHCP settings / and NAT settings for the new jail. 
+Use a webbrowser and go to https://192.168.200.180:32400. There I only had to point the different libraries to my three folders in `/media`. 
+PS: Remember to update your DHCP settings / and NAT settings for the new jail - or just shut down the warden jail and configure the iocage jail to be the same IP.  
 
 ## Automatic update 
 
