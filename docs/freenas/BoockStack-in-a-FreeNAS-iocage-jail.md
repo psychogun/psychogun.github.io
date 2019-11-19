@@ -2,7 +2,7 @@
 layout: default
 title: How to install BookStack in a FreeNAS iocage jail
 parent: FreeNAS
-nav_order: 8
+nav_order: 2
 ---
 
 # How to install BookStack

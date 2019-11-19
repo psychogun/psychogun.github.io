@@ -2,7 +2,7 @@
 layout: default
 title: How to install Plex in a FreeNAS iocage jail
 parent: FreeNAS
-nav_order: 3
+nav_order: 6
 ---
 
 # How to install Plex in a FreeNAS iocage jail
