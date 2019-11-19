@@ -415,6 +415,8 @@ root@Plex:/usr/local/plexdata-plexpass/Plex Media Server/Logs # more /usr/local/
 ```bash
 root@Plex:/usr/local/plexdata-plexpass/Plex Media Server/Logs # sh -x /usr/local/etc/rc.d/plexmediaserver_plexpass start
 ```
+## Authors
+Mr. Johnson
 
 ## Acknowledgments
 * [https://www.ixsystems.com/community/threads/how-to-update-freenas-11-2-plex-server-from-1-13-2-5154-to-1-13-5-5291.69059/page-2](https://www.ixsystems.com/community/threads/how-to-update-freenas-11-2-plex-server-from-1-13-2-5154-to-1-13-5-5291.69059/page-2)

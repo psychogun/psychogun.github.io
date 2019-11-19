@@ -29,3 +29,29 @@ Replace volume name, v, with a 0.
 #!/bin/sh
 for f in *v*; do mv -v "$f" "$(echo "$f" | tr 'v' '0')"; done
 ```
+
+## Move file into folder
+Create a folder for each file based on the first part of the filename of a .pdf before the hyphen, and move the file in to the respective named folder.
+
+```bash
+root@LazyLibrarian:/mnt/LazyLibrarian # nano script.sh
+#!/usr/local/bin/bash
+for f in *–*.pdf; do d=${f%% –*}; mkdir -p "$d" &&  mv "$f" "$d"; done
+
+root@LazyLibrarian:/mnt/LazyLibrarian # chmod +x script.sh
+```
+Execute by placing the `script.sh` file inside unsorted magazine folder, then do `./script.sh` and let it work it's magic. 
+
+Then move these folders into your Magazine folder, and hit Library Scan.
+
+## Is it a real hyphen?
+Check if the - (above) is really a real hyphen.
+```bash
+root@LazyLibrarian:/mnt/LazyLibrarian # printf '–' | od -tx1 -An
+          e2  80  93               
+```
+[http://www.ltg.ed.ac.uk/~richard/utf-8.cgi?input=–&mode=char](http://www.ltg.ed.ac.uk/~richard/utf-8.cgi?input=–&mode=char)
+
+
+## Authors
+Mr. Johnson
