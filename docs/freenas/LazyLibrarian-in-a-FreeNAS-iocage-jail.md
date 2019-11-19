@@ -318,6 +318,9 @@ root@LazyLibrarian:/mnt/LazyLibrarian #
 
 For more information on how to proceed, go here [https://www.b1c1l1.com/blog/2011/05/09/using-utf-8-unicode-on-freebsd/](https://www.b1c1l1.com/blog/2011/05/09/using-utf-8-unicode-on-freebsd/)
 
+## Authors
+Mr. Jonshon
+
 ## Acknowledgments
 [https://serverfault.com/questions/348482/how-to-remove-invalid-characters-from-filenames](https://serverfault.com/questions/348482/how-to-remove-invalid-characters-from-filenames)
 [https://linux.die.net/man/1/convmv](https://linux.die.net/man/1/convmv)
