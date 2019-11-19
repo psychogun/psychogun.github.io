@@ -1,6 +1,6 @@
 ---
 layout: default
-title: How to install LazyLibrarian
+title: How to install LazyLibrarian in a FreeNAS iocage jail
 parent: FreeNAS
 nav_order: 9
 ---
