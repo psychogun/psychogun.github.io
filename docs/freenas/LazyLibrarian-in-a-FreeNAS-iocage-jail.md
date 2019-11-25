@@ -289,6 +289,21 @@ Execute by placing the `script.sh` file inside unsorted magazine folder, then do
 
 Then move these folders into your Magazine folder, and hit Library Scan.
 
+### Create a label in deluge
+Open Deluge, Connection Manager and connect to your deluge daemon. 
+Right-click on the Label pane to the left and press +Add Label, Name: lazylibrarian.
+
+Click Preferences and go to YaRSS2, then select the RSS Feeds tab. 
+Add Feed and enter an appropriate RSS Feed Url with the correct category. Click Save. 
+
+Select the Subscriptions tab and Add Subscription.
+
+Subscription name: Assorted Magazines
+RSS Feed: The one you added above
+Filter include (regex): assorted.magazines
+
+and then go to options, and select Label lazylibrarian. 
+
 
 ### Is it a real hyphen?
 Check if the - (above) is really a real hyphen.
