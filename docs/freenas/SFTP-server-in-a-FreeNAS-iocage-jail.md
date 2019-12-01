@@ -42,18 +42,19 @@ Log in to your actual jail.
 root@freenas:~ # iocage console SFTPman
 root@SFTPman:~ # 
 ```
-When inside of the jail, edit `/etc/rc.conf` and change `sshd_enable="NO"` to `sshd_enable="YES".
+When inside of the jail, edit `/etc/rc.conf` and change `sshd_enable="NO"` to `sshd_enable="YES"`.
 ```bash
 root@SFTPman:~ # vi /etc/rc.conf
 ```
 PS: Check out [http://www.atmos.albany.edu/daes/atmclasses/atm350/vi_cheat_sheet.pdf](http://www.atmos.albany.edu/daes/atmclasses/atm350/vi_cheat_sheet.pdf) if you are unsure how to use the `vi` editor. 
 
 ### Make a group called sftponly
-Make a group called sftponly.
+Make a group called `sftponly`.
 ```bash
 root@SFTPman:~ #  pw groupadd sftponly
 ```
 ### Edit /etc/ssh/sshd_config
+Edit the `sshd_config` file and put these parameters in.
 ```bash
 root@SFTPman:~ # vi /etc/ssh/sshd_config 
 Match Group sftponly
@@ -164,7 +165,7 @@ root@Radarr:/mnt #
 ```
 What we are interested in, is to use one of the groups `group:1006` or `group:1050` which has read and execute access of the folder. 
 Because this is only for accessing and reading the files in the `/mnt/Files/` folder.
-If I would like to have the `sftpuser1` to be able to write to this mount point, I would have proceeded with creating a group on the jail with GID 922 or 1002 and added `sftpuser1` in that group in the following section. 
+If I would like to have the `sftpuser1` to be able to write to this mount point, I would have in the following section proceeded with creating a group on the jail with GID 922 or 1002 and added `sftpuser1` in that group.
 
 ### Create groups with specific GID
 List the groups that our user `sftpuser1` currently belongs to.

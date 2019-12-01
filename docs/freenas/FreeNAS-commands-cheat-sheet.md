@@ -29,10 +29,14 @@ Replace volume name, v, with a 0.
 #!/bin/sh
 for f in *v*; do mv -v "$f" "$(echo "$f" | tr 'v' '0')"; done
 ```
-
+## 2000AD Prog replacement
+Replace `2000AD Prog` with `2000 AD`.
+```bash
+#!/bin/sh
+for f in *AD\ Prog*; do mv -v -- "$f" "${f%%AD Prog*} AD ${f#*AD Prog }"; done
+```
 ## Move file into folder
 Create a folder for each file based on the first part of the filename of a .pdf before the hyphen, and move the file in to the respective named folder.
-
 ```bash
 root@LazyLibrarian:/mnt/LazyLibrarian # nano script.sh
 #!/usr/local/bin/bash
