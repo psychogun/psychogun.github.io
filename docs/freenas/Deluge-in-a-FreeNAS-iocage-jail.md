@@ -126,10 +126,9 @@ Proceed with this action? [y/N]: y
 ```
 Change directory to `/home/deluge/`.
 
-Go to https://github.com/deluge-torrent/deluge and copy the clone link; https://github.com/deluge-torrent/deluge.git. 
+Go to [https://github.com/deluge-torrent/deluge](https://github.com/deluge-torrent/deluge]) and copy the clone link; [https://github.com/deluge-torrent/deluge.git](https://github.com/deluge-torrent/deluge.git]). 
 
 then
-
 ## Download deluge
 ```bash
 ross@Deluge:/home/deluge # git clone https://github.com/deluge-torrent/deluge.git
@@ -300,7 +299,7 @@ Mr. Johnson
 
 ## Acknowledgments
 * [https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/](https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/)
-https://blog.tkrn.io/deluge-in-a-freenas-11-iocage-jail-easy-tutorial/
+* [https://blog.tkrn.io/deluge-in-a-freenas-11-iocage-jail-easy-tutorial/](https://blog.tkrn.io/deluge-in-a-freenas-11-iocage-jail-easy-tutorial/)
 * [https://www.freshports.org/net-p2p/deluge/](https://www.freshports.org/net-p2p/deluge/)
 * [https://github.com/deluge-torrent/deluge/blob/develop/DEPENDS.md](https://github.com/deluge-torrent/deluge/blob/develop/DEPENDS.md)
 * [https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/](https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/)
