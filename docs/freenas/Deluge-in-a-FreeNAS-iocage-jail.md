@@ -7,7 +7,7 @@ nav_order: 3
 
 # How to install Deluge in a FreeNAS iocage jail
 {: .no_toc }
-How to install Deluge 2.0.3 in a FreeNAS iocage jail.
+I have Deluge 1.3.5 installed in an old warden jail on FreeNAS. This is how I replaced the warden jail with a new iocage jail with Deluge 2.0.3 on FreeNAS.
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -292,6 +292,235 @@ Starting deluge_web.
 Navigate to localhost:8112 to see if it is up and running by starting the Daemon through the Connection Manager.
 
 ## Configuration of Deluge
+### Downloads
+Download to: /mnt/Torrents/Transmission
+Move completed to: /mnt/Torrents/Finished
+Copy of .torrent files to: /mnt/Torrents/Old
+Autoadd .torrent files from: /mnt/Torrents/Watch
+Allocation:
+Use Compact
+
+### Encryption
+Inbound: Forced
+Outbound: Forced
+Level: Either
+* Encrypt entire stream
+
+### Bandwitdth
+Maximum Connections: -1
+Maximum Upload Slots: 15
+Maximum Download Speed (KiB/s): -1
+Maximum Upload Speed (KiB/s): -1
+Maximum Half-Open Connections: 50
+Maximum Connection Attempts per Second: 20
+
+* Ignore limits on local network
+* Rate limit IP overhead
+
+Per Torrent Bandwidth Usage
+Maximum Connections: -1
+Maximum Upload Slots: -1
+Maximum Download Speed (KiB/s): -1
+Maximum Upload Speed (KiB/s): -1
+
+### Interface
+* Allow the use of multiple filters at once
+
+## Other
+GeoIP Database
+Location: /usr/local/share/GeoIP/GeoIP.dat
+
+## Daemon 
+Daemon port: 58846
+Connections
+* Allow Remote Connections
+Other
+
+## Queue
+* Queue new torrents on top
+Active Torrents
+Total: 299
+Downloading: 250
+Seeding: 50
+* Ignore slow torrents
+
+Seeding Rotation
+Share Ratio: 0
+Time Ratio: 0
+Time (m): 0
+
+Share Ratio Reached
+* Share Ratio: 0
+ * Remove torrent
+* Stop seeding when share ratio reaches 0.5
+ * Remove torrent when share ratio is reached
+
+## Proxy
+
+## Plugins
+* AutoAdd
+* Blocklist
+* Label
+
+Restart the deluge jail.
+
+## Labels
+### lidarr
+Queue
+v Apply queue settings:
+ v Auto Managed
+  v Stop seed at ratio: 0
+  v Remove at ratio
+
+Folders
+v Apply folder settings:
+ v Move completed to: 
+  /mnt/Torrents/Finished/lidarr_finished
+
+### mylar
+Queue
+v Apply queue settings:
+ v Auto Managed
+  v Stop seed at ratio: 0
+  v Remove at ratio
+
+Folders
+v Apply folder settings:
+ v Move completed to: 
+  /mnt/Mylar_dump/DUMP/
+
+### tv-sonarr
+Queue
+v Apply queue settings:
+ v Auto Managed
+  v Stop seed at ratio: 0
+
+### radarr
+Queue
+v Apply queue settings:
+ v Auto Managed
+  v Stop seed at ratio: 0
+
+### lazylibrarian
+Queue
+v Apply queue settings:
+ v Auto Managed
+  v Stop seed at ratio: 0
+  v Remove at ratio
+
+Folders
+v Apply folder settings:
+ v Move completed to: 
+  /mnt/Torrents/Finished/LazyLibrarian
+
+   
+### Install YaRSS
+#### First install Deluge 
+This I did on my Mint linux edition.
+
+The ​Deluge PPA contains the latest Deluge releases for Ubuntu.
+```bash
+sudo add-apt-repository ppa:deluge-team/stable
+sudo apt-get update
+sudo apt-get install deluge
+```
+
+Start deluge by issuing `deluge`. Change to Thin Client in Preferences. Quit deluge. 
+
+Then run deluge with the following parameters:
+```bash
+deluge "connect ip-adress:port username:password"
+```
+
+See "Misc - Create users for daemond" for further information on how to create users. 
+
+Download [https://bitbucket.org/bendikro/deluge-yarss-plugin/downloads/](https://bitbucket.org/bendikro/deluge-yarss-plugin/downloads/): YaRSS2-2.1.4-py3.6.egg
+
+Go to Preferences, Plugins and press Install within the Deluge client. 
+#### Add RSS Feeds
+Go to Preferences, select YaRSS2 - and then select RSS Feeds.
+
+Click Add Feed:
+RSS Feed Name: 
+RSS Feed URL:
+Update Interval (min): 120 v Run on startup
+Obey TTL: v Use TTL value from RSS Feed (recommended)
+Cookies:
+Magnet link: v Prefer magnet link over torrent
+
+#### Add Subscriptions
+Go to Preferences, select YaRSS2 - and then select Subscriptions.
+
+Click Add Subscription
+Subscription name:
+RSS Feed:
+Filter include (regex)
+Filter exclude (regex)
+
+Options
+Label: 
+
+## AutoAdd
+Go to Preferences, select AutoAdd
+
+/mnt/Torrents/Watch
+
+
+## Misc
+### Create users for daemond
+You can create users in the `auth` file.
+```bash
+ross@Deluge:/home/deluge # cd /home/deluge/.config/deluge/
+ross@Deluge:/home/deluge/.config/deluge # nano auth
+```
+
+### Old jail
+deluge:*:922:922:Deluge BitTorrent Client:/home/deluge:/sbin/nologin
+ross@Deluge:/ # groups deluge
+deluge mylar_dump
+
+groups deluge
+mylar_dump:*:1049:deluge
+
+ross@Deluge:/mnt # ls -alh
+total 578
+drwxr-xr-x     5 ross  wheel          5B Oct  4  2018 .
+drwxr-xr-x    18 ross  wheel         22B Mar 28  2018 ..
+drwxrwx---+ 1209 1000  1002         1.2K Dec 16 16:25 Movies
+drwxrwx---    12 ross  mylar_dump    15B Dec  8 00:20 Mylar_dump
+drwxrwx---+    7 1000  deluge         9B May  7  2018 Torrents
+ross@Deluge:/mnt # 
+
+
+### Groups
+Create a group called `mylar_dump` with GID = 1049 in the iocage jail.
+```bash
+ross@Deluge:~ # pw groupadd mylar_dump -g 1049
+ross@Deluge:~ # groups deluge
+deluge
+ross@Deluge:~ # pw usermod deluge -G deluge,mylar_dump
+ross@Deluge:~ # groups deluge
+deluge mylar_dump
+ross@Deluge:~ # 
+```
+
+### Mount points
+I have to mount Movies, Mylar_dump and Torrents.
+And create a group called mylar_dump with GID=1049.
+
+And then turn off all torrents on the old warden jail, shut down the warden jail - mount the mount points, and then edit the IP of the new iocage jail. And then test.
+
+
+## Execute
+ Torrent Complete /home/deluge/echo_script.sh
+ ```bash
+ ross@Deluge:/home/deluge # more echo_script.sh 
+#!/bin/bash
+torrentid=$1
+torrentname=$2
+torrentpath=$3
+echo "Torrent Details: " "$torrentname" "$torrentpath" "$torrentid"  >> /home/deluge/echo_script.log
+```
 
 
 ## Authors
