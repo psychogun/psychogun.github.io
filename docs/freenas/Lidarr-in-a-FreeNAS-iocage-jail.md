@@ -345,6 +345,19 @@ Click SAVE.
 Start your Lidarr jail again.
 
 
+#### Indexers
+Select +, press Torsznab.
+
+Name: Torsznab - RARBG
+v Enable RSS
+v Enable Automatic Search
+v Enable Interactive Search
+URL: 
+API Path: /api
+API Key: 
+Categories: 100025 ,100023
+Minimum Seeders: 5
+
 ## Fault finding
 System > Status
 
@@ -467,18 +480,6 @@ This file you can now copy to your other jails.
 Then to install it, just do `pkg add -f /tmp/mono.mono-5.20.1.34_2.txz` in your other iocage jail. 
 
 
-#### Indexers
-Select +, press Torsznab.
-
-Name: Torsznab - RARBG
-v Enable RSS
-v Enable Automatic Search
-v Enable Interactive Search
-URL: 
-API Path: /api
-API Key: 
-Categories: 100025 ,100023
-Minimum Seeders: 5
 
 ## Authors
 Mr. Johnson
