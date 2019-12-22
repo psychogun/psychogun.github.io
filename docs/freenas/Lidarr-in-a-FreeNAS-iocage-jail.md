@@ -345,8 +345,126 @@ Click SAVE.
 Start your Lidarr jail again.
 
 
+## Fault finding
+System > Status
 
+### fpcalc could not be found. Audio fingerprinting disabled.
 
+```bash
+root@freenas:~ # iocage console Lidarr
+root@Lidarr:~ # service lidarr stop
+Stopping lidarr.
+Waiting for PIDS: 74622, 74622, 74622.
+root@Lidarr:~ # pkg install chromaprint
+root@Lidarr:~ # service lidarr start
+Starting lidarr.
+root@Lidarr:~ # 
+```
+
+### Updating will not be possible to prevent deleting AppData on Update
+[https://github.com/Lidarr/Lidarr/wiki/Health-checks#updating-will-not-be-possible-to-prevent-deleting-appdata-on-update](https://github.com/Lidarr/Lidarr/wiki/Health-checks#updating-will-not-be-possible-to-prevent-deleting-appdata-on-update)
+
+App-Data directory must reside in another folder other than Lidarr's startup folder.
+```bash
+root@freenas:~ # iocage console Lidarr
+root@Lidarr:/ # cd /usr/local/
+root@Lidarr:/usr/local # service lidarr stop
+root@Lidarr:/usr/local # mkdir Lidarr-AppData
+root@Lidarr:/usr/local # cp -ri /usr/local/Lidarr/lidarr/ /usr/local/Lidarr-AppData/
+root@Lidarr:/usr/local # chown -R lidarr /usr/local/Lidarr-AppData/
+root@Lidarr:/usr/local # nano /etc/rc.d/lidarr 
+```
+Change `: ${lidarr__data_dir:="/usr/local/Lidarr/lidarr"}` to `: ${lidarr__data_dir:="/usr/local/Lidarr-AppData"}`
+
+```bash
+root@Lidarr:/usr/local # service lidarr start
+```
+
+### Currently installed Mono version 5.10.1.57 is supported but has some known issues. Please upgrade Mono to version 5.20.
+[https://www.ixsystems.com/community/resources/how-to-manually-upgrade-mono-from-5-10-to-5-20-in-a-freenas-jail.126/](https://www.ixsystems.com/community/resources/how-to-manually-upgrade-mono-from-5-10-to-5-20-in-a-freenas-jail.126/)
+
+```bash
+root@freenas:~ # iocage console Lidarr
+root@Lidarr:~ # service lidarr stop
+```
+Change from `quarterly` to `latest` in `FreeBSD.conf`:
+```bash
+root@Lidarr:~ # nano /etc/pkg/FreeBSD.conf
+  url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest",
+```
+
+```bash
+root@Lidarr:~ # portsnap fetch extract
+root@Lidarr:~ # pkg update
+root@Lidarr:~ # pkg upgrade 
+```
+Copy everything from [https://bz-attachments.freebsd.org/attachment.cgi?id=205999](https://bz-attachments.freebsd.org/attachment.cgi?id=205999) to `/tmp/mono-patch-5.20.1.34`:
+```bash
+root@Lidarr:~ # nano /tmp/mono-patch-5.20.1.34
+
+root@Lidarr:/usr/ports/lang/mono # 
+root@Lidarr:/usr/ports/lang/mono # patch -E < /tmp/mono-patch-5.20.1.34
+```
+Change `PORTVERSION=` from `5.10.1.57` to `5.20.1.34`, then save and exit. It is right at the top few lines of `Makefile`:
+```bash
+root@Lidarr:/usr/ports/lang/mono # nano Makefile
+```
+Install necessary things to compile `Mono`:
+```bash
+root@Lidarr:/usr/ports/lang/mono # pkg install -y llvm80 libepoxy-1.5.2 perl5 mesa-dri
+```
+```bash
+root@Lidarr:/usr/ports/lang/mono # nano /etc/make.conf
+ALLOW_UNSUPPORTED_SYSTEM=yes
+```
+`pkg delete -f "*proto"``
+
+Make install clean:
+```bash
+root@Lidarr:/usr/ports/lang/mono # make -DBATCH install clean
+```
+Just press 'Enter' if given any promts with options when issuing `deinstall`/`reinstall`:
+```bash
+root@Lidarr:/usr/ports/lang/mono # make deinstall reinstall
+root@Lidarr:/usr/ports/lang/mono # pkg update
+Updating FreeBSD repository catalogue...
+FreeBSD repository is up to date.
+All repositories are up to date.
+root@Lidarr:/usr/ports/lang/mono # pkg upgrade
+Updating FreeBSD repository catalogue...
+FreeBSD repository is up to date.
+All repositories are up to date.
+Updating database digests format: 100%
+Checking for upgrades (89 candidates): 100%
+Processing candidates (89 candidates): 100%
+Checking integrity... done (0 conflicting)
+Your packages are up to date.
+root@Lidarr:/usr/ports/lang/mono # 
+```
+Now, start Lidarr again:
+```bash
+root@Lidarr:/usr/ports/lang/mono # service lidarr start
+Starting lidarr.
+root@Lidarr:/usr/ports/lang/mono # 
+```
+#### make package
+Create a tarball you can use on other systems, by issuing `make package`:
+```bash
+root@Lidarr:/usr/ports/lang/mono # make package
+```
+
+The package should now be in `work/pkg/`. 
+```bash
+root@Lidarr:/usr/ports/lang/mono/work/pkg # ls -alh
+total 71356
+drwxr-xr-x  2 root  wheel     3B Dec 22 23:09 .
+drwxr-xr-x  8 root  wheel    23B Dec 22 23:11 ..
+-rw-r--r--  1 root  wheel    70M Dec 22 23:11 mono-5.20.1.34_2.txz
+root@Lidarr:/usr/ports/lang/mono/work/pkg # 
+```
+
+This file you can now copy to your other jails.
+Then to install it, just do `pkg add -f /tmp/mono.mono-5.20.1.34_2.txz` in your other iocage jail. 
 
 
 #### Indexers
@@ -368,3 +486,6 @@ Mr. Johnson
 * [https://github.com/Lidarr/Lidarr/wiki/Installation#linux](https://github.com/Lidarr/Lidarr/wiki/Installation#linux)
 * [https://www.ixsystems.com/community/threads/how-to-giving-plugins-write-permissions-to-your-data.27273/](https://www.ixsystems.com/community/threads/how-to-giving-plugins-write-permissions-to-your-data.27273/)
 * [https://github.com/lidarr/Lidarr/wiki/Installation-(FreeBSD-FreeNAS)](https://github.com/lidarr/Lidarr/wiki/Installation-(FreeBSD-FreeNAS))
+* [https://unix.stackexchange.com/questions/483990/change-between-quarterly-and-latest-package-set-used-by-pkg-tool-in-freebs](https://unix.stackexchange.com/questions/483990/change-between-quarterly-and-latest-package-set-used-by-pkg-tool-in-freebs)
+* [https://forums.freebsd.org/threads/update-fails-with-error-70-because-of-problematic-file-xorgproto-2018-4-with-xproto-7-0-31.67114/](https://forums.freebsd.org/threads/update-fails-with-error-70-because-of-problematic-file-xorgproto-2018-4-with-xproto-7-0-31.67114/)
+* [https://forums.freebsd.org/threads/creating-binary-packages-without-installing.55238/](https://forums.freebsd.org/threads/creating-binary-packages-without-installing.55238/)
