@@ -7,7 +7,7 @@ nav_order: 3
 
 # How to install Deluge in a FreeNAS iocage jail
 {: .no_toc }
-I have Deluge 1.3.5 installed in an old warden jail on FreeNAS. This is how I replaced the warden jail with a new iocage jail with Deluge 2.0.3 on FreeNAS.
+I have Deluge 1.3.5 installed in an old warden jail on FreeNAS. This is how I replaced the warden jail with a new iocage jail with Deluge 2.0.3 on FreeNAS. This is the information that had me started: [https://forum.deluge-torrent.org/viewtopic.php?t=55437](https://forum.deluge-torrent.org/viewtopic.php?t=55437).
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -33,7 +33,7 @@ Network properties > Interfaces: vnet0:bridge1.
 
 Click SAVE.
 
-Select and START Lidarr.
+Select and START Deluge.
 
 ## Preconfiguration
 ### Log in to your FreeNAS via SSH
@@ -148,14 +148,8 @@ root@Deluge:/home/deluge/deluge # more DEPENDS.md
 
 ## Install dependencies
 ```bash
-root@Deluge:/home/deluge/deluge # pkg install nano intltool closure-compiler py36-twisted  py36-OpenSSL py36-rencode py36-rencode py36-xdg  xdg-utils py36-six py36-zope.interface py36-chardet  py36-setproctitle py36-pillow py36-dbus py36-distro py36-libtorrent-rasterbar py36-GeoIP2 py36-mako libnotify
+root@Deluge:/home/deluge/deluge # pkg install nano intltool closure-compiler py36-twisted  py36-OpenSSL py36-rencode py36-rencode py36-xdg  xdg-utils py36-six py36-zope.interface py36-chardet py36-setproctitle py36-pillow py36-dbus py36-distro py36-libtorrent-rasterbar py36-GeoIP2 py36-mako libnotify
 ```
-
-pyOpenSSL
-rencode
-py36-xdg-utils
-py36-xdg-utils
-setproctitle
 
 ## Build deluge
 ```bash
@@ -169,12 +163,12 @@ ross@Deluge:/home/deluge # cd deluge/
 ross@Deluge:/home/deluge/deluge # python3.6 setup.py install
 ```
 
-## Startup script
+## Startup script deluge_web
 ### /etc/rc.conf
-Edit rc.conf and add the following lines, change `deluge_web_user` to the user you would like deluge_web to run as on your system (I am using `deluge`):
+Edit rc.conf and add the following lines, change `deluge_web_user` to the user you would like `deluge_web` to run as on your system (I am using `deluge`):
 ```bash
 ross@Deluge:/home/deluge/deluge # nano /etc/rc.conf
-# Enable deluge 
+# Enable deluge web service
 deluge_web_enable="YES"
 deluge_web_user="deluge"
 ```
@@ -289,7 +283,91 @@ Starting deluge_web.
 ```
 
 ### 8112
-Navigate to localhost:8112 to see if it is up and running by starting the Daemon through the Connection Manager.
+Navigate to localhost:8112 to see if the deluge webs service is up and running. From the web service, you can start `deluged` (Deluge daemon) through the Connection Manager. 
+
+## Startup script deluged
+If you do not want to have deluge start the daemon automatically, but started from the web service, skip this entire step. 
+### /etc/rc.conf
+Add the following line to `/etc/rc.conf` to enable deluged at startup
+  `deluged_enable="YES"`
+```bash
+ross@Deluge:/home/deluge/deluge # nano /etc/rc.conf
+# Enable deluged
+deluged_enable="YES"
+```
+
+#### /usr/local/etc/rc.d/deluged
+```bash
+ross@Deluge:/home/deluge/deluge # cd /usr/local/etc/rc.d/
+ross@Deluge:/usr/local/etc/rc.d # nano deluge_web
+#!/bin/sh
+#
+#  deluged RCng startup script
+#  created by: R.S.A. aka .faust 
+#            mail: rsa dot aka dot f at gmail dot com
+# 
+ 
+# PROVIDE: deluged
+# REQUIRE: NETWORKING SERVERS DAEMON ldconfig resolv
+# BEFORE: LOGIN
+# KEYWORD: shutdown
+ 
+# Add the following line to /etc/rc.conf.local or /etc/rc.conf to enable deluged at startup
+#       deluged_enable="YES"
+#
+# cfg_dir (str):        Specify the full path to directory with deluged config files
+# log (str):            Specify the full path to the LOG file
+# loglevel (str):       Set loglevel (Available: none, info, warning, error, critical, debug)
+# pidfile (str):        Specify the full path to the PID file
+# deluged_user (str):   Set to user running deluged
+#
+#  Warning! Rights to folders and files must be "rwx" for the user under which deluged is run
+ 
+. /etc/rc.subr
+ 
+name="deluged"
+rcvar=`set_rcvar`
+ 
+load_rc_config $name
+deluged_enable=${deluged_enable:=NO}
+
+cfg_dir="/home/deluge/.config/deluge/"
+log="${cfg_dir}${name}.log"
+loglevel="error"
+pidfile="${cfg_dir}${name}.pid"
+deluged_user="deluge"
+
+required_dirs=${cfg_dir}
+
+command_interpreter="/usr/local/bin/python"
+command="/usr/local/bin/${name}"
+start_cmd="${name}_start"
+
+deluged_start()
+{
+if [ ! -f "${pidfile}" ]; then
+    su -m ${deluged_user} -c "/usr/local/bin/${name} -c ${cfg_dir} -L ${loglevel} -l ${log} -P ${pidfile}"
+    echo "Starting ${name}."
+else
+    GETPROCESSPID=`/bin/ps -auxw | /usr/bin/awk '/deluged/ && !/awk/ && !/sh/ {print $2}'`
+    PIDFROMFILE=`cat ${pidfile}`
+    if [ "$GETPROCESSPID" = "$PIDFROMFILE" ]; then
+        echo "${name} already running with PID: ${PIDFROMFILE} ?"  
+        echo "Remove ${pidfile} manually if needed."
+    else
+        rm -f ${pidfile}
+        su -m ${deluged_user} -c "/usr/local/bin/${name} -c ${cfg_dir} -l ${log} -P ${pidfile}"
+        echo "Starting ${name}."
+    fi
+fi
+}
+run_rc_command "$1"
+```
+
+```bash
+root@Deluge:/usr/local/etc/rc.d # chmod +x deluged 
+```
+
 
 ## Configuration of Deluge
 ### Downloads
@@ -327,9 +405,59 @@ Maximum Upload Speed (KiB/s): -1
 * Allow the use of multiple filters at once
 
 ## Other
-GeoIP Database
-Location: /usr/local/share/GeoIP/GeoIP.dat
+GeoIP.dat is no longer maintained by MaxMind, but there is a guy converting the new GeoIP version 2 files `*.mmdb`  to `*.dat` which you can get here; [https://www.miyuru.lk/geoiplegacy](https://www.miyuru.lk/geoiplegacy).
 
+Anyways - even if you have the "old" `GeoIP.dat` files, we currently just have to wait for the deluge team to use GeoIP2 instead of the old legacy GeoIP python extension, as it is removed from freshports [https://www.freshports.org/net/py-GeoIP/](https://www.freshports.org/net/py-GeoIP/) -- or maybe you could download and install the old one? [https://github.com/maxmind/geoip-api-python](https://github.com/maxmind/geoip-api-python).
+
+### Download old GeoIP Legacy C API
+[https://github.com/maxmind/geoip-api-c](https://github.com/maxmind/geoip-api-c)
+```bash
+root@Deluge:/home/deluge # git clone https://github.com/maxmind/geoip-api-c.git
+Cloning into 'geoip-api-c'...
+remote: Enumerating objects: 3649, done.
+remote: Total 3649 (delta 0), reused 0 (delta 0), pack-reused 3649
+Receiving objects: 100% (3649/3649), 1.75 MiB | 2.91 MiB/s, done.
+Resolving deltas: 100% (2402/2402), done.
+root@Deluge:/home/deluge # 
+```
+Hm. Do not understand how I could get this installed. `./configure` which is suggested, is probably pointing to the `configure.ac` file. [https://forums.freebsd.org/threads/configure.32843/](https://forums.freebsd.org/threads/configure.32843/). 
+
+Blaergh. 
+
+### Download old Legacy GeoIP
+[https://github.com/maxmind/geoip-api-python](https://github.com/maxmind/geoip-api-python)
+```bash
+ross@Deluge:/home/deluge # git clone https://github.com/maxmind/geoip-api-python.git
+Cloning into 'geoip-api-python'...
+remote: Enumerating objects: 441, done.
+remote: Total 441 (delta 0), reused 0 (delta 0), pack-reused 441
+Receiving objects: 100% (441/441), 103.70 KiB | 643.00 KiB/s, done.
+Resolving deltas: 100% (251/251), done.
+root@Deluge:/home/deluge # 
+```
+```bash
+root@Deluge:/home/deluge/geoip-api-python # python3.6 setup.py build
+/usr/local/lib/python3.6/distutils/dist.py:261: UserWarning: Unknown distribution option: 'bugtrack_url'
+  warnings.warn(msg)
+running build
+running build_ext
+building 'GeoIP' extension
+creating build
+creating build/temp.freebsd-11.2-STABLE-amd64-3.6
+cc -Wno-unused-result -Wsign-compare -Wunreachable-code -DNDEBUG -O2 -pipe -fstack-protector-strong -fno-strict-aliasing -fPIC -I/usr/local/include/python3.6m -c py_GeoIP.c -o build/temp.freebsd-11.2-STABLE-amd64-3.6/py_GeoIP.o
+py_GeoIP.c:23:10: fatal error: 'GeoIP.h' file not found
+#include <GeoIP.h>
+         ^~~~~~~~~
+1 error generated.
+error: command 'cc' failed with exit status 1
+root@Deluge:/home/deluge/geoip-api-python # 
+```
+
+GeoIP Database
+* Location: /usr/local/share/GeoIP/GeoIP.dat
+*Location: /usr/home/deluge/GeoIP/GeoIP.dat
+
+Yah, blaergh.
 ## Daemon 
 Daemon port: 58846
 Connections
@@ -436,7 +564,7 @@ See "Misc - Create users for daemond" for further information on how to create u
 
 Download [https://bitbucket.org/bendikro/deluge-yarss-plugin/downloads/](https://bitbucket.org/bendikro/deluge-yarss-plugin/downloads/): YaRSS2-2.1.4-py3.6.egg
 
-Go to Preferences, Plugins and press Install within the Deluge client. 
+Go to Preferences, Plugins and press Install within the Deluge client. If nothing is happening, verify that you are using a correct python version which is corresponding with the version listed in the *.egg.
 #### Add RSS Feeds
 Go to Preferences, select YaRSS2 - and then select RSS Feeds.
 
@@ -464,7 +592,6 @@ Label:
 Go to Preferences, select AutoAdd
 
 /mnt/Torrents/Watch
-
 
 ## Misc
 ### Create users for daemond
@@ -510,7 +637,6 @@ And create a group called mylar_dump with GID=1049.
 
 And then turn off all torrents on the old warden jail, shut down the warden jail - mount the mount points, and then edit the IP of the new iocage jail. And then test.
 
-
 ## Execute
  Torrent Complete /home/deluge/echo_script.sh
  ```bash
@@ -522,6 +648,28 @@ torrentpath=$3
 echo "Torrent Details: " "$torrentname" "$torrentpath" "$torrentid"  >> /home/deluge/echo_script.log
 ```
 
+## Fault finding
+Set error logging to either
+* none
+* critical
+* error
+* warning
+* info
+* debug
+
+Note: `debug` is very verbose and with a lot of torrents log files will be MB's in size.
+
+You change the log levels your `/usr/local/etc/rc.d/deluge_web` and or `/usr/local/etc/rc.d/deluged` file.
+
+Logging for `deluged`:
+```bash
+root@Deluge:~ # tail -f /home/deluge/.config/deluge/deluged.log
+```
+
+Logging for `deluge_web`:
+```bash
+root@Deluge:~ # tail -f /var/tmp/deluge_web.log
+```
 
 ## Authors
 Mr. Johnson
@@ -533,3 +681,10 @@ Mr. Johnson
 * [https://github.com/deluge-torrent/deluge/blob/develop/DEPENDS.md](https://github.com/deluge-torrent/deluge/blob/develop/DEPENDS.md)
 * [https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/](https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/)
 * [https://forum.deluge-torrent.org/viewtopic.php?f=7&t=55437&p=230328&hilit=freebsd#p230328](https://forum.deluge-torrent.org/viewtopic.php?f=7&t=55437&p=230328&hilit=freebsd#p230328)
+* [https://stackoverflow.com/questions/21050456/how-to-convert-a-maxmind-mmdb-to-dat/21150601#21150601](https://stackoverflow.com/questions/21050456/how-to-convert-a-maxmind-mmdb-to-dat/21150601#21150601)
+* [https://www.miyuru.lk/geoiplegacy](https://www.miyuru.lk/geoiplegacy)
+* [https://github.com/sherpya/geolite2legacy](https://github.com/sherpya/geolite2legacy)
+* [https://github.com/transmission-remote-gui/transgui/issues/1104](https://github.com/transmission-remote-gui/transgui/issues/1104)
+* [https://github.com/transmission-remote-gui/transgui/issues/1195](https://github.com/transmission-remote-gui/transgui/issues/1195)
+* [https://dev.deluge-torrent.org/wiki/UserGuide/Service/FreeBSD](https://dev.deluge-torrent.org/wiki/UserGuide/Service/FreeBSD)
+* [https://forum.deluge-torrent.org/viewtopic.php?t=55382](https://forum.deluge-torrent.org/viewtopic.php?t=55382)

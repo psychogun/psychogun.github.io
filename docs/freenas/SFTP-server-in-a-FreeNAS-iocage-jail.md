@@ -2,7 +2,7 @@
 layout: default
 title: How to configure SSH to act as an SFTP server in an iocage jail on FreeNAS
 parent: FreeNAS
-nav_order: 9
+nav_order: 13
 ---
 
 # How to configure SSH to act as an SFTP server in an iocage jail on FreeNAS
@@ -24,6 +24,10 @@ I wanted a secure way to share my datasets on FreeNAS.
 Open up your FreeNAS gui > Jails > ADD.
 
 Select an appropriate jail name.
+
+## Mount points
+Add your different mount points and make sure to make them read only. 
+
 ## Configure of the jail
 Log in to your FreeNAS through SSH, e.g. 
 ```bash
@@ -33,16 +37,31 @@ root@freenas:~ #
 ```
 List available jails.
 ```bash
-root@freenas:~ # jls
-   JID  IP Address      Hostname                      Path
-    17                  SFTPman                       /mnt/Day/iocage/jails/SFTPman/root
+root@freenas:/mnt/Breaking/TV Shows # iocage list
++-----+----------------+-------+--------------+------+
+| JID |      NAME      | STATE |   RELEASE    | IP4  |
++=====+================+=======+==============+======+
+| 10  | SFTPman        | up    | 11.3-RELEASE | DHCP |
++-----+----------------+-------+--------------+------+
 ```
-Log in to your actual jail.
+Log in to your actual jail and update && upgrade:
 ```bash
 root@freenas:~ # iocage console SFTPman
+root@SFTPman:~ # pkg update && pkg upgrade
+Updating FreeBSD repository catalogue...
+FreeBSD repository is up to date.
+All repositories are up to date.
+Updating FreeBSD repository catalogue...
+FreeBSD repository is up to date.
+All repositories are up to date.
+Checking for upgrades (1 candidates): 100%
+Processing candidates (1 candidates): 100%
+Checking integrity... done (0 conflicting)
+Your packages are up to date.
 root@SFTPman:~ # 
 ```
-When inside of the jail, edit `/etc/rc.conf` and change `sshd_enable="NO"` to `sshd_enable="YES"`.
+When inside of the jail, edit `/etc/rc.conf` and `# Enable SSH daemon 
+sshd_enable="YES"`
 ```bash
 root@SFTPman:~ # vi /etc/rc.conf
 ```
@@ -54,9 +73,10 @@ Make a group called `sftponly`.
 root@SFTPman:~ #  pw groupadd sftponly
 ```
 ### Edit /etc/ssh/sshd_config
-Edit the `sshd_config` file and put these parameters in.
+Edit the `sshd_config` file and add these lines of code at the bottom:
 ```bash
 root@SFTPman:~ # vi /etc/ssh/sshd_config 
+# SFTP settings
 Match Group sftponly
 ChrootDirectory /mnt/
 X11Forwarding no
@@ -135,6 +155,7 @@ This service allows sftp connections only.
 ### Try FileZilla
 Check if you can log in with an SFTP application, I tried FileZilla.
 There you'll see that you are able to log in, but you are unable to navigate in the file hierarchy. That is because the created user does not have any permissions to read folders which is mounted. Neither does the group of which the user belongs to (sftponly).
+
 ## getfacl
 Navigate to `/mnt` and do an `ls -alh` to see the UID:GID.
 ```bash
@@ -192,7 +213,7 @@ Now which groups does `sftpuser1` belong to?
 root@SFTPman:/mnt # groups sftpuser1
 sftponly Filesgroup_ro
 ```
-Back in FileZilla you'll se that the folders now are listed.
+Back in FileZilla, disconnect and reconnect- you'll se that the folders now are listed (right click and choose Refresh).
 
 Now you just have to repeat for whatever folders you would like the users to connect to.
 

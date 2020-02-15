@@ -2,7 +2,7 @@
 layout: default
 title: How to install LazyLibrarian in a FreeNAS iocage jail
 parent: FreeNAS
-nav_order: 4
+nav_order: 7
 ---
 
 # How to install LazyLibrarian
@@ -302,7 +302,9 @@ Subscription name: Assorted Magazines
 RSS Feed: The one you added above
 Filter include (regex): assorted.magazines
 
-and then go to options, and select Label lazylibrarian. 
+and then go to options, and select Label lazylibrarian and click Save, Apply and then OK. 
+Then open up a web browser to configure the deluge label.
+
 
 
 ### Is it a real hyphen?

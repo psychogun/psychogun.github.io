@@ -2,7 +2,7 @@
 layout: default
 title: How to install Lidarr in a FreeNAS iocage jail
 parent: FreeNAS
-nav_order: 5
+nav_order: 8
 ---
 
 # How to install Lidarr in a FreeNAS iocage jail
@@ -287,7 +287,7 @@ Album Folder Format: {Artist Name} - {Album Title} [{Release Year}]
 Uncheck Use Hardlinks instead of Copy
 Import Extra Files V
 
-chown User 10000
+chown User 1000
 
 #### Download Clients
 Select +, press Deluge. 
@@ -319,9 +319,9 @@ homem-christo@freenas:~ # getfacl /mnt/Interstella/Torrents/
             owner@:rwxpDdaARWcCo-:fd-----:allow
 homem-christo@freenas:~ # 
 ```
-So a group called deluge is group owner of that folder.
+So a group called `deluge` is group owner of that folder.
 
-Check in FreeNAS gui which GID it has > Accounts > Groups > deluge. 
+Check in FreeNAS gui which GID the `deluge` group has > Accounts > Groups > deluge. 
 I have the group deluge with GID 922, so I would want to create a group inside of my Lidarr jail with GID deluge:
 ```bash
 homem-christo@Lidarr:~ # groups lidarr
@@ -329,7 +329,7 @@ lidarr audio
 homem-christo@Lidarr:~ # pw groupadd deluge -g 922
 homem-christo@Lidarr:~ # groups lidarr
 lidarr audio
-homem-christo@Lidarr:~ # pw usermod lidarr -G lidarr,audio,deluge
+homem-christo@Lidarr:~ # pw usermod lidarr -G audio,deluge
 homem-christo@Lidarr:~ # groups lidarr
 lidarr audio deluge
 homem-christo@Lidarr:~ # 
@@ -414,7 +414,9 @@ root@Lidarr:~ # pkg upgrade
 Copy everything from [https://bz-attachments.freebsd.org/attachment.cgi?id=205999](https://bz-attachments.freebsd.org/attachment.cgi?id=205999) to `/tmp/mono-patch-5.20.1.34`:
 ```bash
 root@Lidarr:~ # nano /tmp/mono-patch-5.20.1.34
-
+```
+Change directory to `/usr/ports/lang/mono/` and apply patch:
+```bash
 root@Lidarr:/usr/ports/lang/mono # 
 root@Lidarr:/usr/ports/lang/mono # patch -E < /tmp/mono-patch-5.20.1.34
 ```
@@ -432,7 +434,7 @@ ALLOW_UNSUPPORTED_SYSTEM=yes
 ```
 `pkg delete -f "*proto"``
 
-Make install clean:
+Make install clean (this will run for quite some time, 30 minutes+ on my system):
 ```bash
 root@Lidarr:/usr/ports/lang/mono # make -DBATCH install clean
 ```
@@ -478,8 +480,6 @@ root@Lidarr:/usr/ports/lang/mono/work/pkg #
 
 This file you can now copy to your other jails.
 Then to install it, just do `pkg add -f /tmp/mono.mono-5.20.1.34_2.txz` in your other iocage jail. 
-
-
 
 ## Authors
 Mr. Johnson

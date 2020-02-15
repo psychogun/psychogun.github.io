@@ -81,7 +81,7 @@ Add another user? (yes/no): no
 ```
 
 ## Install
-Install it:
+Install:
 ```
 root@Airdccp:/usr/local/airdcpp-webclient # make install
 ```

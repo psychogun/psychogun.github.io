@@ -2,7 +2,7 @@
 layout: default
 title: How to move a Dataset in FreeNAS
 parent: FreeNAS
-nav_order: 8
+nav_order: 16
 ---
 
 # How to move a Dataset in FreeNAS

@@ -2,7 +2,7 @@
 layout: default
 title: ELK Stack on Ubuntu for pfSense
 parent: Linux
-nav_order: 1
+nav_order: 3
 ---
 *WORK IN PROGRESS as of 2019-07-31*
 # How to install the ELK Stack on Ubuntu for pfSense

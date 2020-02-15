@@ -2,7 +2,7 @@
 layout: default
 title: Airodump with GPS coordinates
 parent: Linux
-nav_order: 7
+nav_order: 1
 ---
 # Airodump with GPS coordinates
 {: .no_toc }

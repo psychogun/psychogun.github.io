@@ -2,7 +2,7 @@
 layout: default
 title: FreeNAS commands cheat sheet
 parent: FreeNAS
-nav_order: 10
+nav_order: 13
 ---
 
 # FreeNAS commands cheat sheet

@@ -16,7 +16,7 @@ Wanted to document and gather all of my findings in a central place.
 {:toc}
 ---
 ## Getting started
-A pool containing the original dataset Audio named Detainer and a new pool named Destroyer.
+
 
 ## Requirements
 * FreeNAS 11.2
@@ -236,7 +236,6 @@ Bye
 $ 
 ```
 
-
 ## Install Nginx
 
 Install Nginx.
@@ -315,7 +314,7 @@ $
 Install Composer globally by running the following script in your terminal.
 ```bash
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-php -r "if (hash_file('sha384', 'composer-setup.php') === 'a5c698ffe4b8e849a443b120cd5ba38043260d5c4023dbf93e1558871f1f07f58274fc6f4c93bcfd858c6bd0775cd8d1') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+php -r "if (hash_file('sha384', 'composer-setup.php') === 'a5c698ffe4b8e829a443b120cd5ca38043260d5c4023dbf93e1548871f1f07f58274fc6f4c93bcfd858c6bd0775cd8d1') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
 php composer-setup.php
 php -r "unlink('composer-setup.php');"
 sudo mv composer.phar /usr/local/bin/composer
@@ -412,7 +411,7 @@ $ php artisan key:generate
  Do you really wish to run this command? (yes/no) [no]:
  > y
 
-Application key [base64:80ucWtH1+owkhGN3eGEbWMYxESZBfHlc9dQ4ZgwmrQI=] set successfully.
+Application key [base64:80ucFtH1+owZhGN3eGEbWMYxESZBfHld9dQ4ZgwqrMI=] set successfully.
 $ 
 ```
 
@@ -487,6 +486,9 @@ MariaDB [(none)]> SELECT User FROM mysql.user;
 ```bash
 MariaDB [(none)]> SET PASSWORD FOR 'techonthenet'@'localhost' = PASSWORD('newpassword');
 ```
+
+## Authors
+Mr. Johnson
 
 ## Acknowledgments
 * [https://www.vultr.com/docs/how-to-install-bookstack-on-freebsd-12](https://www.vultr.com/docs/how-to-install-bookstack-on-freebsd-12)
