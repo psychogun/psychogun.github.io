@@ -2,7 +2,7 @@
 layout: default
 title: Installing and using Zabbix 
 parent: Linux
-nav_order: 7
+nav_order: 8
 ---
 # Installing and using Zabbix 
 {: .no_toc }
