@@ -2,7 +2,7 @@
 layout: default
 title: How to install the Elastic Stack in a FreeNAS iocage jail
 parent: FreeNAS
-nav_order: 4
+nav_order: 5
 ---
 
 # How to install the Elastic Stack in a FreeNAS iocage jail

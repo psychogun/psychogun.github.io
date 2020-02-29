@@ -2,7 +2,7 @@
 layout: default
 title: How to install Deluge in a FreeNAS iocage jail
 parent: FreeNAS
-nav_order: 3
+nav_order: 4
 ---
 
 # How to install Deluge in a FreeNAS iocage jail

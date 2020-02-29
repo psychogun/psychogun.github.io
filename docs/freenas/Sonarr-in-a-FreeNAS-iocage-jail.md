@@ -2,7 +2,7 @@
 layout: default
 title: How to install Sonarr in a FreeNAS iocage jail
 parent: FreeNAS
-nav_order: 14
+nav_order: 15
 ---
 
 # How to install Sonarr in a FreeNAS iocage jail

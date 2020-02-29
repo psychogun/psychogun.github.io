@@ -2,7 +2,7 @@
 layout: default
 title: How to install OpenVPN server in a FreeNAS iocage jail
 parent: FreeNAS
-nav_order: 10
+nav_order: 11
 ---
 
 # How to install OpenVPN server in a FreeNAS iocage jail
