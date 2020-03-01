@@ -37,7 +37,7 @@ I must master it as I must master my life. Without me, my guide is useless. With
 * IKEA TRADFRI light
 * Apple TV 4th gen
 
-~~## Allocating a VM in ESXi 6.7
+~~ ## Allocating a VM in ESXi 6.7 
 Log in to your ESXi in a web-browser. Press `Virtual Machines` and then `Create / Register VM`.
 
 ***Select creation type***:
@@ -72,7 +72,7 @@ Power on the Virtual machine and follow this guide for an excellent guide to ins
 Remember to select these software selections under installation:
 * docker
 * OpenSSH server
-* standard system utilities~~
+* standard system utilities ~~
 
 
 ## Installation of Home Assistant
