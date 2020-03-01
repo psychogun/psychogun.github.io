@@ -30,7 +30,7 @@ Click NEXT.
 * [v] VNET
 Click NEXT and confirm the settings with clicking SUBMIT. 
 
-Start your jail by selecting it and clicking START.
+Start your jail by selecting it and then click START.
 
 ### update && upgrade
 SSH in to your FreeNAS and log in to your jail with the command `iocage console Mylar3`:
@@ -51,7 +51,7 @@ Python 3.7.6
 ## Install the necessary requirements
 There are some requirements for running `mylar3`. These can be found here [https://github.com/mylar3/mylar3/blob/master/requirements.txt](https://github.com/mylar3/mylar3/blob/master/requirements.txt).
 
-I think I've got them all. Let us install them (The process will require 540 MiB more space, 112 MiB to be downloaded (116 items)):
+I think I've got them all. Let us install them (this process will require 540 MiB more space, 112 MiB (116 items) to be downloaded):
 ```bash
 root@Mylar3:~ # pkg install screen nano git py37-sqlite3 py37-apscheduler py37-cherrypy py37-requests py37-beautifulsoup py37-pip py37-feedparser py37-portend py37-mako py37-six unrar py37-natsort py37-configparser py37-cheroot py37-cloudflare-scrape py37-pyinstaller py37-pillow py37-pytz py37-simplejson py37-tzlocal py37-urllib3
 ```
@@ -63,7 +63,7 @@ I was unable to locate `unrar-cffi`, but let us install it with pip:
 ==0.1.0a5
 
 ## Add a service user
-Add a user which will act as a "service" user to start `mylar3`. This user is called `mylar` with uid=8675309, has no shell and is denied interactive login. With a comment. 
+Add a user which will act as a "service" user to start `mylar3`. This user is called `mylar` with `uid=8675309`, has `/nonexistent` home directory and sets the user's login shell to `/usr/sbin/nologin` which denies this user interactive login- and a comment, `-c`.
 ```bash
 root@Mylar3:/usr/local/etc/rc.d # pw adduser mylar -u 8675309 -d /nonexistent -s /usr/sbin/nologin -c "Mylar service user for mylar3"
 ```
@@ -77,7 +77,7 @@ root@Mylar3:/usr/local # git clone https://github.com/mylar3/mylar3.git
 
 ## Configuration of mylar3
 ### chown
-Make our service user `mylar` the owner of the newly created `mylar3` folder and do this recursively:
+Make our service user `mylar` the owner of the newly created `mylar3` folder, and do this recursively:
 ```bash
 root@Mylar3:/usr/local # chown -R mylar mylar3/
 ```
@@ -192,7 +192,7 @@ run_rc_command "$1"
 
 Make the newly created file executable:
 ```bash
-root@Mylar3:/usr/local/etc/rc.d # chmod +x mylar3 
+root@Mylar3:/usr/local/etc/rc.d # chmod +x /usr/local/etc/rc.d/mylar3 
 ```
 Add the following line to /etc/rc.conf.local or /etc/rc.conf to enable this service:
 ```bash
@@ -292,4 +292,5 @@ Mr. Johnson
 ## Acknowledgments
 * [https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/](https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/)
 * [https://www.freebsd.org/doc/en_US.ISO8859-1/articles/rc-scripting/](https://www.reddit.com/r/nzbhydra/comments/8fqcyl/freebsd_install_guide/)
+* [https://www.freebsd.org/cgi/man.cgi?pw(8)](https://www.freebsd.org/cgi/man.cgi?pw(8))
 
