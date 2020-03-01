@@ -41,13 +41,6 @@ root@Mylar3:~ # pkg update
 root@Mylar3:~ # pkg upgrade
 ```
 
-### Python?
-Which version of python do you currently have installed on your system?
-```bash
-root@Mylar3:/usr/local # python3.7 -V
-Python 3.7.6
-```
-
 ## Install the necessary requirements
 There are some requirements for running `mylar3`. These can be found here [https://github.com/mylar3/mylar3/blob/master/requirements.txt](https://github.com/mylar3/mylar3/blob/master/requirements.txt).
 
@@ -62,8 +55,21 @@ I was unable to locate `unrar-cffi`, but let us install it with pip:
 
 ==0.1.0a5
 
+### Branch: latest
+Let us update all our packages from `quarterly` to `latest`:
+```bash
+root@H37BMYLAR01:/mnt # cd /etc/pkg/
+root@H37BMYLAR01:/etc/pkg # mkdir -p /usr/local/etc/pkg/repos
+root@H37BMYLAR01:/etc/pkg # printf 'FreeBSD: { \n  url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest", \n  mirror_type: "srv", \n  signature_type: "fingerprints", \n  fingerprints: "/usr/share/keys/pkg", \n  enabled: yes \n}' > /usr/local/etc/pkg/repos/FreeBSD.conf
+```
+#### update && upgrade
+```bash
+root@H37BMYLAR01:/usr/local/etc/pkg/repos # pkg update
+root@H37BMYLAR01:/usr/local/etc/pkg/repos # pkg upgrade
+```
+
 ## Add a service user
-Add a user which will act as a "service" user to start `mylar3`. This user is called `mylar` with `uid=8675309`, has `/nonexistent` home directory and sets the user's login shell to `/usr/sbin/nologin` which denies this user interactive login- and a comment, `-c`.
+Add a user which will act as a service user to start `mylar3`. This user is called `mylar` with `uid=8675309`, has `/nonexistent` home directory and sets the user's login shell to `/usr/sbin/nologin` which denies this user interactive login- and a comment is also provided to this user, `-c`.
 ```bash
 root@Mylar3:/usr/local/etc/rc.d # pw adduser mylar -u 8675309 -d /nonexistent -s /usr/sbin/nologin -c "Mylar service user for mylar3"
 ```
@@ -80,6 +86,41 @@ root@Mylar3:/usr/local # git clone https://github.com/mylar3/mylar3.git
 Make our service user `mylar` the owner of the newly created `mylar3` folder, and do this recursively:
 ```bash
 root@Mylar3:/usr/local # chown -R mylar mylar3/
+```
+
+### Carepackage
+If you try to generate a Carepackage (for logs and whatnot), it will fail. We have to create a symbolic link for `pip3` first.
+```bash
+500 Internal Server Error
+
+The server encountered an unexpected condition which prevented it from fulfilling the request.
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.7/site-packages/cherrypy/_cprequest.py", line 670, in respond
+    response.body = self.handler()
+  File "/usr/local/lib/python3.7/site-packages/cherrypy/lib/encoding.py", line 217, in __call__
+    self.body = self.oldhandler(*args, **kwargs)
+  File "/usr/local/lib/python3.7/site-packages/cherrypy/_cpdispatch.py", line 60, in __call__
+    return self.callable(*self.args, **self.kwargs)
+  File "/usr/local/mylar3/mylar/webserve.py", line 5615, in carepackage
+    cp = carePackage()
+  File "/usr/local/mylar3/mylar/carepackage.py", line 25, in __init__
+    self.environment()
+  File "/usr/local/mylar3/mylar/carepackage.py", line 60, in environment
+    text=True)
+  File "/usr/local/lib/python3.7/subprocess.py", line 488, in run
+    with Popen(*popenargs, **kwargs) as process:
+  File "/usr/local/lib/python3.7/subprocess.py", line 800, in __init__
+    restore_signals, start_new_session)
+  File "/usr/local/lib/python3.7/subprocess.py", line 1551, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'pip3': 'pip3'
+Powered by CherryPy 5.4.0
+```
+#### Symbolic link pip
+```bash
+root@Mylar3:~ # 
+root@Mylar3:/usr/local/mylar3 # ln -s /usr/local/bin/pip-3.7 /usr/local/bin/pip3
 ```
 
 ### Manual start
@@ -231,7 +272,6 @@ Configuration upgraded to version 10
 root@Mylar3:/usr/local/etc/rc.d # 
 ```
 
-
 ## Fault finding
 ### Status
 Check if `mylar3` is running (as a service):
@@ -280,12 +320,6 @@ git_branch = python3-dev
 Save.
 
 
-### Symbolic link pip
-```bash
-root@Mylar3:~ # 
-root@Mylar3:/usr/local/mylar3 # ln -s /usr/local/bin/pip-3.7 /usr/local/bin/pip3
-```
-
 ## Authors
 Mr. Johnson
 
@@ -293,4 +327,5 @@ Mr. Johnson
 * [https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/](https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/)
 * [https://www.freebsd.org/doc/en_US.ISO8859-1/articles/rc-scripting/](https://www.reddit.com/r/nzbhydra/comments/8fqcyl/freebsd_install_guide/)
 * [https://www.freebsd.org/cgi/man.cgi?pw(8)](https://www.freebsd.org/cgi/man.cgi?pw(8))
+* [https://forums.freebsd.org/threads/pkg-quarterly-to-latest.72196/](https://forums.freebsd.org/threads/pkg-quarterly-to-latest.72196/)
 
