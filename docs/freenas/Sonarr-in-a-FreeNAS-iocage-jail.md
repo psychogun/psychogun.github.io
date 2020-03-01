@@ -133,8 +133,10 @@ root@Sonarr:~ # id sonarr
 uid=923(sonarr) gid=923(sonarr) groups=923(sonarr)
 ```
 Replace ownage of `351` with user:group `sonarr`:
+```bash
 root@Sonarr:~ # find / -user 351 -exec chown -h sonarr {} \;
 root@Sonarr:~ # find / -group 351 -exec chgrp -h sonarr {} \;
+```
 
 ```bash
 root@Sonarr:~ # getfacl /mnt/TV\ Shows/
