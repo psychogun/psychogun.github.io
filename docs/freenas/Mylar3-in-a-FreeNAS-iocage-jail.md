@@ -317,7 +317,7 @@ root@Mylar3:/usr/local/mylar3 # nano config.ini
 git_branch = python3-dev
 (...)
 ```
-Save.
+Save and use `service mylar3 start` to start the service.
 
 
 ## Authors
