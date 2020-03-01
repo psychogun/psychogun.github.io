@@ -58,14 +58,14 @@ I was unable to locate `unrar-cffi`, but let us install it with pip:
 ### Branch: latest
 Let us update all our packages from `quarterly` to `latest`:
 ```bash
-root@H37BMYLAR01:/mnt # cd /etc/pkg/
-root@H37BMYLAR01:/etc/pkg # mkdir -p /usr/local/etc/pkg/repos
-root@H37BMYLAR01:/etc/pkg # printf 'FreeBSD: { \n  url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest", \n  mirror_type: "srv", \n  signature_type: "fingerprints", \n  fingerprints: "/usr/share/keys/pkg", \n  enabled: yes \n}' > /usr/local/etc/pkg/repos/FreeBSD.conf
+root@Mylar3:/mnt # cd /etc/pkg/
+root@Mylar3:/etc/pkg # mkdir -p /usr/local/etc/pkg/repos
+root@Mylar3:/etc/pkg # printf 'FreeBSD: { \n  url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest", \n  mirror_type: "srv", \n  signature_type: "fingerprints", \n  fingerprints: "/usr/share/keys/pkg", \n  enabled: yes \n}' > /usr/local/etc/pkg/repos/FreeBSD.conf
 ```
 #### update && upgrade
 ```bash
-root@H37BMYLAR01:/usr/local/etc/pkg/repos # pkg update
-root@H37BMYLAR01:/usr/local/etc/pkg/repos # pkg upgrade
+root@Mylar3:/usr/local/etc/pkg/repos # pkg update
+root@Mylar3:/usr/local/etc/pkg/repos # pkg upgrade
 ```
 
 ## Add a service user
