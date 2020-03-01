@@ -319,6 +319,26 @@ git_branch = python3-dev
 ```
 Save and use `service mylar3 start` to start the service.
 
+### ComicTagger
+
+Until this is committed, [https://github.com/mylar3/mylar3/issues/126](https://github.com/mylar3/mylar3/issues/126), we'll have to set `ct_settingspath` manually to make ComicTagger work properly. The error you'll see in the log,
+```bash
+ERROR	Unable to create .ComicTagger directory in /. This WILL cause problems when tagging.
+```
+is because ComicTagger will try to create the folder in current `/home` directory. And remember, our user does not have a `home` directory.
+
+```bash
+root@Mylar3:~ # service mylar3 stop
+root@Mylar3:~ # cd /usr/local/mylar3/
+root@Mylar3:/usr/local/mylar3 # mkdir ComicTagger
+root@Mylar3:/usr/local/mylar3 # chown mylar ComicTagger/
+root@Mylar3:/usr/local/mylar3 # nano config.ini
+(...)
+ct_settingspath = /usr/local/mylar3/ComicTagger
+
+root@Mylar3:/usr/local/mylar3 # service mylar3 start
+```
+
 
 ## Authors
 Mr. Johnson
