@@ -66,7 +66,7 @@ Edit `buildconf.py` and change `[getenv("MAKE", 'make')` to `[getenv("MAKE", 'gm
 ```bash
 root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # nano buildconf.py
 (..)
-change  [getenv("MAKE", 'make')    to  [getenv("MAKE", 'gmake')
+                           [getenv("MAKE", 'gmake')
 ```
 Save.
 ```bash
