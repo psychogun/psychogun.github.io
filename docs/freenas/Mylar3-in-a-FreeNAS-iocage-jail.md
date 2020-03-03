@@ -19,7 +19,7 @@ From
 * FreeNAS Version: FreeNAS-11.3-RELEASE
 * Iocage jail version: 11.3-RELEASE
 
-## Getting started
+# Getting started
 Go to your FreeNAS. Select Jails > and click Add.
 * Name: Mylar3
 * Jail Type: Default (Clone Jail)
@@ -32,7 +32,7 @@ Click NEXT and confirm the settings with clicking SUBMIT.
 
 Start your jail by selecting it and then click START.
 
-### update && upgrade
+## update && upgrade
 SSH in to your FreeNAS and log in to your jail with the command `iocage console Mylar3`:
 
 ```bash
@@ -87,14 +87,14 @@ root@Mylar3:/tmp #
 ```
 If it comes back with an error, it's not installed. If it just goes to the next line, it's installed.
 
-### Branch: latest
+## Branch: latest
 Let us update all our packages from `quarterly` to `latest`:
 ```bash
 root@Mylar3:/mnt # cd /etc/pkg/
 root@Mylar3:/etc/pkg # mkdir -p /usr/local/etc/pkg/repos
 root@Mylar3:/etc/pkg # printf 'FreeBSD: { \n  url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest", \n  mirror_type: "srv", \n  signature_type: "fingerprints", \n  fingerprints: "/usr/share/keys/pkg", \n  enabled: yes \n}' > /usr/local/etc/pkg/repos/FreeBSD.conf
 ```
-#### update && upgrade
+## update && upgrade
 ```bash
 root@Mylar3:/usr/local/etc/pkg/repos # pkg update
 root@Mylar3:/usr/local/etc/pkg/repos # pkg upgrade
