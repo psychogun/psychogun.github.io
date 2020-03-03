@@ -100,13 +100,13 @@ root@Mylar3:/usr/local/etc/pkg/repos # pkg update
 root@Mylar3:/usr/local/etc/pkg/repos # pkg upgrade
 ```
 
-## Add a service user
+# Add a service user
 Add a user which will act as a service user to start `mylar3`. This user is called `mylar` with `uid=8675309`, has `/nonexistent` home directory and sets the user's login shell to `/usr/sbin/nologin` which denies this user interactive login- and a comment is also provided to this user, `-c`.
 ```bash
 root@Mylar3:/usr/local/etc/rc.d # pw adduser mylar -u 8675309 -d /nonexistent -s /usr/sbin/nologin -c "Mylar service user for mylar3"
 ```
 
-## Install mylar3
+# Install mylar3
 We'll use `git clone` and this will create a folder called `mylar3` in the working current directory. Let us do this under the `/usr/local/` folder:
 ```bash
 root@Mylar3:~ # cd /usr/local/
@@ -304,8 +304,8 @@ Configuration upgraded to version 10
 root@Mylar3:/usr/local/etc/rc.d # 
 ```
 
-## Fault finding
-### Status
+# Fault finding
+## Status
 Check if `mylar3` is running (as a service):
 
 ```bash
@@ -319,7 +319,7 @@ root@Mylar3:~ # ps -aux | grep mylar3
 mylar 10075  0.0  0.1 98004 61108  -  SJ   22:36   0:00.13 /usr/local/bin/python /usr/local/mylar3/Mylar.py --daemon --nolaunch --pidfile /var/run/mylar3/mylar3.pid --config /usr/local/mylar3/config.ini (python3.7)
 ```
 
-### Change branch
+## Change branch
 If you would like to change `mylar3` from the `master` branch to `python3-dev` (which get updates more frequently), do this:
 
 Stop `mylar3` from running with `service mylar3 stop` (or use `screen -r` to reattach to your screen session and then press CTRL + C on your keyboard). 
@@ -351,7 +351,7 @@ git_branch = python3-dev
 ```
 Save and use `service mylar3 start` to start the service.
 
-### Debug mode
+## Debug mode
 Add the option `-v` to `Mylar.py` to enable `DEBUG` logging.
 
 ```bash
