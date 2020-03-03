@@ -49,11 +49,43 @@ I think I've got them all. Let us install them (this process will require 540 Mi
 root@Mylar3:~ # pkg install screen nano git py37-sqlite3 py37-apscheduler py37-cherrypy py37-requests py37-beautifulsoup py37-pip py37-feedparser py37-portend py37-mako py37-six unrar py37-natsort py37-configparser py37-cheroot py37-cloudflare-scrape py37-pyinstaller py37-pillow py37-pytz py37-simplejson py37-tzlocal py37-urllib3
 ```
 
-I was unable to locate `unrar-cffi`, but let us install it with pip: 
+I was unable to locate `unrar-cffi` which is essential for ComicTagger to work properly. You could try to install it with `pip3 install unrar-cffi`,but as it isn't built for *BSD, it would throw an error:
 
-??
+```bash
+root@Mylar3:/mnt/Mylar_dump/Mylar3 # /usr/bin/pip3 install unrar-cffi
+```
 
-==0.1.0a5
+Lets build `unrar-cffi` from source:
+```bash
+root@Mylar3:/tmp # wget https://files.pythonhosted.org/packages/32/6b/5f6cffd8e30304d160933342214c097bb7dca9d52bd6cf14a1678b2ea0b9/unrar-cffi-0.1.0a5.tar.gz
+root@Mylar3:/tmp # pkg install gmake
+root@Mylar3:/tmp # tar -xvzf unrar-cffi-0.1.0a5.tar.gz
+root@Mylar3:/tmp # cd unrar-cffi-0.1.0a5
+```
+Edit `buildconf.py` and change `[getenv("MAKE", 'make')` to `[getenv("MAKE", 'gmake')``
+```bash
+root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # nano buildconf.py
+(..)
+change  [getenv("MAKE", 'make')    to  [getenv("MAKE", 'gmake')
+```
+Save.
+```bash
+root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # python setup.py build
+root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # python setup.py install
+```
+
+To see if it has been installed, open `python`: 
+```bash
+root@Mylar3:/tmp # /usr/bin/python3.7
+Python 3.7.6 (default, Jan 30 2020, 01:17:40) 
+[Clang 8.0.0 (tags/RELEASE_800/final 356365)] on freebsd11
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import unrar.cffi
+>>>
+>>> exit() 
+root@Mylar3:/tmp # 
+```
+If it comes back with an error, it's not installed. If it just goes to the next line, it's installed.
 
 ### Branch: latest
 Let us update all our packages from `quarterly` to `latest`:
@@ -319,26 +351,15 @@ git_branch = python3-dev
 ```
 Save and use `service mylar3 start` to start the service.
 
-### ComicTagger
-
-Until this is committed, [https://github.com/mylar3/mylar3/issues/126](https://github.com/mylar3/mylar3/issues/126), we'll have to set `ct_settingspath` manually to make ComicTagger work properly. The error you'll see in the log,
-```bash
-ERROR	Unable to create .ComicTagger directory in /. This WILL cause problems when tagging.
-```
-is because ComicTagger will try to create the folder in current `/home` directory. And remember, our user does not have a `home` directory.
+### Debug mode
+Add the option `-v` to `Mylar.py` to enable `DEBUG` logging.
 
 ```bash
-root@Mylar3:~ # service mylar3 stop
-root@Mylar3:~ # cd /usr/local/mylar3/
-root@Mylar3:/usr/local/mylar3 # mkdir ComicTagger
-root@Mylar3:/usr/local/mylar3 # chown mylar ComicTagger/
-root@Mylar3:/usr/local/mylar3 # nano config.ini
-(...)
-ct_settingspath = /usr/local/mylar3/ComicTagger
-
-root@Mylar3:/usr/local/mylar3 # service mylar3 start
+root@Mylar3:/usr/local/mylar3 # service mylar3 stop
+root@Mylar3:/usr/local/mylar3 # cd /usr/local/mylar3/logs
+root@Mylar3:/usr/local/mylar3/logs # rm mylar.log
+root@Mylar3:/usr/local/mylar3/logs # su -m mylar -c '/usr/local/bin/python3.7 /usr/local/mylar3/Mylar.py -v'
 ```
-
 
 ## Authors
 Mr. Johnson
