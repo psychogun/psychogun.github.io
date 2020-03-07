@@ -25,8 +25,8 @@ Proper GPS synchronization uses a PPS output (or similar) from the device, fed d
 
 ## Prerequisites
 * Raspberry Pi Model 3
-~~* Globalsat BU-353S4 (`lsusb` shows `ID 067b:2303`)~~
-~~* Globalsat BU-353 USB GPS receiver originally used the SiRF Star III chipset, now also available with the SiRF Star IV chipset which offers enhanced performance (BU-353-S4 variant). Both versions use the Prolific PL2303 serial/USB chipset. This howto was done with the S4 variant. It is a high-quality device, readily available (Ebay etc.) for around $30.~~
+* ~~Globalsat BU-353S4 (`lsusb` shows `ID 067b:2303`)~~
+* ~~Globalsat BU-353 USB GPS receiver originally used the SiRF Star III chipset, now also available with the SiRF Star IV chipset which offers enhanced performance (BU-353-S4 variant). Both versions use the Prolific PL2303 serial/USB chipset. This howto was done with the S4 variant. It is a high-quality device, readily available (Ebay etc.) for around $30.~~
 * The GPS antenna will need to have a good view of GPS satellites 
 * Adafruit Ultimate GPS HAT
 * This was done from MacOS
