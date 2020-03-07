@@ -50,7 +50,7 @@ zamba:boot don$ touch ssh
 ```
 Insert the microSDHC card to your Raspberry Pi, connect your network cable and finally your power supply. Go to your DHCP server and find out which IP adress the Raspberry Pi was given. Use SSH to connect, the default username and password is `pi` and `raspberry`. 
 
-## Change password for user pi
+### Change password for user pi
 ```bash
 zamba:~ don ssh -l pi 192.168.52.253
 pi@raspberrypi:~ $ passwd
@@ -61,7 +61,7 @@ Retype new password:
 passwd: password updated successfully
 ```
 
-## Change the pi username
+### Change the pi username
 ```bash
 root@raspberrypi:~# sudo passwd root
 New password: 
@@ -116,17 +116,17 @@ admin@raspberrypi:~ $ sudo passwd -l root
 passwd: password expiry information changed.
 ```
 
-## Change hostname
+### Change hostname
 Use `raspi-config` and enter the `Network Options` menu and change the `Hostname` to something of your liking. This will require a reboot.
 
-## Update & Upgrade
+### Update & Upgrade
 ```bash
 admin@NTPSERVER01:~ $ sudo apt-get update
 admin@NTPSERVER01:~ $ sudo apt-get upgrade
 admin@NTPSERVER01:~ $ sudo reboot
 ```
 
-## Set your time zone
+### Set your time zone
 ```bash
 admin@NTPSERVER01:~ $ date
 Sat 11 Jan 21:22:53 GMT 2020
@@ -142,8 +142,8 @@ Sat 11 Jan 22:24:16 CET 2020
 
 ## Serial port
 The Ultimate GPS hat delivers its data over a serial port at 9600 bps, which uses pins 14 and 15 on the GPIO header.
-On the Raspberry Pi 2, this went directly to the hardware UART and was available to Linux on /dev/ttyAMA0. Assuming there was no serial console using it, GPS works great here.
-But on the Pi 3, the high-performance hardware UART is used by the Bluetooth subsystem, and the serial port supported on GPIO pins 14+15 is emulated much more weakly and is available on /`dev/ttyS0`. This is pretty much a software UART, and I don't like it. 
+On the Raspberry Pi 2, this went directly to the hardware UART and was available to Linux on `/dev/ttyAMA0`. Assuming there was no serial console using it, GPS works great here.
+But on the Pi 3, the high-performance hardware UART is used by the Bluetooth subsystem, and the serial port supported on GPIO pins 14+15 is emulated much more weakly and is available on `/dev/ttyS0`. This is pretty much a software UART, and I don't like it. 
 
 Well, I do not know about that- most of these instructions were taken from this excellent guide [http://www.unixwiz.net/techtips/raspberry-pi3-gps-time.html](http://www.unixwiz.net/techtips/raspberry-pi3-gps-time.html).
 
@@ -269,7 +269,7 @@ For more information about NMEA data, visit [https://www.gpsworld.com/what-exact
 admin@NTPSERVER01:~ $ sudo apt-get install gpsd
 ```
 
-## Create /etc/default/gpsd
+### Create /etc/default/gpsd
 This file contains the default parameters for the service when it starts, and this includes the required device names for the serial port and PPS device names. 
 
 `gpsd` will definitely not work right without this.
@@ -379,7 +379,7 @@ Always check for the fix LED on the GPS hat itself, which should flash once ever
 
 Do not proceed to the next section until you get valid PPS input and valid GPS data showing up via gpsmon.
 
-### Build and configure NTPsec
+## Build and configure NTPsec
 The stock `ntpd` shipped with your distribution is intended to be used as a client instance, not a server. It doesn't do 1PPS, and thereforce can't be used for precision timekeeping. Thus, we're going to build a better version from source. That version is NTPsec, which runs lighter and more securely and can do more accurate time stepping.
 
 To read more about NTPSec vs NTP, go to https://www.ntpsec.org
@@ -432,7 +432,7 @@ Let’s check the NTPsec version number:
 administrator@H37BNTP01:~ $ sudo /usr/local/sbin/ntpd -V
 ntpd ntpsec-1.1.8+ 2020-03-06T23:05:21Z (git rev f0bd02b25)
 ```
-## Setting up the NTP Service (Systemd)
+### Setting up the NTP Service (Systemd)
 Perfect. Next, we set up NTPsec as a system service. For this, we create an ‘ntp’ user and an ‘ntp’ group with restricted rights. We also create folders for log files and certificates.
 
 Because Raspbian no longer includes `ntpd`, we need to add a user for our NTPSec `ntpd` to run as, and create a couple of directories `ntpd` needs in place before running.
@@ -465,7 +465,7 @@ Created symlink /etc/systemd/system/multi-user.target.wants/ntpd.service → /li
 ```
 Now NTPsec is executed automatically when rebooting the system. At the moment the service is not running yet, because we have to configure it first.
 
-## Feeding NTPD
+### Feeding NTPD
 The final part of this project configures the NTP (Network Time Protocol) daemon to consume the GPS time, possibly correlate it with other sources, and make accurate time available to the local machine and the rest of the network.
 
 How does NTP get the precise time from `gpsd`? The answer is via shared memory. NTPD supports multiple kinds of time drivers, and one of them is a set of shared memory segments that feeds accurate time to all callers.
@@ -625,7 +625,7 @@ The refid tags are actually free text (1-4 chars) and can be anything you like; 
 * A reliable source has suggested that putting the PPS server+fudge stanzas first, followed by GPS, and then only preferring PPS, will yield a more reliable clock.
 
 
-## Disable NTP support in DHCP
+### Disable NTP support in DHCP
 DHCP on many networks delivers time server config to their clients, allowing them to synchronize time properly along with the rest of the network. 
 This is a good thing except for NTP time servers themselves.
 
