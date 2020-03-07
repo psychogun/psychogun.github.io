@@ -39,11 +39,11 @@ I downloaded `2019-09-26-raspbian-buster-lite.img` from [https://www.raspberrypi
 Follow the installation instructions provided here [https://www.raspberrypi.org/documentation/installation/installing-images/README.md](https://www.raspberrypi.org/documentation/installation/installing-images/README.md) to install the image/flash your SD card.
 
 ### Enable sshd
-In order to remotely administer your Raspberry Pi server, you will need to enable the SSH server.
+In order to remotely administer your headless Raspberry Pi server, you will need to enable the SSH server.
 
 So how do you enable SSH server when Raspbian Buster Lite boots for the first time?
 
-First, reinsert your microSD card to your computer. When your computer loads up your microSD card, simply copy a blank file named as `ssh` into the root directory of your microSD card:
+First, reinsert your microSD card to your MacOS powered device. When your computer loads up your microSD card, simply copy a blank file named as `ssh` into the root directory of your microSD card:
 ```zsh
 zamba:~ don$ cd /Volumes/boot/
 zamba:boot don$ touch ssh
