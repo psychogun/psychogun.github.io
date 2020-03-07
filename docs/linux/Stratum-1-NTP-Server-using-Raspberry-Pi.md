@@ -433,7 +433,7 @@ administrator@H37BNTP01:~ $ sudo /usr/local/sbin/ntpd -V
 ntpd ntpsec-1.1.8+ 2020-03-06T23:05:21Z (git rev f0bd02b25)
 ```
 ### Setting up the NTP Service (Systemd)
-Perfect. Next, we set up NTPsec as a system service. For this, we create an ‘ntp’ user and an ‘ntp’ group with restricted rights. We also create folders for log files and certificates.
+Perfect. Next, we set up NTPsec as a system service. For this, we create an `ntp` user and an `ntp` group with restricted rights. We also create folders for log files and certificates.
 
 Because Raspbian no longer includes `ntpd`, we need to add a user for our NTPSec `ntpd` to run as, and create a couple of directories `ntpd` needs in place before running.
 
@@ -484,7 +484,7 @@ sample NTP2 1579299792.000893131 1579299792.000016570 1579299792.000000000 0 -30
 ```
 The key values here are `NTP0` (which represents the time, but not displayed here), and `NTP2`, which represents the PPS; I believe the "Prec" (precision) column is what identifies this but am not sure. These NTP# values are key for the next step.
 
-Create your own NTP configuration with these contents as `ntp.conf`, but don't copy it to `/etc` yet. We're going to test this configuration in place before installing it.
+Create your own NTP configuration with this content as `ntp.conf`:
 
 ```bash
 admin@NTPSERVER01:~/ntpsec $ sudo touch /etc/ntp.conf
@@ -583,7 +583,7 @@ admin@NTPSERVER01:~/ntpsec $
 
 In the first example, the Raspberry Pi synchronizes its clock with a public NTPsec time server using a classical unsecured NTP connection.
 
-In the second example, the client communicates with the same time server via an NTS-secured NTP connection. The initial channel to the NTS-KE server uses the default port 123 TCP (currently implementation-specific). Since the NTPsec time server uses certificates issued by Let’s Encrypt, we do not need to set any additional parameters. To check the certificates, the client uses the local root CA pool (/etc/ssl/certs/ca-certificates.crt), which also allows the verification of certificates issued by Let’s Encrypt.
+In the second example, the client communicates with the same time server via an NTS-secured NTP connection. The initial channel to the NTS-KE server uses the default port 123 TCP (currently implementation-specific). Since the NTPsec time server uses certificates issued by Let’s Encrypt, we do not need to set any additional parameters. To check the certificates, the client uses the local root CA pool (`/etc/ssl/certs/ca-certificates.crt`), which also allows the verification of certificates issued by Let’s Encrypt.
 
 In the third example, we connect to the time server of the Ostfalia University, which is also NTS-capable. This uses TCP port 443 for the NTS-KE connection and uses self-signed test certificates. To check the server certificate we have to specify the root CA manually. The corresponding certificate can be downloaded by the following command:
 ```bash
@@ -594,7 +594,7 @@ Caution: The time server of the Ostfalia University also publishes its private k
 
 The fourth example differs from the third one only from the deactivated domain validation. This can be useful when we running a local NTS server with certificates without a registered domain.
 
-The other entries in the configuration file are optional and are used to record statistics and log files. The descriptions as well as the complete parameter list (incl. NTS) can be found in ntp_conf.adoc. Here only very briefly described:
+The other entries in the configuration file are optional and are used to record statistics and log files. The descriptions as well as the complete parameter list (incl. NTS) can be found in `ntp_conf.adoc`. Here only very briefly described:
 
 ```bash
 server <name>:  The destination NTP time server (DNS name or IP address)
@@ -606,7 +606,9 @@ ca <file>:      [NTS] The trusted root CA certificate for the server
 noval:          [NTS] Skips the DNS verification
 ```
 
-Even though GPS provides highly accurate time, it's a best practice to have multiple time sources and let ntpd sort it out: if the GPS antenna gets disloged or blocked or something, we want at least some semblance of accurate time rather than just freewheeling with no real time source. ~~So, comment out all but the first two server lines, giving us two outside sources.~~
+Even though GPS provides highly accurate time, it's a best practice to have multiple time sources and let `ntpd` sort it out: if the GPS antenna gets disloged or blocked or something, we want at least some semblance of accurate time rather than just freewheeling with no real time source. 
+
+
 We've also added in some fake server lines that hook into the shared memory portion. This is done with "servers" using IP addresses in the 127.127.t.u range, where "t" is the clock driver type and "x" is the unit number within that type. The type numbers are hardcoded in the program with several dozen driver numbers assigned.
 
 A small sample of drivers:
@@ -650,15 +652,13 @@ It probably requires reboot for this to take effect. At this point, you will be 
 ```bash
 admin@NTPSERVER01:~ $ sudo reboot
 ```
-### Restart ntp
-We now want to restart ntp, and then we`ll check the ntp status with `ntpq -p`:
+### Status of ntp
+After the reboot, check the `ntp` status with `ntpq -p`:
 ```bash
 admin@NTPSERVER01:~ $ ntpq -p
-administrator@H37BNTP01:~ $ ntpq -p
      remote                                   refid      st t when poll reach   delay   offset   jitter
 =======================================================================================================
-+ntp1.glypnod.com                        64.142.1.20      2 u   48   64    3 180.2011   0.6331   0.1146
- ntp1.glypnod.com                        204.123.2.72     2 7   66   64    2 180.8374  -1.0179   0.0000                                                                     
++ntp1.glypnod.com                        204.123.2.72     2 7   66   64    2 180.8374  -1.0179   0.0000                                                                     
 *SHM(2)                                  .PPS.            0 l   56   64    1   0.0000  -0.0181   0.0000
 xSHM(0)                                  .GPS.            0 l   15   64    3   0.0000 -506.770 300.2489
 admin@NTPSERVER01:~ $ 
@@ -670,7 +670,7 @@ But how good is our time, compared to other sources? Install `ntpstat` to get an
 
 Here is another raspberry client using a server from a default pool. 
 ```bash
-pi@hhalberry:~$ ntpstat
+pi@halberry:~$ ntpstat
 synchronised to NTP server (192.36.143.130) at stratum 2 
    time correct to within 196 ms
    polling server every 64 s
@@ -686,17 +686,18 @@ admin@NTPSERVER01:~ $
 ```
 
 ## Share our time
-Now that this raspberry is syncing with a UFH radio at stratum 1, we want to make our raspberry available as a NTP server.
+Now that this raspberry is syncing with a UFH radio at stratum 1, we want to make our raspberry available as a NTP server. This is already configured in our `ntp.conf` file, the section with access control configuration. You can check if our Raspberry is allowing NTP traffic with `netstat`:
 
 ```bash
 administrator@H37BNTP01:~ $ netstat -a | grep ntp                      
 udp        0      0 localhost:ntp           0.0.0.0:*                          
 udp        0      0 0.0.0.0:ntp             0.0.0.0:*                          
-udp6       0      0 fe80::f337:776a:44d:ntp [::]:*                             
+udp6       0      0 fe80::f347:77da:42d:ntp [::]:*                             
 udp6       0      0 localhost:ntp           [::]:*                             
 udp6       0      0 [::]:ntp                [::]:*    
 ```
 
+### Configure PfSense
 
 
 
@@ -707,6 +708,7 @@ udp6       0      0 [::]:ntp                [::]:*
 
 
 
+# USB Dongle 
 ## Install GPS packages
 `gpsd` is a general-purpose daemon designed to interact with most types of GPS models using a wide variety of protocols. It is also capable of processing the PPS signals and sending timing information to ntpd via dedicated shared memory devices. One for pushing to ntpd absolute timestamp parsed from the NMEA messages (or supported equivalent), another for PPS timing data. 
 
