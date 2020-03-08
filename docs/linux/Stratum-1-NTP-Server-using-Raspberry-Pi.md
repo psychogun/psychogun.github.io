@@ -698,7 +698,36 @@ udp6       0      0 [::]:ntp                [::]:*
 ```
 
 ### Configure PfSense
+Interfaces > Assignments > VLANs > Click Add.
 
+* Parent interface: Your LAN interface
+* VLAN Tag: 28
+* VLAN Priority: 0
+* Description: NTP server
+Click Save
+
+Go Interfaces > Assignments > and select Interface Assignments.
+
+Under Available network ports: select  `VLAN 28 on em0 - lan (NTP Server)` and click Add. 
+
+Click on the newly added interface.
+
+* Enable: [v] Enable interface
+* Description: VLAN28_NTP
+* IPv4 Configuration Type: Static IPv4
+* IPv6 Configuration Type: None
+* IPv4 Address: 192.168.28.1/30
+
+Save and Apply Changes
+
+Go to Services > DHCP Server and select your interface VLAN28_NTP.
+
+* Enable DHCP server on VLAN28_NTP interface
+* Range: From 192.168.28.2 To: 192.168.28.2
+
+Go to Services > NTP and Add our NTP server with an address of 192.168.28.2 and select Prefer. 
+
+You should now see under Status > NTP that our NTP server at `192.168.28.2` is our active Peer. 
 
 
 
@@ -948,10 +977,10 @@ admin@NTPSERVER01:~ $ ntpq -p
  SHM(1)          .PPS.            0 l    -   16    0    0.000    0.000   0.000
 ```
 
-## Fault finding
+# Fault finding
 * [https://www.cyberciti.biz/faq/linux-unix-bsd-is-ntp-client-working/](https://www.cyberciti.biz/faq/linux-unix-bsd-is-ntp-client-working/)
 
-### lsmod
+## lsmod
 Is pps modules loaded?
 ```bash
 admin@NTPSERVER01:~ $ lsmod | grep pps
@@ -969,7 +998,7 @@ admin@NTPSERVER01:~ $ dmesg | grep pps
 admin@NTPSERVER01:~ $ 
 ```
 
-### Are you synchronized?
+## Are you synchronized?
 ```
 admin@NTPSERVER01:~ $ ntpq -p
      remote           refid      st t when poll reach   delay   offset  jitter
@@ -984,7 +1013,7 @@ admin@NTPSERVER01:~ $ ntpq -pn
 ```
 If you do not have a `*` to the left of either source, you are not synchronized.
 
-### Check the GPS status
+## Check the GPS status
 Do your GPS have a 3D FIX?
 ```bash
 admin@NTPSERVER01:~ $ cgps -s
@@ -1009,7 +1038,7 @@ admin@NTPSERVER01:~ $ cgps -s
 ```
 Try to move your GPS receiver. 
 
-### gpsmon
+## gpsmon
 The `gpsmon` command connects to the `gpsd` server and displays output about the connected GPS.  You should see a list of satellites on the left (0 through 11) along with S/N ratios (some should be in the 30s or higher if you have good antenna placement).  You should see values for “Latitude” and “Longitude”.  If you have a good antenna positioning and you’re in the USA, you should see “FAA: D” in the middle box.  The middle bottom box should also indicate a PPS value (a decimal number, which should be very small if your time on your machine is close to correct).
 ```bash
 admin@NTPSERVER01:~ $ gpsmon
@@ -1045,7 +1074,7 @@ ity":"N","stopbits":1,"cycle":1.00}]}
 ```
 
 
-### Check that things look right
+## Check that things look right
 ```
 admin@NTPSERVER01:~ $ watch ntpq -p
 Every 2.0s: ntpq -p                                                                                                                                                                                                            raspberrypi: Sun Jan  5 21:50:50 2020
@@ -1059,7 +1088,7 @@ Every 2.0s: ntpq -p                                                             
 `*` is the source you are synchronized to (syspeer).
 
 
-### ntpstat
+## ntpstat
 ```bash
 admin@NTPSERVER01:~ $ sudo apt-get install ntpstat
 admin@NTPSERVER01:~ $ ntpstat 
@@ -1072,7 +1101,7 @@ admin@NTPSERVER01:~ $
 
 ```
 
-### ppscheck
+## ppscheck
 ```
 admin@NTPSERVER01:~ $ ppscheck /dev/ttyUSB0 
 open(/dev/ttyUSB0) failed: 16 Device or resource busy
@@ -1150,26 +1179,14 @@ C:\Users\Don Pablo>
 
 
 
-
-http://www.linuxpps.org/pipermail/discussions/2008-July/002068.html
-http://lkml.iu.edu/hypermail/linux/kernel/0902.0/03213.html
-
-https://community.raspberryshake.org/t/is-my-gps-working/691/7
-
-https://www.lammertbies.nl/comm/info/gps-time
-https://www.lammertbies.nl/comm/info/gps-time
-
-https://www.digitalimpuls.no/trådløst/141114/adafruit-ultimate-gps-hat--mini-kit-for-raspberry-pi-a-plus-b-plus-pi-2--pi-3?gclid=Cj0KCQiA9dDwBRC9ARIsABbedBPzCB2IizHE2Bkb59GQ4q7H0Rv1zLiwZ3u69HDvGDCprpeR08maSOEaAgSgEALw_wcB
-https://www.digitalimpuls.no/diverse/141111/gps-antenna--external-active-antenna-3-5v-28db-5-meter-sma
-
-https://www.digitalimpuls.no/diverse/141112/antennekabel-sma-to-ufl-adapter-sma-f--ufl-ipex-ipax-ipx-mhf-am
-https://www.digitalimpuls.no/gp/124589/maxell-3v-litium-batteri-cr-1220-36-mah
-
-
 ## Authors
 Mr. Johnson
 
 ## Acknowledgments
+* [http://www.linuxpps.org/pipermail/discussions/2008-July/002068.html](http://www.linuxpps.org/pipermail/discussions/2008-July/002068.html)
+* [http://lkml.iu.edu/hypermail/linux/kernel/0902.0/03213.html](http://lkml.iu.edu/hypermail/linux/kernel/0902.0/03213.html)
+* [https://www.lammertbies.nl/comm/info/gps-time](https://www.lammertbies.nl/comm/info/gps-time)
+* [https://community.raspberryshake.org/t/is-my-gps-working/691/7](https://community.raspberryshake.org/t/is-my-gps-working/691/7)
 * [https://weberblog.net/setting-up-nts-secured-ntp-with-ntpsec/](https://weberblog.net/setting-up-nts-secured-ntp-with-ntpsec/)
 * [https://thepihut.com/blogs/raspberry-pi-tutorials/how-to-change-the-default-account-username-and-password](https://thepihut.com/blogs/raspberry-pi-tutorials/how-to-change-the-default-account-username-and-password)
 * [https://www.howtovmlinux.com/articles/rasberry-pi/enable-root-login-and-change-password-raspberrypi.html](https://www.howtovmlinux.com/articles/rasberry-pi/enable-root-login-and-change-password-raspberrypi.html)
