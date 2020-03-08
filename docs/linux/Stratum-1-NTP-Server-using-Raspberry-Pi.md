@@ -980,7 +980,7 @@ admin@NTPSERVER01:~ $ ntpq -p
 ```
 
 # Fault finding
-* [https://www.cyberciti.biz/faq/linux-unix-bsd-is-ntp-client-working/](https://www.cyberciti.biz/faq/linux-unix-bsd-is-ntp-client-working/)
+
 
 ## lsmod
 Is pps modules loaded?
@@ -1185,6 +1185,7 @@ C:\Users\Don Pablo>
 Mr. Johnson
 
 ## Acknowledgments
+* [https://www.cyberciti.biz/faq/linux-unix-bsd-is-ntp-client-working/](https://www.cyberciti.biz/faq/linux-unix-bsd-is-ntp-client-working/)
 * [http://www.linuxpps.org/pipermail/discussions/2008-July/002068.html](http://www.linuxpps.org/pipermail/discussions/2008-July/002068.html)
 * [http://lkml.iu.edu/hypermail/linux/kernel/0902.0/03213.html](http://lkml.iu.edu/hypermail/linux/kernel/0902.0/03213.html)
 * [https://www.lammertbies.nl/comm/info/gps-time](https://www.lammertbies.nl/comm/info/gps-time)
