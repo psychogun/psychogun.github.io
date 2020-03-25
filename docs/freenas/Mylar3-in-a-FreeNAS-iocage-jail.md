@@ -44,7 +44,7 @@ root@Mylar3:~ # pkg upgrade
 ## Install the necessary requirements
 There are some requirements for running `mylar3`. These can be found here [https://github.com/mylar3/mylar3/blob/master/requirements.txt](https://github.com/mylar3/mylar3/blob/master/requirements.txt).
 
-I think I've got them all. Let us install them (this process will require 540 MiB more space, 112 MiB (116 items) to be downloaded):
+I think I've got them all. Let us install them:
 ```bash
 root@Mylar3:~ # pkg install gmake wget screen nano git py37-sqlite3 py37-apscheduler py37-cherrypy py37-requests py37-beautifulsoup py37-pip py37-feedparser py37-portend py37-mako py37-six unrar py37-natsort py37-configparser py37-cheroot py37-cloudflare-scrape py37-pyinstaller py37-pillow py37-pytz py37-simplejson py37-tzlocal py37-urllib3
 ```
@@ -86,7 +86,7 @@ If it comes back with an error, it's not installed. If it just goes to the next 
 ## Branch: latest
 Let us update all our packages from `quarterly` to `latest`:
 ```bash
-root@Mylar3:/mnt # cd /etc/pkg/
+root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # cd /etc/pkg/
 root@Mylar3:/etc/pkg # mkdir -p /usr/local/etc/pkg/repos
 root@Mylar3:/etc/pkg # printf 'FreeBSD: { \n  url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest", \n  mirror_type: "srv", \n  signature_type: "fingerprints", \n  fingerprints: "/usr/share/keys/pkg", \n  enabled: yes \n}' > /usr/local/etc/pkg/repos/FreeBSD.conf
 ```
