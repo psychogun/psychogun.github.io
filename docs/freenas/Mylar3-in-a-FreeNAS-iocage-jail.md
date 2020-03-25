@@ -72,14 +72,14 @@ root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # python3.7 setup.py install
 
 To see if it has been installed, open `python`: 
 ```bash
-root@Mylar3:/tmp # python3.7
+root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # python3.7
 Python 3.7.6 (default, Jan 30 2020, 01:17:40) 
 [Clang 8.0.0 (tags/RELEASE_800/final 356365)] on freebsd11
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import unrar.cffi
 >>>
 >>> exit() 
-root@Mylar3:/tmp # 
+root@Mylar3:/tmp/unrar-cffi-0.1.0a5 #
 ```
 If it comes back with an error, it's not installed. If it just goes to the next line, it's installed.
 
@@ -90,22 +90,22 @@ root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # cd /etc/pkg/
 root@Mylar3:/etc/pkg # mkdir -p /usr/local/etc/pkg/repos
 root@Mylar3:/etc/pkg # printf 'FreeBSD: { \n  url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest", \n  mirror_type: "srv", \n  signature_type: "fingerprints", \n  fingerprints: "/usr/share/keys/pkg", \n  enabled: yes \n}' > /usr/local/etc/pkg/repos/FreeBSD.conf
 ```
-## update && upgrade
+### update && upgrade
 ```bash
-root@Mylar3:/usr/local/etc/pkg/repos # pkg update
-root@Mylar3:/usr/local/etc/pkg/repos # pkg upgrade
+root@Mylar3:/etc/pkg # pkg update
+root@Mylar3:/etc/pkg # pkg upgrade
 ```
 
 # Add a service user
 Add a user which will act as a service user to start `mylar3`. This user is called `mylar` with `uid=8675309`, has `/nonexistent` home directory and sets the user's login shell to `/usr/sbin/nologin` which denies this user interactive login- and a comment is also provided to this user, `-c`.
 ```bash
-root@Mylar3:/usr/local/etc/rc.d # pw adduser mylar -u 8675309 -d /nonexistent -s /usr/sbin/nologin -c "Mylar service user for mylar3"
+root@Mylar3:/etc/pkg # pw adduser mylar -u 8675309 -d /nonexistent -s /usr/sbin/nologin -c "Mylar service user for mylar3"
 ```
 
 # Install mylar3
 We'll use `git clone` and this will create a folder called `mylar3` in the working current directory. Let us do this under the `/usr/local/` folder:
 ```bash
-root@Mylar3:~ # cd /usr/local/
+root@Mylar3:/etc/pkg # cd /usr/local/
 root@Mylar3:/usr/local # git clone https://github.com/mylar3/mylar3.git
 ```
 
