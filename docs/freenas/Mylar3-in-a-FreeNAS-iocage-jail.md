@@ -96,6 +96,35 @@ root@Mylar3:/etc/pkg # pkg update
 root@Mylar3:/etc/pkg # pkg upgrade
 ```
 
+## Requirements.txt
+Do this. As well. 
+```bash
+root@Mylar3:/etc/pkg # cd /tmp
+root@Mylar3:/tmp # nano requirements.txt
+#### ESSENTIAL LIBRARIES FOR MAIN FUNCTIONALITY ####
+APScheduler>=3.6.3
+beautifulsoup4>=4.8.2
+cfscrape>=2.0.8
+cheroot==8.2.1
+CherryPy>=18.5.0
+configparser>=4.0.2
+feedparser>=5.2.1
+Mako>=1.1.0
+natsort>=3.5.2
+Pillow>=4.2.1,~=6.2.2
+portend>=2.6
+pyinstaller>=3.5
+pytz>=2019.3
+requests>=2.22.0
+simplejson>=3.17.0
+six>=1.13.0
+tzlocal>=2.0.0
+unrar>=0.3
+urllib3>=1.25.7
+
+root@Mylar3:/tmp # pip-3.7 install -r requirements.txt
+```
+
 # Add a service user
 Add a user which will act as a service user to start `mylar3`. This user is called `mylar` with `uid=8675309`, has `/nonexistent` home directory and sets the user's login shell to `/usr/sbin/nologin` which denies this user interactive login- and a comment is also provided to this user, `-c`.
 ```bash
