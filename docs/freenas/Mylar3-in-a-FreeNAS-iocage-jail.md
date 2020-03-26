@@ -85,7 +85,8 @@ If it comes back with an error, it's not installed. If it just goes to the next 
 
 ## Branch: latest
 Do not do this. It will make you suffer.
-~Let us update all our packages from `quarterly` to `latest`:~
+
+~~Let us update all our packages from `quarterly` to `latest`:~~
 ```bash
 root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # cd /etc/pkg/
 root@Mylar3:/etc/pkg # mkdir -p /usr/local/etc/pkg/repos
@@ -93,7 +94,8 @@ root@Mylar3:/etc/pkg # printf 'FreeBSD: { \n  url: "pkg+http://pkg.FreeBSD.org/$
 ```
 ### update && upgrade
 Neither this. 
-~Do an `update` and `upgrade` for installing the latest versions of your already installed software:~
+
+~~Do an `update` and `upgrade` for installing the latest versions of your already installed software:~~
 ```bash
 root@Mylar3:/etc/pkg # pkg update
 root@Mylar3:/etc/pkg # pkg upgrade
