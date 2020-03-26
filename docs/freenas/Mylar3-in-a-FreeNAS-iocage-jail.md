@@ -136,13 +136,13 @@ Edit `buildconf.py` and change `[getenv("MAKE", 'make')` to `[getenv("MAKE", 'gm
 (..)
 BUILD_CMD = [getenv("MAKE", 'gmake'), "-C", UNRARSRC, "lib"]
 ```
-Save.
+Save, then build and install:
 ```bash
 (mylar) [root@Mylar3 /tmp/unrar-cffi-0.1.0a5]# python setup.py build
 (mylar) [root@Mylar3 /tmp/unrar-cffi-0.1.0a5]# python setup.py install
 ```
 
-To see if it has been installed, open `python`: 
+To see if the package has been installed, open `python`: 
 ```bash
 (mylar) [root@Mylar3 /tmp/unrar-cffi-0.1.0a5]# python
 Python 3.7.6 (default, Jan 30 2020, 01:17:40) 
@@ -155,7 +155,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 ```
 If it comes back with an error, it's not installed. If it just goes to the next line, it's installed.
 
-# Download mylar3
+# Install mylar3
 Now since we have all the required dependencies, let us install Mylar.
 
 We'll use `git clone` and this will create a folder called `mylar3` in the working current directory. Let us do this under the `/usr/local/` folder:
@@ -333,7 +333,6 @@ Configuration upgraded to version 10
 29-Feb-2020 23:26:25 - INFO :: mylar.validateAndCreateDirectory.1693 : MainThread : [DIRECTORY-CHECK] Found comic directory: /usr/local/mylar3
 root@Mylar3:/usr/local/etc/rc.d # 
 ```
-
 
 # Fault finding
 ## pip freeze
