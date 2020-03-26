@@ -75,7 +75,7 @@ Add the user `mylar` to our `mylar_dump` group:
 ```bash
 root@Mylar3:/usr/local # pw usermod mylar -G mylar_dump
 root@Mylar3:/usr/local # id mylar
-uid=920(mylar) gid=1048(mylar) groups=1048(mylar),1049(mylar_dump)
+uid=8675309(mylar) gid=1048(mylar) groups=1048(mylar),1049(mylar_dump)
 ```
 
 ## Create a virtual environment
