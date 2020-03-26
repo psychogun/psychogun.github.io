@@ -50,7 +50,11 @@ root@Mylar3:~ # pkg install gmake wget screen nano git sudo bash py37-virtualenv
 ```
 
 ## Add a group
-According to your ACLs on the mounted dataset(s), which groups have read/write access to the share? On my datasets, there is a group called `mylar` with a `GID=1048` and on another dataset there's a group called `mylar_dump` with a `GID=1049` that has read/write access. Let's create these groups in the jail:
+According to your ACLs on the mounted dataset(s), which groups have read/write access to the share? On my datasets, there is a group called `mylar` with a `GID=1048` and on another dataset there's a group called `mylar_dump` with a `GID=1049` that has read/write access.
+
+These mounted datasets are for the Comic Location Path and the folder to monitor.
+
+ Let's create these groups in the jail:
 ```bash
 root@Mylar3:/etc/pkg # pw groupadd mylar -g 1048
 root@Mylar3:/etc/pkg # pw groupadd mylar_dump -g 1049
