@@ -7,9 +7,9 @@ nav_order: 10
 
 # How to install Mylar3 in a FreeNAS iocage jail
 {: .no_toc }
-From 
+This is how I installed mylar3 in an python virtual environment in a FreeNAS iocage jail. 
 
-## Table of contents
+# Table of contents
 {: .no_toc .text-delta }
 1. TOC
 {:toc}
@@ -30,6 +30,9 @@ Click NEXT.
 * [v] VNET
 Click NEXT and confirm the settings with clicking SUBMIT. 
 
+## Add mount points
+Add your mount points. 
+
 Start your jail by selecting it and then click START.
 
 ## update && upgrade
@@ -41,71 +44,57 @@ root@Mylar3:~ # pkg update
 root@Mylar3:~ # pkg upgrade
 ```
 
-## Install the necessary requirements
-There are some requirements for running `mylar3`. These can be found here [https://github.com/mylar3/mylar3/blob/master/requirements.txt](https://github.com/mylar3/mylar3/blob/master/requirements.txt).
-
-I think I've got them all. Let us install them:
+## Install some necessary dependencies
 ```bash
-root@Mylar3:~ # pkg install gmake wget screen nano git py37-sqlite3 py37-apscheduler py37-cherrypy py37-requests py37-beautifulsoup py37-pip py37-feedparser py37-portend py37-mako py37-six unrar py37-natsort py37-configparser py37-cheroot py37-cloudflare-scrape py37-pyinstaller py37-pillow py37-pytz py37-simplejson py37-tzlocal py37-urllib3
+root@Mylar3:~ # pkg install gmake wget screen nano git sudo bash py37-virtualenv py37-pip lzlib openjpeg unrar py37-sqlite3
 ```
 
-I was unable to locate `unrar-cffi` which is essential for ComicTagger to work properly. You could try to install it with `pip3 install unrar-cffi`,but as it isn't built for *BSD, it would throw an error.
-
-Lets instead build `unrar-cffi` from source:
+## Add a group
+According to your ACLs on the mounted dataset(s), which groups have read/write access to the share? On my datasets, there is a group called `mylar` with a `GID=1048` and on another dataset there's a group called `mylar_dump` with a `GID=1049` that has read/write access. Let's create these groups in the jail:
 ```bash
-root@Mylar3:~ # cd /tmp/
-root@Mylar3:/tmp # wget https://files.pythonhosted.org/packages/32/6b/5f6cffd8e30304d160933342214c097bb7dca9d52bd6cf14a1678b2ea0b9/unrar-cffi-0.1.0a5.tar.gz
-root@Mylar3:/tmp # tar -xvzf unrar-cffi-0.1.0a5.tar.gz
-root@Mylar3:/tmp # cd unrar-cffi-0.1.0a5
+root@Mylar3:/etc/pkg # pw groupadd mylar -g 1048
+root@Mylar3:/etc/pkg # pw groupadd mylar_dump -g 1049
 ```
-Edit `buildconf.py` and change `[getenv("MAKE", 'make')` to `[getenv("MAKE", 'gmake')``
+## Add a service user
+Add a user which will act as a service user to start `mylar3`. This user is called `mylar` with `uid=8675309`, has `/nonexistent` home directory and sets the user's login shell to `/usr/sbin/nologin` which denies this user interactive login- and a comment is also provided to this user, `-c`.
 ```bash
-root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # nano buildconf.py
-(..)
-BUILD_CMD = [getenv("MAKE", 'gmake'), "-C", UNRARSRC, "lib"]
-```
-Save.
-```bash
-root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # python3.7 setup.py build
-root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # python3.7 setup.py install
+root@Mylar3:/etc/pkg # pw adduser mylar -u 8675309 -d /nonexistent -s /usr/sbin/nologin -c "Mylar service user for mylar3"
 ```
 
-To see if it has been installed, open `python`: 
+Which groups does this user belong to?
 ```bash
-root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # python3.7
-Python 3.7.6 (default, Jan 30 2020, 01:17:40) 
-[Clang 8.0.0 (tags/RELEASE_800/final 356365)] on freebsd11
-Type "help", "copyright", "credits" or "license" for more information.
->>> import unrar.cffi
->>>
->>> exit() 
-root@Mylar3:/tmp/unrar-cffi-0.1.0a5 #
-```
-If it comes back with an error, it's not installed. If it just goes to the next line, it's installed.
-
-## Branch: latest
-Do not do this. It will make you suffer.
-
-~~Let us update all our packages from `quarterly` to `latest`:~~
-```bash
-root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # cd /etc/pkg/
-root@Mylar3:/etc/pkg # mkdir -p /usr/local/etc/pkg/repos
-root@Mylar3:/etc/pkg # printf 'FreeBSD: { \n  url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest", \n  mirror_type: "srv", \n  signature_type: "fingerprints", \n  fingerprints: "/usr/share/keys/pkg", \n  enabled: yes \n}' > /usr/local/etc/pkg/repos/FreeBSD.conf
-```
-### update && upgrade
-Neither this. 
-
-~~Do an `update` and `upgrade` for installing the latest versions of your already installed software:~~
-```bash
-root@Mylar3:/etc/pkg # pkg update
-root@Mylar3:/etc/pkg # pkg upgrade
+root@Mylar3:/usr/local # id mylar
+uid=8675309(mylar) gid=1048(mylar) groups=1048(mylar)
 ```
 
-## Requirements.txt
-Do this. This you should do:
+Add the user `mylar` to our `mylar_dump` group:
 ```bash
-root@Mylar3:/etc/pkg # cd /tmp
-root@Mylar3:/tmp # nano requirements.txt
+root@Mylar3:/usr/local # pw usermod mylar -G mylar_dump
+root@Mylar3:/usr/local # id mylar
+uid=920(mylar) gid=1048(mylar) groups=1048(mylar),1049(mylar_dump)
+```
+
+## Create a virtual environment
+To create a python virtual environment, which will be identified as `(mylar)`, inside of `/usr/local/virtual` folder, do this:
+```
+root@Mylar3:/usr/local/virtual # python3.7 -m venv /usr/local/virtual/mylar
+```
+
+## Activate the virtual environment
+```bash
+root@Mylar3:/usr/local/virtual # cd /usr/local/virtual/mylar/bin
+root@Mylar3:/usr/local/virtual/mylar/bin # bash
+[root@Mylar3 /usr/local/virtual/mylar/bin]# source ./activate
+(mylar) [root@Mylar3 /usr/local/virtual/mylar/bin]# 
+```
+# Requirements.txt
+There are some requirements for running `mylar3`. These can be found here [https://github.com/mylar3/mylar3/blob/master/requirements.txt](https://github.com/mylar3/mylar3/blob/master/requirements.txt). In the `requirements.txt` below, I have omitted `unrar` and `unrar-cffi` from the original file. This is because `unrar` broke `unrar-cffi` (and we've already installed `unrar`).
+
+Create a `requirements.txt` file:
+```bash
+(mylar) [root@Mylar3-1 /usr/local/virtual/mylar]# cd /tmp
+(mylar) [root@Mylar3 /tmp]#  nano requirements.txt
+
 #### ESSENTIAL LIBRARIES FOR MAIN FUNCTIONALITY ####
 APScheduler>=3.6.3
 beautifulsoup4>=4.8.2
@@ -124,34 +113,60 @@ requests>=2.22.0
 simplejson>=3.17.0
 six>=1.13.0
 tzlocal>=2.0.0
-unrar>=0.3
 urllib3>=1.25.7
-
-root@Mylar3:/tmp # pip-3.7 install -r requirements.txt
 ```
-Carry on. 
-
-# Add a service user
-Add a user which will act as a service user to start `mylar3`. This user is called `mylar` with `uid=8675309`, has `/nonexistent` home directory and sets the user's login shell to `/usr/sbin/nologin` which denies this user interactive login- and a comment is also provided to this user, `-c`.
+Install these through the python packet manager, `pip`, in your virtual environment:
 ```bash
-root@Mylar3:/etc/pkg # pw adduser mylar -u 8675309 -d /nonexistent -s /usr/sbin/nologin -c "Mylar service user for mylar3"
+(mylar) [root@Mylar3 /tmp]# pip install -r requirements.txt 
+```
+I was unable to `pip install unrar-cffi`, because it is not built for *BSD (?). `unrar-cffi` is essential for ComicTagger to work properly, so lets instead build `unrar-cffi` from source:
+```bash
+(mylar) [root@Mylar3 /tmp]# cd /tmp/
+(mylar) [root@Mylar3 /tmp]# wget https://files.pythonhosted.org/packages/32/6b/5f6cffd8e30304d160933342214c097bb7dca9d52bd6cf14a1678b2ea0b9/unrar-cffi-0.1.0a5.tar.gz
+(mylar) [root@Mylar3 /tmp]# tar -xvzf unrar-cffi-0.1.0a5.tar.gz
+(mylar) [root@Mylar3 /tmp]# cd unrar-cffi-0.1.0a5
+```
+Edit `buildconf.py` and change `[getenv("MAKE", 'make')` to `[getenv("MAKE", 'gmake')``
+```bash
+(mylar) [root@Mylar3 /tmp/unrar-cffi-0.1.0a5]# nano buildconf.py
+(..)
+BUILD_CMD = [getenv("MAKE", 'gmake'), "-C", UNRARSRC, "lib"]
+```
+Save.
+```bash
+(mylar) [root@Mylar3 /tmp/unrar-cffi-0.1.0a5]# python setup.py build
+(mylar) [root@Mylar3 /tmp/unrar-cffi-0.1.0a5]# python setup.py install
 ```
 
-# Install mylar3
+To see if it has been installed, open `python`: 
+```bash
+(mylar) [root@Mylar3 /tmp/unrar-cffi-0.1.0a5]# python
+Python 3.7.6 (default, Jan 30 2020, 01:17:40) 
+[Clang 8.0.0 (tags/RELEASE_800/final 356365)] on freebsd11
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import unrar.cffi
+>>>
+>>> exit() 
+(mylar) [root@Mylar3 /tmp/unrar-cffi-0.1.0a5]#
+```
+If it comes back with an error, it's not installed. If it just goes to the next line, it's installed.
+
+# Download mylar3
+Now since we have all the required dependencies, let us install Mylar.
+
 We'll use `git clone` and this will create a folder called `mylar3` in the working current directory. Let us do this under the `/usr/local/` folder:
 ```bash
-root@Mylar3:/etc/pkg # cd /usr/local/
-root@Mylar3:/usr/local # git clone https://github.com/mylar3/mylar3.git
+(mylar) [root@Mylar3 /tmp/unrar-cffi-0.1.0a5]# cd /usr/local
+(mylar) [root@Mylar3 /usr/local]$ git clone https://github.com/mylar3/mylar3.git
 ```
-
-## Configuration of mylar3
-### chown
+# Configuration of mylar3
+## chown
 Make our service user `mylar` the owner of the newly created `mylar3` folder, and do this recursively:
 ```bash
-root@Mylar3:/usr/local # chown -R mylar mylar3/
+(mylar) [root@Mylar3 /usr/local]$ chown -R mylar mylar3/
 ```
 
-### Carepackage
+## Carepackage
 If you try to generate a Carepackage (for logs and whatnot), it will fail. We have to create a symbolic link for `pip3` first.
 ```bash
 500 Internal Server Error
@@ -180,56 +195,33 @@ Traceback (most recent call last):
 FileNotFoundError: [Errno 2] No such file or directory: 'pip3': 'pip3'
 Powered by CherryPy 5.4.0
 ```
-#### Symbolic link pip
+### Symbolic link pip
 ```bash
-root@Mylar3:~ # 
-root@Mylar3:/usr/local/mylar3 # ln -s /usr/local/bin/pip-3.7 /usr/local/bin/pip3
+(mylar) [root@Mylar3 /tmp]# ln -s /usr/local/bin/pip-3.7 /usr/local/bin/pip3
 ```
 
-### Manual start
+# Manual start
 If you would like to manually start `mylar3` with the user `mylar` and all the default settings, I suggest doing this:
 ```bash
-root@Mylar3:/usr/local/mylar3 # screen
-root@Mylar3:/usr/local/mylar3 # su -m mylar -c '/usr/local/bin/python3.7 /usr/local/mylar3/Mylar.py'
+(mylar) [root@Mylar3 /tmp]# screen
+root@Mylar3:/tmp # bash
+(mylar) [root@Mylar3 /tmp]# source /usr/local/virtual/mylar/bin/activate
+(mylar) [root@Mylar3 /tmp]# sudo -u mylar -s bash
+(mylar) (mylar) [mylar@Mylar3 /tmp]$ python /usr/local/mylar3/Mylar.py 
 ```
+
 Use CTRL + A + D to detach from screen and `mylar` will be running in the "background".
 
 You will now be able to access `mylar3`, if you open http://ip-adress:8090/home.
 
-To reattach the `screen` session, write `screen -r`. 
+To reattach the `screen` session, write `screen -r`. For now, stop Mylar with using CTRL + C. You can exit from the screen session, writing `exit`, `exit` and `exit`. 
 
-### Automatic start
+# Automatic start
 To make `mylar3` start at boot of the jail, do the following:
-
-#### python symlink
-```bash
-root@Mylar3:/usr/local/ # cd bin/
-root@Mylar3:/usr/local/bin # ls -alh | grep python
--r-xr-xr-x    2 root  wheel   5.4K Jan 30 02:18 python3.7
-lrwxr-xr-x    1 root  wheel    17B Jan 30 02:19 python3.7-config -> python3.7m-config
--r-xr-xr-x    2 root  wheel   5.4K Jan 30 02:18 python3.7m
--r-xr-xr-x    1 root  wheel   2.9K Jan 30 02:19 python3.7m-config
-```
-
-Make a python symlink from `python3.7` to `python`. This is necessary in the rc script we'll be using next (or just edit the script with the correct path to a python executable):
-
-```bash
-root@Mylar3:/usr/local/etc/rc.d # ln -s /usr/local/bin/python3.7 /usr/local/bin/python
-```
-Voilà:
-```bash
-root@Mylar3:/usr/local/bin # ls -alh | grep python
-lrwxr-xr-x    1 root  wheel    24B Feb 29 23:23 python -> /usr/local/bin/python3.7
--r-xr-xr-x    2 root  wheel   5.4K Jan 30 02:18 python3.7
-lrwxr-xr-x    1 root  wheel    17B Jan 30 02:19 python3.7-config -> python3.7m-config
--r-xr-xr-x    2 root  wheel   5.4K Jan 30 02:18 python3.7m
--r-xr-xr-x    1 root  wheel   2.9K Jan 30 02:19 python3.7m-config
-```
-
-#### rc.d
+## rc.d
 Create a file called `mylar3` in `/usr/local/etc/rc.d/`:
 ```bash
-root@Mylar3:~ # nano /usr/local/etc/rc.d/mylar3
+root@Mylar3:/usr/local/bin # nano /usr/local/etc/rc.d/mylar3
 
 #!/bin/sh
 #
@@ -250,8 +242,6 @@ root@Mylar3:~ # nano /usr/local/etc/rc.d/mylar3
 #
 #
 #
-#
-#
 # mylar3_user:  The user account Mylar daemon runs as what
 #           you want it to be. It uses 'mylar' user by
 #           default. Do not sets it as empty or it will run
@@ -261,6 +251,11 @@ root@Mylar3:~ # nano /usr/local/etc/rc.d/mylar3
 # mylar3_pid:  The name of the pidfile to create.
 #           Default is mylar.pid in mylar_dir.
 # mylar3_conf: The name of the config file you would like to launch with mylar3.
+#
+# command:    The path to your virtual environment executable
+#
+# https://psychogun.github.io/docs/freenas/Mylar3-in-a-FreeNAS-iocage-jail/
+#
 
 . /etc/rc.subr
 
@@ -275,7 +270,7 @@ load_rc_config ${name}
 
 pidfile="/var/run/mylar3/mylar3.pid"
 
-command="/usr/local/bin/python"
+command="/usr/local/virtual/mylar/bin/python"
 command_args="${mylar3_dir}/Mylar.py --daemon --nolaunch --pidfile $pidfile --config $mylar3_conf"
 
 
@@ -296,11 +291,11 @@ run_rc_command "$1"
 
 Make the newly created file executable:
 ```bash
-root@Mylar3:/usr/local/etc/rc.d # chmod +x /usr/local/etc/rc.d/mylar3 
+root@Mylar3:/usr/local/bin # chmod +x /usr/local/etc/rc.d/mylar3 
 ```
 Add the following line to /etc/rc.conf.local or /etc/rc.conf to enable this service:
 ```bash
-root@Mylar3:/usr/local/mylar3 # nano /etc/rc.conf
+root@Mylar3:/usr/local/bin # nano /etc/rc.conf
 
 (...)
 # Enable Mylar
@@ -335,7 +330,68 @@ Configuration upgraded to version 10
 root@Mylar3:/usr/local/etc/rc.d # 
 ```
 
+
 # Fault finding
+## pip freeze
+On the jail:
+```bash
+root@Mylar3:~ # pip freeze
+sqlite3==0.0.0
+virtualenv==16.7.5
+root@Mylar3:~ # 
+```
+In the virtual environment:
+```bash
+root@Mylar3:~ # sudo -u mylar -s bash
+[mylar@Mylar3 /root]$ source /usr/local/virtual/mylar/bin/activate
+(mylar) [mylar@Mylar3 /root]$ pip freeze
+altgraph==0.17
+APScheduler==3.6.3
+beautifulsoup4==4.8.2
+certifi==2019.11.28
+cffi==1.14.0
+cfscrape==2.1.1
+chardet==3.0.4
+cheroot==8.2.1
+CherryPy==18.5.0
+configparser==5.0.0
+feedparser==5.2.1
+idna==2.9
+jaraco.classes==3.1.0
+jaraco.collections==3.0.0
+jaraco.functools==3.0.0
+jaraco.text==3.2.0
+Mako==1.1.2
+MarkupSafe==1.1.1
+more-itertools==8.2.0
+natsort==7.0.1
+Pillow==6.2.2
+portend==2.6
+pycparser==2.20
+PyInstaller==3.6
+pytz==2019.3
+requests==2.23.0
+simplejson==3.17.0
+six==1.14.0
+soupsieve==2.0
+sqlite3==0.0.0
+tempora==3.0.0
+tzlocal==2.0.0
+unrar-cffi==0.1.0a5
+urllib3==1.25.8
+zc.lockfile==2.0
+```
+
+## unrar.cffi
+```bash
+(mylar) [mylar@Mylar3 /root]$ python
+Python 3.7.6 (default, Mar 21 2020, 01:17:29) 
+[Clang 8.0.0 (tags/RELEASE_800/final 356365)] on freebsd11
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import unrar.cffi
+>>> 
+```
+
 ## Status
 Check if `mylar3` is running (as a service):
 
@@ -386,16 +442,32 @@ Save and use `service mylar3 start` to start the service.
 Add the option `-v` to `Mylar.py` to enable `DEBUG` logging.
 
 ```bash
-root@Mylar3:/usr/local/mylar3 # service mylar3 stop
-root@Mylar3:/usr/local/mylar3 # cd /usr/local/mylar3/logs
-root@Mylar3:/usr/local/mylar3/logs # rm mylar.log
-root@Mylar3:/usr/local/mylar3/logs # su -m mylar -c '/usr/local/bin/python3.7 /usr/local/mylar3/Mylar.py -v'
+root@Mylar3:~ # service mylar3 stop
+root@Mylar3:~ # sudo -u mylar -s bash
+[mylar@Mylar3 /root]$ source /usr/local/virtual/mylar/bin/activate
+(mylar) [mylar@Mylar3 /root]$ python /usr/local/mylar3/Mylar.py -v
+```
+Then use `(mylar) [mylar@Mylar3 /root]$ tail -f /usr/local/mylar3/logs/mylar.log`.
+
+## Migrate 
+### /cache
+```bash
+root@Freenas:~ # cp -rp /mnt/TankJr/iocage/jails/Mylar3/root/usr/local/mylar3/cache/* /mnt/TankJr/iocage/jails/Mylar3-1/root/usr/local/mylar3/cache/
+```
+### config.ini
+```bash
+root@Freenas:~ # cp -p /mnt/TankJr/iocage/jails/Mylar3/root/usr/local/mylar3/config.ini /mnt/TankJr/iocage/jails/Mylar3-1/root/usr/local/mylar3/
+```
+### mylar.db
+```bash
+root@Freenas:~ # cp -p /mnt/TankJr/iocage/jails/Mylar3/root/usr/local/mylar3/mylar.db /mnt/TankJr/iocage/jails/Mylar3-1/root/usr/local/mylar3/
 ```
 
 ## Authors
 Mr. Johnson
 
 ## Acknowledgments
+* [https://docs.python.org/3/library/venv.html](https://docs.python.org/3/library/venv.html)
 * [https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/](https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/)
 * [https://www.freebsd.org/doc/en_US.ISO8859-1/articles/rc-scripting/](https://www.reddit.com/r/nzbhydra/comments/8fqcyl/freebsd_install_guide/)
 * [https://www.freebsd.org/cgi/man.cgi?pw(8)](https://www.freebsd.org/cgi/man.cgi?pw(8))
