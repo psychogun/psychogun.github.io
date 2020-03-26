@@ -84,20 +84,23 @@ root@Mylar3:/tmp/unrar-cffi-0.1.0a5 #
 If it comes back with an error, it's not installed. If it just goes to the next line, it's installed.
 
 ## Branch: latest
-Let us update all our packages from `quarterly` to `latest`:
+Do not do this. It will make you suffer.
+~Let us update all our packages from `quarterly` to `latest`:~
 ```bash
 root@Mylar3:/tmp/unrar-cffi-0.1.0a5 # cd /etc/pkg/
 root@Mylar3:/etc/pkg # mkdir -p /usr/local/etc/pkg/repos
 root@Mylar3:/etc/pkg # printf 'FreeBSD: { \n  url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest", \n  mirror_type: "srv", \n  signature_type: "fingerprints", \n  fingerprints: "/usr/share/keys/pkg", \n  enabled: yes \n}' > /usr/local/etc/pkg/repos/FreeBSD.conf
 ```
 ### update && upgrade
+Neither this. 
+~Do an `update` and `upgrade` for installing the latest versions of your already installed software:~
 ```bash
 root@Mylar3:/etc/pkg # pkg update
 root@Mylar3:/etc/pkg # pkg upgrade
 ```
 
 ## Requirements.txt
-Do this. As well. 
+Do this. This you should do:
 ```bash
 root@Mylar3:/etc/pkg # cd /tmp
 root@Mylar3:/tmp # nano requirements.txt
@@ -124,6 +127,7 @@ urllib3>=1.25.7
 
 root@Mylar3:/tmp # pip-3.7 install -r requirements.txt
 ```
+Carry on. 
 
 # Add a service user
 Add a user which will act as a service user to start `mylar3`. This user is called `mylar` with `uid=8675309`, has `/nonexistent` home directory and sets the user's login shell to `/usr/sbin/nologin` which denies this user interactive login- and a comment is also provided to this user, `-c`.
