@@ -297,7 +297,7 @@ Make the newly created file executable:
 ```bash
 root@Mylar3:/usr/local/bin # chmod +x /usr/local/etc/rc.d/mylar3 
 ```
-Add the following line to /etc/rc.conf.local or /etc/rc.conf to enable this service:
+Add the following line to `/etc/rc.conf` to enable this service:
 ```bash
 root@Mylar3:/usr/local/bin # nano /etc/rc.conf
 
@@ -455,21 +455,22 @@ Then use `(mylar) [mylar@Mylar3 /root]$ tail -f /usr/local/mylar3/logs/mylar.log
 ## Migrate 
 ### /cache
 ```bash
-root@Freenas:~ # cp -rp /mnt/TankJr/iocage/jails/Mylar3/root/usr/local/mylar3/cache/* /mnt/TankJr/iocage/jails/Mylar3-1/root/usr/local/mylar3/cache/
+root@Freenas:~ # cp -rp /mnt/TankJr/iocage/jails/oldMylar3/root/usr/local/mylar3/cache/* /mnt/TankJr/iocage/jails/newMylar3/root/usr/local/mylar3/cache/
 ```
 ### config.ini
 ```bash
-root@Freenas:~ # cp -p /mnt/TankJr/iocage/jails/Mylar3/root/usr/local/mylar3/config.ini /mnt/TankJr/iocage/jails/Mylar3-1/root/usr/local/mylar3/
+root@Freenas:~ # cp -p /mnt/TankJr/iocage/jails/oldMylar3/root/usr/local/mylar3/config.ini /mnt/TankJr/iocage/jails/newMylar3/root/usr/local/mylar3/
 ```
 ### mylar.db
 ```bash
-root@Freenas:~ # cp -p /mnt/TankJr/iocage/jails/Mylar3/root/usr/local/mylar3/mylar.db /mnt/TankJr/iocage/jails/Mylar3-1/root/usr/local/mylar3/
+root@Freenas:~ # cp -p /mnt/TankJr/iocage/jails/oldMylar3/root/usr/local/mylar3/mylar.db /mnt/TankJr/iocage/jails/newMylar3/root/usr/local/mylar3/
 ```
 
-## Authors
+# Authors
 Mr. Johnson
 
-## Acknowledgments
+# Acknowledgments
+* [https://github.com/mylar3/mylar3/issues/211](https://github.com/mylar3/mylar3/issues/211)
 * [https://docs.python.org/3/library/venv.html](https://docs.python.org/3/library/venv.html)
 * [https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/](https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/)
 * [https://www.freebsd.org/doc/en_US.ISO8859-1/articles/rc-scripting/](https://www.reddit.com/r/nzbhydra/comments/8fqcyl/freebsd_install_guide/)
