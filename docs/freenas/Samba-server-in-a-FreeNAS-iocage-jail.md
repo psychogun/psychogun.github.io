@@ -300,8 +300,8 @@ smb: \> ls
 smb: \> 
 ```
 
-## Fault finding
-### smbclient -L   
+# Fault finding
+## smbclient -L   
 List shares that are available at ip:
 ```bash
 root@Samba:~ # smbclient -L 192.168.20.3
@@ -323,7 +323,7 @@ Anonymous login successful
 	MYGROUP              
 ```
 
-### smbstatus
+## smbstatus
 ```bash
 root@Samba:~ # smbstatus
 
