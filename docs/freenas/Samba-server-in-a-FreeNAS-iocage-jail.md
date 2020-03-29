@@ -16,7 +16,7 @@ I wanted to isolate a jail with VLAN from my network and use Samba to share some
 ---
 ## Getting started
 ### Prerequisites
-* FreeNAS
+* FreeNAS 11.3
 * SMB Shares
 * Different users & groups
 
@@ -105,44 +105,6 @@ root@Samba:/usr/local # id smbuser
 uid=8675309(smbuser) gid=8675309(smbuser) groups=8675309(smbuser),1050(Documents_ro)
 ```
 
-# Create a user
-Add a user in the jail:
-```bash
-root@Samba:/mnt # adduser
-Username: user1
-Full name: User Number 1
-Uid (Leave empty for default): 
-Login group [user1]: 
-Login group is user1. Invite max into other groups? []: Documents_ro
-Login class [default]: 
-Shell (sh csh tcsh nologin) [sh]: nologin
-Home directory [/home/user1]: 
-Home directory permissions (Leave empty for default): 
-Use password-based authentication? [yes]: 
-Use an empty password? (yes/no) [no]: no
-Use a random password? (yes/no) [no]: yes
-Lock out the account after creation? [no]: no
-Username   : user1
-Password   : <random>
-Full Name  : User Number 1
-Uid        : 1001
-Class      : 
-Groups     : user1 Documents_ro
-Home       : /home/user1
-Home Mode  : 
-Shell      : /usr/sbin/nologin
-Locked     : no
-OK? (yes/no): y
-adduser: INFO: Successfully added (user1) to the user database.
-adduser: INFO: Password for (user1) is: sgHjPKfI3a
-Add another user? (yes/no): no
-Goodbye!
-```
-
-```bash
-root@Samba:/mnt # id user1
-uid=1001(user1) gid=1001(user1) groups=1001(user1),1050(Documents_ro)
-```
 
 Check to see if the user `user1` has the right permissions on the mounted ACL dataset:
 ```bash
@@ -155,7 +117,7 @@ group:Documents_ro:r-x---a-R-c---:fd-----:allow
 ```
 If you are able to see `group:Documents_ro`, instead of `group:1050`, all is good. 
 
-All good. ZrZapTvg
+All good. 
 
 # VLAN
 To enable VLAN `20`on your iocage jail, add this to `rc.conf` (`epair0b` is the main interface, you can find out yours by using `ifconfig`):
@@ -229,7 +191,7 @@ root@Samba:/etc/pkg # nano /usr/local/etc/smb4.conf
 # following example restricts access to two C class networks and
 # the "loopback" interface. For more examples of the syntax see
 # the smb.conf man page
-   hosts allow = 14.
+;  hosts allow = 14.
 
 # Uncomment this if you want a guest account, you must add this to /etc/passwd
 # otherwise the user "nobody" is used
@@ -342,7 +304,7 @@ smb: \>
 ### smbclient -L   
 List shares that are available at ip:
 ```bash
-root@Samba:~ # smbclient -L 192.168.101.3
+root@Samba:~ # smbclient -L 192.168.20.3
 Enter MYGROUP\root's password: 
 Anonymous login successful
 
