@@ -18,7 +18,6 @@ This is how i installed a Radarr, an independent fork of Sonarr reworked for aut
 ## Getting started
 These instructions will tell you how to add storage to an iocage jail, install and run Radarr and integrate Radarr with Deluge.
 
-
 ### Prerequisites
 * Knowledge of SSH and how to navigate to your jail in FreeNAS
 * FreeNAS 11.2 and knowledge of how to create a jail with shares and knowledge of UNIX folder and files permissions
@@ -26,12 +25,12 @@ These instructions will tell you how to add storage to an iocage jail, install a
 ## Udate and upgrade
 Update and upgrade your iocage jail first:
 ```tcsh
-root@Airdccp:/ # pkg upgrade && pkg update
+root@Radarr:/ # pkg upgrade && pkg update
 ```
 
 Update and upgrade your iocage jail first:
 ```tcsh
-root@Airdccp:/ # pkg upgrade && pkg update
+root@Radarr:/ # pkg upgrade && pkg update
 ```
 
 ## Install radarr
@@ -94,144 +93,8 @@ The process will require 440 MiB more space.
 108 MiB to be downloaded.
 
 Proceed with this action? [y/N]: y
-root@Radarr:~ # 
-```
+(...)
 
-Set `radarr_enable="YES"` in `/etc/rc.conf`, then start the Radarr service by executing
-```bash
-root@Radarr:/usr/local/etc/rc.d # service radarr start
-```
-
-
-## User configuration
-```bash
-===> Creating groups.
-Creating group 'radarr' with gid '352'.
-===> Creating users
-Creating user 'radarr' with uid '352'.
-```
-
-Message from freetype2-2.10.1:
-
---
-The 2.7.x series now uses the new subpixel hinting mode (V40 port's option) as
-the default, emulating a modern version of ClearType. This change inevitably
-leads to different rendering results, and you might change port's options to
-adapt it to your taste (or use the new "FREETYPE_PROPERTIES" environment
-variable).
-
-The environment variable "FREETYPE_PROPERTIES" can be used to control the
-driver properties. Example:
-
-FREETYPE_PROPERTIES=truetype:interpreter-version=35 \
-	cff:no-stem-darkening=1 \
-	autofitter:warping=1
-
-This allows to select, say, the subpixel hinting mode at runtime for a given
-application.
-
-If LONG_PCF_NAMES port's option was enabled, the PCF family names may include
-the foundry and information whether they contain wide characters. For example,
-"Sony Fixed" or "Misc Fixed Wide", instead of "Fixed". This can be disabled at
-run time with using pcf:no-long-family-names property, if needed. Example:
-
-FREETYPE_PROPERTIES=pcf:no-long-family-names=1
-
-How to recreate fontconfig cache with using such environment variable,
-if needed:
-# env FREETYPE_PROPERTIES=pcf:no-long-family-names=1 fc-cache -fsv
-
-The controllable properties are listed in the section "Controlling FreeType
-Modules" in the reference's table of contents
-(/usr/local/share/doc/freetype2/reference/site/index.html, if documentation was installed).
-=====
-Message from python27-2.7.17_1:
-
---
-Note that some standard Python modules are provided as separate ports
-as they require additional dependencies. They are available as:
-
-bsddb           databases/py-bsddb
-gdbm            databases/py-gdbm
-sqlite3         databases/py-sqlite3
-tkinter         x11-toolkits/py-tkinter
---
-===>   NOTICE:
-
-This port is deprecated; you may wish to reconsider installing it:
-
-EOLed upstream.
-
-It is scheduled to be removed on or after 2020-12-31.
-=====
-Message from py27-setuptools-41.4.0_1:
-
---
-Only /usr/local/bin/easy_install-2.7 script has been installed
-  since Python 2.7 is not the default Python version.
-=====
-Message from ca_root_nss-3.49.2:
-
---
-FreeBSD does not, and can not warrant that the certification authorities
-whose certificates are included in this package have in any way been
-audited for trustworthiness or RFC 3647 compliance.
-
-Assessment and verification of trust is the complete responsibility of the
-system administrator.
-
-
-This package installs symlinks to support root certificates discovery by
-default for software that uses OpenSSL.
-
-This enables SSL Certificate Verification by client software without manual
-intervention.
-
-If you prefer to do this manually, replace the following symlinks with
-either an empty file or your site-local certificate bundle.
-
-  * /etc/ssl/cert.pem
-  * /usr/local/etc/ssl/cert.pem
-  * /usr/local/openssl/cert.pem
-=====
-Message from libinotify-20180201_1:
-
---
-Libinotify functionality on FreeBSD is missing support for
-
-  - detecting a file being moved into or out of a directory within the
-    same filesystem
-  - certain modifications to a symbolic link (rather than the
-    file it points to.)
-
-in addition to the known limitations on all platforms using kqueue(2)
-where various open and close notifications are unimplemented.
-
-This means the following regression tests will fail:
-
-Directory notifications:
-   IN_MOVED_FROM
-   IN_MOVED_TO
-
-Open/close notifications:
-   IN_OPEN
-   IN_CLOSE_NOWRITE
-   IN_CLOSE_WRITE
-
-Symbolic Link notifications:
-   IN_DONT_FOLLOW
-   IN_ATTRIB
-   IN_MOVE_SELF
-   IN_DELETE_SELF
-
-Kernel patches to address the missing directory and symbolic link
-notifications are available from:
-
-https://github.com/libinotify-kqueue/libinotify-kqueue/tree/master/patches
-
-You might want to consider increasing the kern.maxfiles tunable if you plan
-to use this library for applications that need to monitor activity of a lot
-of files.
 =====
 Message from mono-5.10.1.57_2:
 
@@ -268,42 +131,28 @@ following first:
   NUnit) and procfs(5) has to be mounted for these features to work:
     # echo "proc            /proc   procfs  rw 0 0" >> /etc/fstab
 root@Radarr:~ # 
-root@Radarr:~ # 
-root@Radarr:~ # 
+```
+To be able to update Radarr, the user which executes the service, (`radarr`), needs rights to the Startup directory:
+```bash
+root@Radarr:~ # cd /usr/local/share/
+root@Radarr:/usr/local/share # chown -R radarr radarr/
+```
+
+Set `radarr_enable="YES"` in `/etc/rc.conf`, then start the Radarr service by executing
+```bash
+root@Radarr:/usr/local/etc/rc.d # service radarr start
+```
 
 ## Configuring folders
-Stop the Sonarr jail. 
+Stop the Radarr jail. 
 
-Add two mount points, one folder for the TV Shows, the other folder for handling the Deluge transfer.
+Add two mount points, one folder for the Movies, the other folder for handling the Deluge transfer.
 
 * Source: /mnt/Breaking/Movies
 * Destination: /mnt/Breaking/iocage/jails/Radarr/root/mnt/Movies
 
 * Source: /mnt/Breaking/Torrents
 * Destination: /mnt/Breaking/iocage/jails/Radarr/root/mnt/Torrents
-
-Under the installation, a `radarr` user and group was created with a `uid` and `gid` of `352`:
-
-
-```bash
-===> Creating groups.
-Creating group 'radarr' with gid '352'.
-===> Creating users
-Creating user 'radarr' with uid '352'.
-```
-
-
-You can change it with this;
-```bash
-root@Sonarr:~ # id sonarr
-uid=351(sonarr) gid=351(sonarr) groups=351(sonarr)
-root@Sonarr:~ # pw usermod sonarr -u 923
-root@Sonarr:~ # id sonarr
-uid=923(sonarr) gid=351(sonarr) groups=351(sonarr)
-```
-Replace ownage of `351` with user:group `sonarr`:
-root@Sonarr:~ # find / -user 351 -exec chown -h sonarr {} \;
-root@Sonarr:~ # find / -group 351 -exec chgrp -h sonarr {} \;
 
 ```bash
 root@Radarr:/mnt # getfacl Movies/
@@ -331,6 +180,31 @@ root@Radarr:/mnt # pw groupadd deluge -g 922
 root@Radarr:/mnt # pw usermod radarr -G movies,deluge
 root@Radarr:/mnt # groups radarr
 radarr movies deluge
+```
+
+
+## User configuration
+```bash
+===> Creating groups.
+Creating group 'radarr' with gid '352'.
+===> Creating users
+Creating user 'radarr' with uid '352'.
+```
+Under the installation, a `radarr` user and group was created with a `uid` and `gid` of `352`:
+
+You can change that users `uid` from `352` to for example `923` with this:
+```bash
+root@Radarr:~ # id radarr
+uid=352(radarr) gid=352(radarr) groups=352(radarr)
+root@Radarr:~ # pw usermod radarr -u 923
+root@Radarr:~ # id radarr
+uid=923(radarr) gid=351(radarr) groups=351(radarr)
+```
+
+Replace ownage of `352` with user:group `radarr`:
+```bash
+root@Radarr:~ # find / -user 352 -exec chown -h radarr {} \;
+root@Radarr:~ # find / -group 352 -exec chgrp -h radarr {} \;
 ```
 
 ## Authors
