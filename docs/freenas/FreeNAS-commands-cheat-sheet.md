@@ -2,7 +2,7 @@
 layout: default
 title: FreeNAS commands cheat sheet
 parent: FreeNAS
-nav_order: 18
+nav_order: 19
 ---
 
 # FreeNAS commands cheat sheet
@@ -16,7 +16,6 @@ This are useful commands I have found managing FreeNAS.
 ---
 
 ## Find
-
 | Command  | Explanation |
 | ------------- | ------------- |
 | `find /mnt/directory1/ -name "Absurd Superpowers*" -type f -exec mv {} /mnt/directory1/moved \;`  | Find files located in `/mnt/directory1` named `"Absurd Superpowers*"` and move those files to `/mnt/directory1/moved` |
@@ -55,6 +54,8 @@ root@LazyLibrarian:/mnt/LazyLibrarian # printf '–' | od -tx1 -An
           e2  80  93               
 ```
 [http://www.ltg.ed.ac.uk/~richard/utf-8.cgi?input=–&mode=char](http://www.ltg.ed.ac.uk/~richard/utf-8.cgi?input=–&mode=char)
+
+## Move a folder
 
 
 ## Authors

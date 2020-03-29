@@ -2,7 +2,7 @@
 layout: default
 title: How to configure SSH to act as an SFTP server in an iocage jail on FreeNAS
 parent: FreeNAS
-nav_order: 14
+nav_order: 15
 ---
 
 # How to configure SSH to act as an SFTP server in an iocage jail on FreeNAS
