@@ -18,11 +18,10 @@ This is how i installed jackett, which works as a proxy server- it translates qu
 ## Getting started
 Show some love for Jackett over at [https://github.com/Jackett/Jackett](https://github.com/Jackett/Jackett).
 
-These instructions will download, compile, install and run AirDC++ in an iocage jail on FreeNAS. There are no provided binaries for BSD on [https://airdcpp-web.github.io/docs/installation/installation.html](https://airdcpp-web.github.io/docs/installation/installation.html).
 
 ### Prerequisites
-* Knowledge of SSH and how to navigate to your jail in FreeNAS
-* FreeNAS 11.2 and knowledge of how to create a jail with shares and knowledge of UNIX folder and files permissions
+* FreeNAS Version: FreeNAS-11.3-RELEASE
+* Iocage jail version: 11.3-RELEASE
 
 ## Installing
 
