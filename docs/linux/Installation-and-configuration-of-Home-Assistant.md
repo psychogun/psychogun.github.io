@@ -466,9 +466,6 @@ Go to Configuration > Devices and delete all the unknown entities. Restart `sudo
 
 Go to Configuration > Z-Wave and `ADD NODE SECURE` and follow the inclusion settings for the device from the manual. Now it should show up as the ZW112 device. 
 
-```
-
-
 
 ## Remote access with TLS/SSL via Let's Encrypt
 Follow this excellent guide over here [https://www.home-assistant.io/docs/ecosystem/certificates/lets_encrypt/](https://www.home-assistant.io/docs/ecosystem/certificates/lets_encrypt/)
