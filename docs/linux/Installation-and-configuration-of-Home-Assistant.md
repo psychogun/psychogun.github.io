@@ -4,11 +4,14 @@ title: Installation and configuration of Home Assistant
 parent: Linux
 nav_order: 7
 ---
-*WORK IN PROGRESS as of 2019-08-30*
+
 # Installation and configuration of Home Assistant
 {: .no_toc }
-This is how I used Home Assistant to send me events through Apple's Home app, with the help of an Ubuntu installation allocated on a ~~VM in ESXi 6.7~~ Proxmox Virtual Environment 6.1-5 with USB devices passed through the host. 
+This is how I used Home Assistant to send me events through Apple's Home app, with the help of an Ubuntu installation allocated in a Proxmox Virtual Environment 6.1-5 with USB devices passed through the host. 
+
 I have some lights, a smartlock, some devices to measure temperature and, hm, what else, a motion detector that triggers the light if it is dark. This howto came to life when I decided to use Proxmox instead of ESXi. 
+
+I am basically following this guide: [https://www.home-assistant.io/docs/installation/raspberry-pi/](https://www.home-assistant.io/docs/installation/raspberry-pi/)
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -37,46 +40,17 @@ I must master it as I must master my life. Without me, my guide is useless. With
 * IKEA TRADFRI light
 * Apple TV 4th gen
 
-~~ ## Allocating a VM in ESXi 6.7 
-Log in to your ESXi in a web-browser. Press `Virtual Machines` and then `Create / Register VM`.
-
-***Select creation type***:
-
-Create a new virtual machine > Next
-
-***Select a name and guest OS***
-
-Name: goodgold
-Compatibility: ESXi 6.7 Virtual Machine
-Guest OS family: Linux
-Guest OS version: Ubuntu Linux (64-bit)
-
-***Select storage***
-
-Standard
-Select a fitting datastore for the virtual machine's configuration files and all of it's virtual disks > Next
-
-***Customize settings***
-
-I recommend 20GB for harddrive size, rest default, that is OK for now > Next
-
-***Ready to complete***
-
-Press Finish and you have created the VM which we are installing Ubuntu 18.04 on.
-
-Right click on your newly created Virtual machine. Select `Edit settings`. Scroll down to CD/DVD Drive 1 and select `Datastore ISO file`. Navigate to your `ubuntu-18.04.1-live-server-amd64.iso` file`.  Select > Save. 
+## Allocating a VM in Proxmox
+Log in to your Proxmox in a web-browser and create a new virtal machine. 2GiB RAM and 32GiB harddrive is enough.
 
 Power on the Virtual machine and follow this guide for an excellent guide to installing ubuntu server: [https://tutorials.ubuntu.com/tutorial/tutorial-install-ubuntu-server-1604](https://tutorials.ubuntu.com/tutorial/tutorial-install-ubuntu-server-1604#0) 
 (even though the link is for 1604, almost the same applies for 18.04).
 
-Remember to select these software selections under installation:
-* docker
-* OpenSSH server
-* standard system utilities ~~
+Remember to select to install `OpenSSH server` under the installation of Ubuntu.
 
-
-## Installation of Home Assistant
-I am using a virtual environment provided by Proxmox. Under the creation of the guest host, remember to install OpenSSH Server.
+## Some things first ..
+### update && upgrade
+Update and upgrade:
 ```bash
 sudo apt-get update
 sudo apt-get upgrade
@@ -86,10 +60,9 @@ Set the correct date and time:
 ```bash
 assistant@linuxbabe:~$ sudo dpkg-reconfigure tzdata
 ```
+Issue `sudo shutdown now` to power of the guest and go to the Proxmox web gui and enable QEMU Guest Agent under Options, then start it again.
 
-`sudo shutdown now` the Guest host and enable QEMU Guest Agent under Options in the Proxmox web gui. 
-
-## Upgrade Python
+### Upgrade Python
 Which version do you currently have?
 ```bash
 assistant@linuxbabe:~$ python3 -V
@@ -98,9 +71,13 @@ Python 3.6.9
 Install `python3.8`:
 ```bash
 assistant@linuxbabe:~$ sudo apt-get install python3.8
-assistant@linuxbabe:~$ python3.8 -V
-Python 3.8.0
 ```
+The default `python3` environment is still `Python 3.6.9`.
+```bash
+assistant@linuxbabe:~$ python3 -V
+Python 3.6.9
+```
+
 Add python3.6 & python3.8 to update-alternatives:
 ```bash
 assistant@linuxbabe:~$ sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
@@ -127,7 +104,7 @@ assistant@linuxbabe:~$ python3 -V
 Python 3.8.0
 ```
 ### Install the dependencies
-Fire up the guest host again and log in and install all the required dependencies for running Home Assistant in an python virtual environment:
+Install all the required dependencies for running Home Assistant in an python virtual environment:
 ```bash
 assistant@linuxbabe:~$ sudo apt-get install python3.8-dev python3.8-venv python3-pip libffi-dev libssl-dev libudev-dev build-essential
 ```
@@ -145,7 +122,7 @@ assistant@linuxbabe:/srv$ sudo mkdir homeassistant
 assistant@linuxbabe:/srv$ sudo chown homeassistant:homeassistant homeassistant
 ```
 
-Next up is to create and change to a virtual environment for Home Assistant. This will be done as the homeassistant account.
+Next up is to use the `homeassistant` user (`sudo -u homeassistant -H -s`) to create a virtual environment- in the current directory (`python3 -m venv .`) and activate the python virtual environment (`source /srv/homeassistant/bin/activate`). This will be done as the homeassistant account.
 
 ```bash
 assistant@linuxbabe:/srv$ sudo -u homeassistant -H -s
@@ -155,7 +132,7 @@ homeassistant@linuxbabe:/srv/homeassistant$ source bin/activate
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ 
 ```
 
-Once you have activated the virtual environment (notice the prompt change to `(homeassistant) homeassistant@raspberrypi:/srv/homeassistant $)` you will need to run the following command to install a required python package.
+Once you have activated the virtual environment (notice the prompt change to `(homeassistant) homeassistant@linuxbabe:/srv/homeassistant $)` you will need to run the following command to install a required python package inside of the virtual environment.
 
 ```bash
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ python3 -m pip install wheel
@@ -168,8 +145,7 @@ Successfully installed wheel-0.33.6
 
 Once you have installed the required python package it is now time to install Home Assistant!
 
-### Install Home Assistant
-
+## Install Home Assistant
 ```bash
 homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ pip3 install homeassistant
 ```
@@ -182,7 +158,11 @@ Start Home Assistant for the first time. This will complete the installation for
 
 When you run the hass command for the first time, it will download, install and cache the necessary libraries/dependencies. This procedure may take anywhere between 5 to 10 minutes. During that time, you may get “site cannot be reached” error when accessing the web interface. This will only happen for the first time, and subsequent restarts will be much faster.
 
-You can now reach your installation on your Raspberry Pi over the web interface on `http://ipaddress:8123`. Hop on in and configure user and set your timezone and location. 
+You can now reach your installation on your Raspberry Pi over the web interface on `http://ipaddress:8123`. 
+
+Hop on in and configure a user, set your timezone, location and metrics. It will also be possible to set up integrations discovered on the network. 
+
+
 
 Further more, you are able to set up integrations from the web service, but that did not work out, at least for me when I tried to install Z-Wave, it just hangs on `2020-01-29 16:50:52 INFO (SyncWorker_2) [homeassistant.util.package] Attempting install of homeassistant-pyozw==0.1.7` ..
 
@@ -191,6 +171,8 @@ USB Path: /dev/ttyACM0
 Network Key: 
 
 ### Home Assistant as a daemon
+Stop `hass` with your keyboard, CTRL + C. 
+
 Do this if you would like Home Assistant to start on boot.
 ```bash
 assistant@linuxbabe:/srv$ sudo nano /etc/systemd/system/home-assistant@homeassistant.service
@@ -229,7 +211,7 @@ assistant@linuxbabe:/srv$ sudo systemctl start home-assistant@homeassistant
 
 You can also substitute the `start` above with `stop` to stop Home Assistant, `restart` to restart Home Assistant, and `status` to see a brief status report as seen below.
 ```bash
-sudo systemctl enable home-assistant@homeassistant
+assistant@linuxbabe:/srv$ sudo systemctl status home-assistant@homeassistant
 ```
 
 To get Home Assistant’s logging output, simple use journalctl.
@@ -245,26 +227,26 @@ When working on Home Assistant, you can easily restart the system and then watch
 $ sudo systemctl restart home-assistant@YOUR_USER && sudo journalctl -f -u home-assistant@YOUR_USER
 ```
 
-Do these things that are stated above, and shut down your VM guest through Proxmox web gui.
+Do these things that are stated above/whatever you want, and shut down your VM guest through Proxmox web gui and/or issue `sudo shutdown now`.
 
 ## Attaching Z-Wave controllers
 I am using a Aeotec ZW090 Z-Stick Gen5 EU for communication with my ID Lock 150. We will have to pass USB device through the host to the guest OS. 
 
 First, list available USB devices on the proxmox host:
 ```bash
-root@h37bproxmox01:~# lsusb 
+root@proxmox:~# lsusb 
 Bus 002 Device 002: ID 8087:8000 Intel Corp. 
 Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
 Bus 001 Device 002: ID 8087:8008 Intel Corp. 
 Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
 Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
 Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-root@h37bproxmox01:~# 
+root@proxmox:~# 
 ```
 
 Plug in the Z-Stick USB dongle:
 ```bash
-root@h37bproxmox01:~# lsusb
+root@proxmox:~# lsusb
 Bus 002 Device 002: ID 8087:8000 Intel Corp. 
 Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
 Bus 001 Device 002: ID 8087:8008 Intel Corp. 
@@ -272,11 +254,11 @@ Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
 Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
 Bus 003 Device 002: ID 0658:0200 Sigma Designs, Inc. Aeotec Z-Stick Gen5 (ZW090) - UZB
 Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-root@h37bproxmox01:~# 
+root@proxmox:~# 
 ```
 All right, it is attached with and `ID` of `0658:0200`. 
 
-It does not automatically attach itself in our Virtual Machine, as you can see:
+It does not automatically attach itself in our Virtual Machine, as you could see if the guest was still powered on:
 ```bash
 assistant@linuxbabe:~$ lsusb 
 Bus 001 Device 002: ID 0627:0001 Adomax Technology Co., Ltd 
@@ -307,8 +289,8 @@ zwave:
   network_key: !secret network_key
 
 ```
-If this unit has been paired with Z-Wave devices from before, they will be added automatically in Home Assistant. 
 
+Include the secret network key, read more here about the network key management: [https://www.home-assistant.io/docs/z-wave/installation/](https://www.home-assistant.io/docs/z-wave/installation/)
 ```bash
 assistant@linuxbabe:~$ cd /home/homeassistant/.homeassistant/
 assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo nano secrets.yaml 
@@ -317,22 +299,38 @@ assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo nano secrets.yaml
 # Learn more at https://home-assistant.io/docs/configuration/secrets/
 some_password: welcome
 network_key: "0x2D, 0xE2, 0x1F, 0xAB, 0xAE, 0xA8, 0xF2, 0xXE, 0x79, 0x2D, 0x3C, 0x21, 0x11, 0x3E, 0xF5, 0x9E"
-
+```
+Secure the `secrets.yaml` file:
+```bash
 assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo chmod 600 secrets.yaml 
 ```
-
-(Remember to also add `network_key:` underneath `usb_path:` if this has been generated).
+If this unit has been paired with Z-Wave devices from before, the devices will be added automatically in Home Assistant. 
 
 ### Z-Wave dependencies
 Install the necesseary dependencies to make Z-Wave work:
 ```bash
-$ sudo apt-get install -y make libudev-dev g++ libyaml-dev libdpkg-perl python3.7-dev
+$ sudo apt-get install -y make libudev-dev g++ libyaml-dev libdpkg-perl
 ```
 
-Restart Home Assistant through Configuration > Server Controls > and Server Management. 
+Restart Home Assistant through Configuration > Server Controls > and Server Management or with `sudo systemctl restart home-assistant@homeassistant`.
 
 The first time Home Assistant uses `zwave` it will download `python_openzwave` in the background (Z-Wave drivers). It might take some time. 
 
+Edit the newly downloaded `options.xml` file and add the same network key there as well:
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo nano options.xml 
+(...)
+<Option name="NetworkKey" value="0x2D, 0xE2, 0x1F, 0xAB, 0xAE, 0xA8, 0xF2, 0xXE, 0x79, 0x2D, 0x3C, 0x21, 0x11, 0x3E, 0xF5, 0x9E" />
+(...)
+```
+As we did with our `secrets.yaml` file, secure the `options.xml` too:
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo chmod 600 options.xml 
+```
+Restart Home Assistant again;
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo systemctl restart home-assistant@homeassistant
+```
 
 ## Controlling Home Assistant from Apple Home
 ### Apple Home dependencies
@@ -445,6 +443,32 @@ Click `SET CONFIG PARAMETER`.
 
 * Make sure that also the entity `binary_sensor.aeon_labs_zw100_multisensor_6_sensor` also uses `Binary Sensor Report`, as stated as best practise here: [https://www.home-assistant.io/docs/z-wave/entities/](https://www.home-assistant.io/docs/z-wave/entities/).
 
+## Fantem (Oomi) Unknown: type=0002, id=0070
+I have a door / window sensor from Fantem, which is not yet listed with configuration files on the OpenZwave project page. Anywhow, this is the same device as the Aeotec Zw112. So we'll just link this configuration file to that device.
+
+```bash
+sudo nano /srv/homeassistant/lib/python3.8/site-packages/python_openzwave/ozw_config/manufacturer_specific.xml
+(...)
+<Manufacturer id="016a" name="Fantem (Oomi)">
+(...)
+                <Product type="0002" id="0070" name="ZW112 Door Window Sensor 6" config ="aeotec/zw112.xml" />
+</Manufacturer>
+```
+
+To make it take effect, remove the `zwcfg_*.xml` inside of `/home/homeassistant/.homeassistant`.
+```bash
+sudo systemctl stop home-assistant@homeassistant
+sudo mv zwcfg_0xac103ded.xml zwcfg_0xac103ded.backup
+sudo systemctl start home-assistant@homeassistant
+```
+
+Go to Configuration > Devices and delete all the unknown entities. Restart `sudo systemctl restart home-assistant@homeassistant`. 
+
+Go to Configuration > Z-Wave and `ADD NODE SECURE` and follow the inclusion settings for the device from the manual. Now it should show up as the ZW112 device. 
+
+```
+
+
 
 ## Remote access with TLS/SSL via Let's Encrypt
 Follow this excellent guide over here [https://www.home-assistant.io/docs/ecosystem/certificates/lets_encrypt/](https://www.home-assistant.io/docs/ecosystem/certificates/lets_encrypt/)
@@ -501,13 +525,31 @@ homeassistant@linuxbabe:/srv/homeassistant$ source bin/activate
 
 ## Upgrade Home Assistant
 ```bash
-photon:~ keyne$ ssh -l carolee 192.168.112.10
-carolee@goodgold:~$ screen
-carolee@goodgold:~$ sudo -u homeassistant -H -s
-[sudo] password for carolee: 
-
-homeassistant@goodgold:/home/carolee$ source /srv/homeassistant/bin/activate
-(homeassistant) homeassistant@goodgold:/home/carolee$ pip3 install --upgrade homeassistant
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ cd /srv/
+assistant@linuxbabe:/srv$ cd homeassistant
+assistant@linuxbabe:/srv/homeassistant$ sudo -u homeassistant -H -s
+[sudo] password for assistant: 
+homeassistant@linuxbabe:/srv/homeassistant$ source bin/activate
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ 
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl | grep home
+  home-assistant@homeassistant.service                                                               loaded active running   Home Assistant                                                               
+  system-home\x2dassistant.slice                                                                     loaded active active    system-home\x2dassistant.slice                       
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl status home-assistant@homeassistant
+● home-assistant@homeassistant.service - Home Assistant
+   Loaded: loaded (/etc/systemd/system/home-assistant@homeassistant.service; enabled; vendor preset: enabled)
+   Active: active (running) since Mon 2020-03-02 00:08:17 CET; 1 months 3 days ago
+ Main PID: 994 (hass)
+    Tasks: 40 (limit: 3194)
+   CGroup: /system.slice/system-home\x2dassistant.slice/home-assistant@homeassistant.service
+           └─994 /srv/homeassistant/bin/python3 /srv/homeassistant/bin/hass -c /home/homeassistant/.homeassistant
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl stop home-assistant@homeassistant
+==== AUTHENTICATING FOR org.freedesktop.systemd1.manage-units ===
+Authentication is required to stop 'home-assistant@homeassistant.service'.
+Authenticating as: Home Assistant (assistant)
+Password: 
+==== AUTHENTICATION COMPLETE ===
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ pip3 install --upgrade homeassistant
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl start home-assistant@homeassistant
 ```
 
 ## Starting Home Assistant
@@ -685,7 +727,7 @@ assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo nano /etc/samba/smb
 
 ```
 
-Restart the samba:
+Restart the samba service:
 ```bash
 assistant@linuxbabe:~$ sudo service smbd restart
 ```
@@ -705,7 +747,8 @@ Press enter to see a dump of your service definitions
 ^C
 ```
 
-On MacOS, open Finder and press `command + K`. Connect to server `smb://172.16.32.17/homeassistant/.homeassistant` to see your configuration files. Now you can directly edit the files from there.
+On MacOS, open Finder and press `command + K`. Connect to server `smb://172.16.32.17/homeassistant/.homeassistant` to see your configuration files. 
+Now you can directly edit the files from there.
 
 ## Enable Multi-factor Authentication Modules
 Go to your profile by clicking your name down to the left.
@@ -729,21 +772,19 @@ crw-rw---- 1 root dialout 188, 0 Feb  4 22:39 /dev/ttyUSB0
 ```
 Following this guide [https://www.home-assistant.io/integrations/zha/](https://www.home-assistant.io/integrations/zha/)
 
-```
+```bash
 ZHA
 USB Device Path: /dev/ttyUSB0
 Radio Type: deconz
 ```
 
-
 deCONZ by dresden elektronik is a software that communicates with ConBee/RaspBee Zigbee gateways and exposes Zigbee devices that are connected to the gateway.
-
-
 
 ## Authors
 Mr. Johnson
 
 ## Acknowledgments
+* [https://translate.google.com/translate?sl=auto&tl=en&u=https%3A%2F%2Fforum.jeedom.com%2Fviewtopic.php%3Ft%3D39395](https://translate.google.com/translate?sl=auto&tl=en&u=https%3A%2F%2Fforum.jeedom.com%2Fviewtopic.php%3Ft%3D39395)
 * [https://www.home-assistant.io/integrations/zha/](https://www.home-assistant.io/integrations/zha/)
 * [https://josiahvorst.com/a-superior-zigbee-experience-with-deconz-conbee-ii-home-assistant/](https://josiahvorst.com/a-superior-zigbee-experience-with-deconz-conbee-ii-home-assistant/)
 * [https://www.home-assistant.io/integrations/systemmonitor](https://www.home-assistant.io/integrations/systemmonitor)
