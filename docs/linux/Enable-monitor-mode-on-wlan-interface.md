@@ -91,7 +91,7 @@ phy#1
 ### Come back
 ```bash
 ┌─[✗]─[black@mamba]─[/etc]
-└──╼ $sudo airodump-ng stop wlan0mon
+└──╼ $sudo airmon-ng stop wlan0mon
 ┌─[✗]─[black@mamba]─[/etc]
 └──╼ $sudo service network-manager restart
 ┌─[✗]─[black@mamba]─[/etc]
