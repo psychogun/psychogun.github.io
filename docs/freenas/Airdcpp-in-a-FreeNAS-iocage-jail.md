@@ -24,26 +24,30 @@ These instructions will download, compile, install and run AirDC++ in an iocage 
 
 ## Compiling
 Update and upgrade your iocage jail first:
-```tcsh
+```bash
 root@Airdccp:/ # pkg upgrade && pkg update
 ```
+
 To compile Airdcpp on FreeNAS (FreeBSD), we need to install all the required dependencies listed here
 [https://airdcpp-web.github.io/docs/installation/dependencies.html](https://airdcpp-web.github.io/docs/installation/dependencies.html):
-```tcsh
+```bash
 root@Airdccp:/ # pkg install gcc cmake pkgconf npm node python boost-all bzip2 leveldb miniupnpc openssl websocketpp tbb php72-maxminddb git nano screen
 ```
+
 Use git clone to download AirDC++ in an appropiate folder:
-```tcsh
+```bash
 root@Airdccp:/ # cd /usr/local/
 root@Airdccp:/usr/local# git clone https://github.com/airdcpp-web/airdcpp-webclient.git
-````
+```
+
 Hop on in to the newly created folder and call on `cmake .` to generate a makefile:
-```tcsh
+```bash
 root@Airdccp:/usr/local # cd airdcpp-webclient/
 root@Airdccp:/usr/local/airdcpp-webclient # cmake .
 ```
+
 Use `make` to compile AirDC++ with gcc (the number after -j indicates how many processor cores you are giving the task):
-```
+```bash
 root@Airdccp:/usr/local/airdcpp-webclient # make -j6
 ```
 
@@ -81,7 +85,6 @@ Add another user? (yes/no): no
 ```
 
 ## Install
-Install:
 ```bash
 root@Airdccp:/usr/local/airdcpp-webclient # make install
 ```
