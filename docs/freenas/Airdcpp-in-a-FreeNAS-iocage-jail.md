@@ -28,9 +28,9 @@ Update and upgrade your iocage jail first:
 root@Airdccp:/ # pkg upgrade && pkg update
 ```
 To compile Airdcpp on FreeNAS (FreeBSD), we need to install all the required dependencies listed here
-[https://airdcpp-web.github.io/docs/installation/dependencies.html](https://airdcpp-web.github.io/docs/installation/dependencies.html).
+[https://airdcpp-web.github.io/docs/installation/dependencies.html](https://airdcpp-web.github.io/docs/installation/dependencies.html):
 ```tcsh
-root@Airdccp:/ # pkg install gcc cmake pkgconf npm node python boost-all bzip2 leveldb miniupnpc openssl websocketpp tbb php72-maxminddb git nano 
+root@Airdccp:/ # pkg install gcc cmake pkgconf npm node python boost-all bzip2 leveldb miniupnpc openssl websocketpp tbb php72-maxminddb git nano screen
 ```
 Use git clone to download AirDC++ in an appropiate folder:
 ```tcsh
@@ -82,21 +82,23 @@ Add another user? (yes/no): no
 
 ## Install
 Install:
-```
+```bash
 root@Airdccp:/usr/local/airdcpp-webclient # make install
 ```
 First time you are using AirDC++, you have to configure it:
-```
+```bash
 root@Airdcpp:/usr/local/airdcpp-webclient # airdcppd/airdcppd --configure
 ```
 The `--configure` parameter will create a config file, `WebServer.xml`, under your root home folder which we will copy to our created user' home space:
-```
+```bash
 root@Airdcpp:/usr/local/airdcpp-webclient # cp /root/.airdc++/WebServer.xml /home/zanko/.airdc++/WebServer.xml
 ```
 Change ownership of the .airdc++ folder which we just created, recursively (-R):
-```
+```bash
 root@Airdcpp:/usr/local/airdcpp-webclient # chown -R zanko:zanko /home/zanko/.airdc++/
 ```
+
+### Manual run
 Check if you are able to run AirDC++ as our newly created user: (more about the command line options can be found here: [https://airdcpp-web.github.io/docs/usage/command-line-options.html](https://airdcpp-web.github.io/docs/usage/command-line-options.html)
 Basically, what you now want to do is open `screen` and run the command below and then detach (ctrl + a, d) from the `screen` session.
 ```
@@ -112,8 +114,101 @@ root@Airdccp:/ # top
 Hit ctrl + c to close `top`.
 To connect to your session again, write `screen -r`.
 
+### Automatic run
+Create a file called `airdcppd` in `/usr/local/etc/rc.d/`:
+```bash
+root@Airdcpp:/usr/local/bin # nano /usr/local/etc/rc.d/airdcppd
+
+#!/bin/sh
+#
+# PROVIDE: airdcpp
+# REQUIRE: DAEMON
+# BEFORE:  LOGIN
+# KEYWORD: shutdown
+#
+# Add the following line to /etc/rc.conf.local or /etc/rc.conf
+# to enable this service:
+#           airdcppd_enable="YES"
+# Start it with:
+#           service airdcppd start
+#
+# Stop it with:
+#           service airdcppd stop
+#
+#
+#
+#
+# zanko:  The user account airdcppd daemon runs as what
+#           you want it to be. It uses 'zanko' user by
+#           default. Do not sets it as empty or it will run
+#           as root.
+# airdcpp_dir:   Directory where airdccpd lives.
+#           Default: /usr/local/airdcpp-webclient/airdcppd
+# airdcpp_pid:  The name of the pidfile to create.
+#               Custom pid file path (default: /.airdcppd.pid)
+#
+# airdcpp_conf: The directory of where WebServer.xml resides
+#
+#
+# https://psychogun.github.io/docs/freenas/Airdcpp-in-a-FreeNAS-iocage-jail/
+#
+
+. /etc/rc.subr
+
+name="airdcppd"
+rcvar="${name}_enable"
+pidfile="/var/run/${name}/${name}.pid"
+
+load_rc_config ${name}
+: "${airdcppd_enable:="NO"}"
+: "${airdcppd_user:="zanko"}"
+: "${airdcppd_dir:="/usr/local/airdcpp-webclient/airdcppd"}"
+: "${airdcppd_conf:="/home/zanko/.airdc++/"}"
+
+
+command="$airdcppd_dir/airdcppd"
+command_args="-d -p=$pidfile -c=$airdcppd_conf"
+
+
+start_precmd="${name}_start_precmd"
+airdcppd_start_precmd() {
+        if [ $($ID -u) != 0 ]; then
+                err 1 "Must be root."
+        fi
+
+        if [ ! -d /var/run/$name ]; then
+                install -do $airdcppd_user /var/run/$name
+        fi
+}
+
+load_rc_config ${name}
+run_rc_command "$1"
+
+```
+Make the file executable:
+```bash
+root@Airdcpp:/usr/local/etc/rc.d # chmod +x /usr/local/etc/rc.d/airdcppd 
+```
+
+Add the following line to `/etc/rc.conf` to enable this service:
+```bash
+root@Airdcpp:/usr/local/bin # nano /etc/rc.conf
+
+(...)
+# Enable Airdcppd
+airdcppd_enable="YES"
+```
+
+Start the `airdcppd` daemon:
+```bash
+root@Airdcpp:/usr/local/etc/rc.d # service airdcppd start
+```
+
 ## Authors
 Mr. Johnson
 
 ## Acknowledgments
+* [https://www.reddit.com/r/freenas/comments/9ijrsp/ive_read_dozens_of_guides_but_i_still_dont/](https://www.reddit.com/r/freenas/comments/9ijrsp/ive_read_dozens_of_guides_but_i_still_dont/)
+* [https://groups.google.com/forum/#!topic/openhab/o1FIhkvSq90](https://groups.google.com/forum/#!topic/openhab/o1FIhkvSq90)
+* [https://airdcpp-web.github.io/docs/usage/command-line-options.html](https://airdcpp-web.github.io/docs/usage/command-line-options.html)
 
