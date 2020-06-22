@@ -123,22 +123,22 @@ Use `raspi-config` and enter the `Network Options` menu and change the `Hostname
 
 ### Update & Upgrade
 ```bash
-admin@NTPSERVER01:~ $ sudo apt-get update
-admin@NTPSERVER01:~ $ sudo apt-get upgrade
-admin@NTPSERVER01:~ $ sudo reboot
+admin@raspberrypi:~ $ sudo apt-get update
+admin@raspberrypi:~ $ sudo apt-get upgrade
+admin@raspberrypi:~ $ sudo reboot
 ```
 
 ### Set your time zone
 ```bash
-admin@NTPSERVER01:~ $ date
+admin@raspberrypi:~ $ date
 Sat 11 Jan 21:22:53 GMT 2020
-admin@NTPSERVER01:~ $ sudo dpkg-reconfigure tzdata
+admin@raspberrypi:~ $ sudo dpkg-reconfigure tzdata
 
 Current default time zone: 'Europe/Paris'
 Local time is now:      Sat Jan 11 22:24:07 CET 2020.
 Universal Time is now:  Sat Jan 11 21:24:07 UTC 2020.
 
-admin@NTPSERVER01:~ $ date
+admin@raspberrypi:~ $ date
 Sat 11 Jan 22:24:16 CET 2020
 ```
 
@@ -157,16 +157,16 @@ Fortunately, it's possible to shuffle around the hardware in software (!) to tak
 This refers to the serial console, which is generally useful, but as we prefer to use the UART for our GPS Hat, we have to disable the consoles. This is done in several steps.
 
 ```bash
-admin@NTPSERVER01:~ $ sudo systemctl stop serial-getty@ttyAMA0.service
-admin@NTPSERVER01:~ $ sudo systemctl disable serial-getty@ttyAMA0.service
+admin@raspberrypi:~ $ sudo systemctl stop serial-getty@ttyAMA0.service
+admin@raspberrypi:~ $ sudo systemctl disable serial-getty@ttyAMA0.service
 ```
 
 This prevents the serial console programs from starting, but does not keep the Linux kernel from attempting to use it. This must be disabled by editing `/boot/cmdline.txt` and removing the serial portions shown in strikeout text (~~console=serial0,115200~~):
 ```bash
-admin@NTPSERVER01:~ $ sudo nano /boot/cmdline.txt
-admin@NTPSERVER01:~ $ more /boot/cmdline.txt 
+admin@raspberrypi:~ $ sudo nano /boot/cmdline.txt
+admin@raspberrypi:~ $ more /boot/cmdline.txt 
 console=serial0,115200 console=tty1 root=PARTUUID=6c586e13-02 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait
-admin@NTPSERVER01:~ $ 
+admin@raspberrypi:~ $ 
 ```
 
 Change to `console=tty1 root=PARTUUID=6c586e13-02 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait`.
@@ -175,7 +175,7 @@ Change to `console=tty1 root=PARTUUID=6c586e13-02 rootfstype=ext4 elevator=deadl
 I didn't care about Bluetooth so was happy to disable it entirely and use the `/dev/ttyAMA0` serial port for the GPS, and this is easy to do with the Device Tree Overlay facility: these allow easy tailoring of low-level device behavior with a simple config file.
 Edit `/boot/config.txt` and add the lines:
 ```bash
-admin@NTPSERVER01:~ $ sudo nano /boot/config.txt
+admin@raspberrypi:~ $ sudo nano /boot/config.txt
 # Use the /dev/ttyAMA0 UART for user applications (GPS), not Bluetooth
 dtoverlay=pi3-disable-bt
 ```
@@ -191,14 +191,14 @@ All changes to `/boot/config.txt` require a reboot to make it so. My configs do 
 Though not strictly necessary, we can also disable the hciuart service that nominally attempts to talk to the UART; this may prevent some warnings in the logfiles:
 
 ```bash
-admin@NTPSERVER01:~ $ sudo systemctl disable hciuart
+admin@raspberrypi:~ $ sudo systemctl disable hciuart
 Removed /etc/systemd/system/multi-user.target.wants/hciuart.service.
-admin@NTPSERVER01:~ $ 
+admin@raspberrypi:~ $ 
 ```
 
-If this has been done correctly (and after a reboot - `admin@NTPSERVER01:~ $ sudo reboot`), we expect to see NMEA data on that serial port, which you can see directly with:
+If this has been done correctly (and after a reboot - `admin@raspberrypi:~ $ sudo reboot`), we expect to see NMEA data on that serial port, which you can see directly with:
 ```bash
-admi@NTPSERVER01:~ $ cat /dev/ttyAMA0
+admi@raspberrypi:~ $ cat /dev/ttyAMA0
 $GPGGA,052731.000,3343.3943,N,11749.3064,W,2,04,3.93,24.8,M,-34.2,M,0000,0000*65
 
 $GPGSA,A,3,13,17,28,19,,,,,,,,,4.05,3.93,0.99*0C
@@ -216,13 +216,13 @@ Linux has special kernel support for Pulse Per Second input via a GPIO pin to he
 ### Install pps-tools
 These are a standard package, though not installed by default; they are added with:
 ```bash
-admin@NTPSERVER01:~ $ sudo apt-get install pps-tools
+admin@raspberrypi:~ $ sudo apt-get install pps-tools
 ```
 
 ### Enable PPS support in the kernel
 We have to tell the Linux kernel that PPS support is desired, and which GPIO pin to use for it. As with the UART configuration, this is done in `/boot/config.txt` by adding this to the bottom:
 ```bash
-admin@NTPSERVER01:~ $ sudo nano /boot/config.txt 
+admin@raspberrypi:~ $ sudo nano /boot/config.txt 
 # enable GPS PPS
 dtoverlay=pps-gpio,gpiopin=4
 ```
@@ -234,7 +234,7 @@ Do a `sudo reboot` after this editing.
 ### Test the PPS support
 With this done, the special device `/dev/pps0` is available to poll the PPS signal, and it can be checked out with the `ppstest` program:
 ```bash
-admin@NTPSERVER01:~ $ sudo ppstest /dev/pps0
+admin@raspberrypi:~ $ sudo ppstest /dev/pps0
 trying PPS source "/dev/pps0"
 found PPS source "/dev/pps0"
 ok, found 1 source(s), now start fetching data...
@@ -243,7 +243,7 @@ time_pps_fetch() error -1 (Connection timed out)
 ```
 `ppstest` timed out because my antenna did not have any GPS coverage. This was the intended result:
 ```bash
-admin@NTPSERVER01:~ $ sudo ppstest /dev/pps0
+admin@raspberrypi:~ $ sudo ppstest /dev/pps0
 trying PPS source "/dev/pps0"
 found PPS source "/dev/pps0"
 ok, found 1 source(s), now start fetching data...
@@ -268,7 +268,7 @@ There are a number of services that can decode and interpret the NMEA data comin
 For more information about NMEA data, visit [https://www.gpsworld.com/what-exactly-is-gps-nmea-data/](https://www.gpsworld.com/what-exactly-is-gps-nmea-data/).
 
 ```bash
-admin@NTPSERVER01:~ $ sudo apt-get install gpsd
+admin@raspberrypi:~ $ sudo apt-get install gpsd
 ```
 
 ### Create /etc/default/gpsd
@@ -276,7 +276,7 @@ This file contains the default parameters for the service when it starts, and th
 
 `gpsd` will definitely not work right without this.
 ```bash
-admin@NTPSERVER01:~ $ sudo nano /etc/default/gpsd 
+admin@raspberrypi:~ $ sudo nano /etc/default/gpsd 
 # /etc/default/gpsd
 #
 # Default settings for the gpsd init script and the hotplug wrapper.
@@ -304,18 +304,18 @@ Since we have a fulltime connection via the hardware serial port, there's no nee
 
 ### Configure gpsd service
 ```bash
-admin@NTPSERVER01:~ $ sudo systemctl enable gpsd
+admin@raspberrypi:~ $ sudo systemctl enable gpsd
 Synchronizing state of gpsd.service with SysV service script with /lib/systemd/systemd-sysv-install.
 Executing: /lib/systemd/systemd-sysv-install enable gpsd
 Created symlink /etc/systemd/system/multi-user.target.wants/gpsd.service → /lib/systemd/system/gpsd.service.
-admin@NTPSERVER01:~ $ sudo systemctl start gpsd
-admin@NTPSERVER01:~ $ 
+admin@raspberrypi:~ $ sudo systemctl start gpsd
+admin@raspberrypi:~ $ 
 ```
 
 ### Check status
 Assuming the "start" operation succeeded, check the status more generally via `systemctl`:
 ```
-admin@NTPSERVER01:~ $ sudo systemctl status gpsd
+admin@raspberrypi:~ $ sudo systemctl status gpsd
 ● gpsd.service - GPS (Global Positioning System) Daemon
    Loaded: loaded (/lib/systemd/system/gpsd.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2020-01-09 17:47:55 GMT; 8min ago
@@ -327,7 +327,7 @@ admin@NTPSERVER01:~ $ sudo systemctl status gpsd
 
 Jan 09 17:47:55 raspberrypi systemd[1]: Starting GPS (Global Positioning System) Daemon...
 Jan 09 17:47:55 raspberrypi systemd[1]: Started GPS (Global Positioning System) Daemon.
-admin@NTPSERVER01:~ $ 
+admin@raspberrypi:~ $ 
 ```
 Here we're looking for the status is enabled and active and running, possibly with a few snippets of logfiles after.
 
@@ -337,8 +337,8 @@ Now for the moment of truth: we're going to install the `gpsmon` program to see 
 
 The middle bottom box should also indicate a PPS value (a decimal number, which should be very small if your time on your machine is close to correct).
 ```bash
-admin@NTPSERVER01:~ $ sudo apt-get install gpsd-clients
-admin@NTPSERVER01:~ $ gpsmon
+admin@raspberrypi:~ $ sudo apt-get install gpsd-clients
+admin@raspberrypi:~ $ gpsmon
 
 /dev/ttyAMA0                  NMEA0183>
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -388,10 +388,10 @@ To read more about NTPSec vs NTP, go to https://www.ntpsec.org
 
 To ensure the correct functioning of NTPsec, we should also disable the local time synchronization service. 
 ```bash
-administrator@H37BNTP01:~ $ sudo systemctl stop systemd-timesyncd.service
+administrator@raspberrypi:~ $ sudo systemctl stop systemd-timesyncd.service
 [sudo] password for administrator: 
 Warning: The unit file, source configuration file or drop-ins of systemd-timesyncd.service changed on disk. Run 'systemctl daemon-reload' to reload units.
-administrator@H37BNTP01:~ $ sudo systemctl disable systemd-timesyncd.service
+administrator@raspberrypi:~ $ sudo systemctl disable systemd-timesyncd.service
 Removed /etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service.
 Removed /etc/systemd/system/dbus-org.freedesktop.timesync1.service.
 ```
@@ -401,37 +401,37 @@ Removed /etc/systemd/system/dbus-org.freedesktop.timesync1.service.
 Install the build prerequisites:
 
 ```bash
-admin@NTPSERVER01:~ $ sudo apt install bison libcap-dev libssl-dev libreadline-dev git python-dev bc
+admin@raspberrypi:~ $ sudo apt install bison libcap-dev libssl-dev libreadline-dev git python-dev bc
 ```
 
 Build NTPsec. The `--refclock` option says to include only shared-memory refclock support, excluding all other drivers (GPS, PTP, SHM, etc) `--refclock=all`:
 
 ```bash
-admin@NTPSERVER01:~ $ cd /home/pi/
-admin@NTPSERVER01:~ $ git clone https://gitlab.com/NTPsec/ntpsec.git
-admin@NTPSERVER01:~ $ cd ntpsec/
-admin@NTPSERVER01:~/ntpsec $ ./waf configure --refclock=shm
+admin@raspberrypi:~ $ cd /home/pi/
+admin@raspberrypi:~ $ git clone https://gitlab.com/NTPsec/ntpsec.git
+admin@raspberrypi:~ $ cd ntpsec/
+admin@raspberrypi:~/ntpsec $ ./waf configure --refclock=shm
 (...)
 'configure' finished successfully (46.675s)
 ```
 Finally, we build the source code:
 ```
-admin@NTPSERVER01:~/ntpsec $ ./waf build
+admin@raspberrypi:~/ntpsec $ ./waf build
 ```
 Install the binaries:
 ```bash
-admin@NTPSERVER01:~/ntpsec $ sudo ./waf install
+admin@raspberrypi:~/ntpsec $ sudo ./waf install
 ```
 
 Delete the temporary working directory (NTPsec source code):
 ```bash
-administrator@H37BNTP01:~/ntpsec $ cd ..
-administrator@H37BNTP01:~ $ rm -r -f ntpsec/
+administrator@raspberrypi:~/ntpsec $ cd ..
+administrator@raspberrypi:~ $ rm -r -f ntpsec/
 ```
 
 Let’s check the NTPsec version number:
 ```bash
-administrator@H37BNTP01:~ $ sudo /usr/local/sbin/ntpd -V
+administrator@raspberrypi:~ $ sudo /usr/local/sbin/ntpd -V
 ntpd ntpsec-1.1.8+ 2020-03-06T23:05:21Z (git rev f0bd02b25)
 ```
 ### Setting up the NTP Service (Systemd)
@@ -441,28 +441,28 @@ Because Raspbian no longer includes `ntpd`, we need to add a user for our NTPSec
 
 Create ntp directories:
 ```bash
-administrator@H37BNTP01:~ $ sudo mkdir -p /var/lib/ntp/certs
-administrator@H37BNTP01:~ $ sudo mkdir -p /var/log/ntpstats
+administrator@raspberrypi:~ $ sudo mkdir -p /var/lib/ntp/certs
+administrator@raspberrypi:~ $ sudo mkdir -p /var/log/ntpstats
 ```
 Add system user `ntp`:
 ```bash
-administrator@H37BNTP01:~ $ sudo adduser --system --no-create-home --disabled-login --gecos '' ntp
+administrator@raspberrypi:~ $ sudo adduser --system --no-create-home --disabled-login --gecos '' ntp
 ```
 Add group `ntp`:
 ```bash
-administrator@H37BNTP01:~ $ sudo addgroup --system ntp
+administrator@raspberrypi:~ $ sudo addgroup --system ntp
 ```
 Add user `ntp` to group `ntp`:
 ```bash
-administrator@H37BNTP01:~ $ sudo addgroup ntp ntp
+administrator@raspberrypi:~ $ sudo addgroup ntp ntp
 ```
 Set folder permissions (recursive):
 ```bash
-administrator@H37BNTP01:~ $ sudo chown -R ntp:ntp /var/lib/ntp /var/log/ntpstats
+administrator@raspberrypi:~ $ sudo chown -R ntp:ntp /var/lib/ntp /var/log/ntpstats
 ```
 Enable the NTPsec service:
 ```bash
-administrator@H37BNTP01:~ $ sudo systemctl enable ntpd
+administrator@raspberrypi:~ $ sudo systemctl enable ntpd
 Created symlink /etc/systemd/system/multi-user.target.wants/ntpd.service → /lib/systemd/system/ntpd.service.
 ```
 Now NTPsec is executed automatically when rebooting the system. At the moment the service is not running yet, because we have to configure it first.
@@ -475,7 +475,7 @@ Note that `gpsd` also provides a TCP-based network service for all of the data i
 The configuration is a little tricky and is not at all intuititive, so we'll do checking in steps.
 First is the tool `ntpshmmon`, which monitors shared memory as if it were a client, and reports the counters found:
 ```bash
-admin@NTPSERVER01:~ $ ntpshmmon
+admin@raspberrypi:~ $ ntpshmmon
 ntpshmmon version 1
 #      Name Seen@                Clock                Real                 L Prec
 sample NTP2 1579299789.000814106 1579299789.000017440 1579299789.000000000 0 -30
@@ -489,8 +489,8 @@ The key values here are `NTP0` (which represents the time, but not displayed her
 Create your own NTP configuration with this content as `ntp.conf`:
 
 ```bash
-admin@NTPSERVER01:~/ntpsec $ sudo touch /etc/ntp.conf
-admin@NTPSERVER01:~/ntpsec $ sudo nano /etc/ntp.conf
+admin@raspberrypi:~/ntpsec $ sudo touch /etc/ntp.conf
+admin@raspberrypi:~/ntpsec $ sudo nano /etc/ntp.conf
 
 # /etc/ntp.conf, configuration for ntpd; see ntp.conf(5) for help
 
@@ -580,7 +580,7 @@ restrict source notrap nomodify noquery
 # next lines.  Please do this only if you trust everybody on the network!
 #disable auth
 #broadcastclient
-admin@NTPSERVER01:~/ntpsec $ 
+admin@raspberrypi:~/ntpsec $ 
 ```
 
 In the first example, the Raspberry Pi synchronizes its clock with a public NTPsec time server using a classical unsecured NTP connection.
@@ -636,7 +636,7 @@ This is a good thing except for NTP time servers themselves.
 Remove `ntp-servers` from `/etc/dhcp/dhclient.conf`:
 
 ```bash
-admin@NTPSERVER01:~ $ sudo nano /etc/dhcp/dhclient.conf 
+admin@raspberrypi:~ $ sudo nano /etc/dhcp/dhclient.conf 
 (...)
 send host-name = gethostname();
 request subnet-mask, broadcast-address, time-offset, routers,
@@ -648,22 +648,22 @@ request subnet-mask, broadcast-address, time-offset, routers,
 
 Delete these related files: `/lib/dhcpcd/dhcpcd-hooks/50-ntp.conf`
 ```bash
-admin@NTPSERVER01:~ $ sudo mv /lib/dhcpcd/dhcpcd-hooks/50-ntp.conf /lib/dhcpcd/dhcpcd-hooks/50-ntp.bak
+admin@raspberrypi:~ $ sudo mv /lib/dhcpcd/dhcpcd-hooks/50-ntp.conf /lib/dhcpcd/dhcpcd-hooks/50-ntp.bak
 ```
 It probably requires reboot for this to take effect. At this point, you will be able to configure NTP support entirely without interference from the rest of the system.
 ```bash
-admin@NTPSERVER01:~ $ sudo reboot
+admin@raspberrypi:~ $ sudo reboot
 ```
 ### Status of ntp
 After the reboot, check the `ntp` status with `ntpq -p`:
 ```bash
-admin@NTPSERVER01:~ $ ntpq -p
+admin@raspberrypi:~ $ ntpq -p
      remote                                   refid      st t when poll reach   delay   offset   jitter
 =======================================================================================================
 +ntp1.glypnod.com                        204.123.2.72     2 7   66   64    2 180.8374  -1.0179   0.0000                                                                     
 *SHM(2)                                  .PPS.            0 l   56   64    1   0.0000  -0.0181   0.0000
 xSHM(0)                                  .GPS.            0 l   15   64    3   0.0000 -506.770 300.2489
-admin@NTPSERVER01:~ $ 
+admin@raspberrypi:~ $ 
 ```
 * `*` means that this is the preferred time server
 
@@ -680,18 +680,18 @@ synchronised to NTP server (192.36.143.130) at stratum 2
 
 Compared to our stratum 1 server;
 ```bash
-admin@NTPSERVER01:~ $ ntpstat
+admin@raspberrypi:~ $ ntpstat
 synchronised to UHF radio at stratum 1 
    time correct to within 2 ms
    polling server every 64 s
-admin@NTPSERVER01:~ $ 
+admin@raspberrypi:~ $ 
 ```
 
 ## Share our time
 Now that this raspberry is syncing with a UFH radio at stratum 1, we want to make our raspberry available as a NTP server. This is already configured in our `ntp.conf` file, the section with access control configuration. You can check if our Raspberry is allowing NTP traffic with `netstat`:
 
 ```bash
-administrator@H37BNTP01:~ $ netstat -a | grep ntp                      
+administrator@raspberrypi:~ $ netstat -a | grep ntp                      
 udp        0      0 localhost:ntp           0.0.0.0:*                          
 udp        0      0 0.0.0.0:ntp             0.0.0.0:*                          
 udp6       0      0 fe80::f347:77da:42d:ntp [::]:*                             
@@ -746,7 +746,7 @@ You should now see under Status > NTP that our NTP server at `192.168.28.2` is o
 ntpd will see them as two different SHM devices (Shared Host Memory).
 
 ```bash
-admin@NTPSERVER01:~ $ sudo apt-get install gpsd gpsd-clients python-gps ntp pps-tools
+admin@raspberrypi:~ $ sudo apt-get install gpsd gpsd-clients python-gps ntp pps-tools
 Reading package lists... Done
 Building dependency tree       
 Reading state information... Done
@@ -770,7 +770,7 @@ Do you want to continue? [Y/n] y
 ```
 ### Reboot
 ```bash
-admin@NTPSERVER01:~ $ sudo reboot
+admin@raspberrypi:~ $ sudo reboot
 ```
 
 ## LSUSB
@@ -794,7 +794,7 @@ ubuntu@ubuntu:~$
 
 ## Edit “/etc/default/gpsd”
 ```bash
-admin@NTPSERVER01:~ $ sudo nano /etc/default/gpsd
+admin@raspberrypi:~ $ sudo nano /etc/default/gpsd
 
 # Default settings for the gpsd init script and the hotplug wrapper.
 
@@ -816,12 +816,12 @@ GPSD_OPTIONS="-F /var/run/gpsd.sock -b -n"
 
 ## Restart the gpsd Service     
 ```bash
-admin@NTPSERVER01:~ $ sudo systemctl enable gpsd
+admin@raspberrypi:~ $ sudo systemctl enable gpsd
 Synchronizing state of gpsd.service with SysV service script with /lib/systemd/systemd-sysv-install.
 Executing: /lib/systemd/systemd-sysv-install enable gpsd
 Created symlink /etc/systemd/system/multi-user.target.wants/gpsd.service → /lib/systemd/system/gpsd.service.
-admin@NTPSERVER01:~ $ sudo systemctl start gpsd
-admin@NTPSERVER01:~ $ sudo systemctl status gpsd
+admin@raspberrypi:~ $ sudo systemctl start gpsd
+admin@raspberrypi:~ $ sudo systemctl status gpsd
 ● gpsd.service - GPS (Global Positioning System) Daemon
    Loaded: loaded (/lib/systemd/system/gpsd.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2020-01-05 21:18:31 GMT; 4s ago
@@ -834,14 +834,14 @@ admin@NTPSERVER01:~ $ sudo systemctl status gpsd
 
 Jan 05 21:18:31 raspberrypi systemd[1]: Starting GPS (Global Positioning System) Daemon...
 Jan 05 21:18:31 raspberrypi systemd[1]: Started GPS (Global Positioning System) Daemon.
-admin@NTPSERVER01:~ $ 
+admin@raspberrypi:~ $ 
 ```
 
 ### cgps -s
 At this point, you should be able to see a text-mode output from your GPS receiver by running the command `cgps -s`. 
 This will display the details of your current location with values, something like the following:
 ```bash
-admin@NTPSERVER01:~ $ cgps -s
+admin@raspberrypi:~ $ cgps -s
 
 ┌───────────────────────────────────────────┐┌─────────────────────────────────┐
 │    Time:       2020-01-05T16:11:12.000Z   ││PRN:   Elev:  Azim:  SNR:  Used: │
@@ -869,7 +869,7 @@ While we are at it, we comment out all our `pool` lines as well, because we are 
 
 Edit `/etc/ntp.conf`:
 ```bash
-admin@NTPSERVER01:~ $ sudo nano /etc/ntp.conf
+admin@raspberrypi:~ $ sudo nano /etc/ntp.conf
 
 (...)
 
@@ -896,11 +896,11 @@ fudge 127.127.28.1  time1 0.183 refid PPS
 ```
 ## Restart the ntp service
 ```bash
-admin@NTPSERVER01:~ $ sudo systemctl enable ntp
+admin@raspberrypi:~ $ sudo systemctl enable ntp
 Synchronizing state of ntp.service with SysV service script with /lib/systemd/systemd-sysv-install.
 Executing: /lib/systemd/systemd-sysv-install enable ntp
-admin@NTPSERVER01:~ $ sudo systemctl start ntp
-admin@NTPSERVER01:~ $ sudo systemctl status ntp
+admin@raspberrypi:~ $ sudo systemctl start ntp
+admin@raspberrypi:~ $ sudo systemctl status ntp
 ● ntp.service - Network Time Service
    Loaded: loaded (/lib/systemd/system/ntp.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2020-01-05 21:14:58 GMT; 8min ago
@@ -921,7 +921,7 @@ Jan 05 21:15:17 raspberrypi ntpd[514]: receive: Unexpected origin timestamp 0xe1
 Jan 05 21:15:17 raspberrypi ntpd[514]: receive: Unexpected origin timestamp 0xe1bcd05a.605492a6 does not match aorg 0000000000.00000000 from server@51.174.198.198 xmt 0xe1bcd065.5d08dbe7
 Jan 05 21:15:17 raspberrypi ntpd[514]: receive: Unexpected origin timestamp 0xe1bcd05a.605763a9 does not match aorg 0000000000.00000000 from server@192.36.143.130 xmt 0xe1bcd065.5e6f150d
 Jan 05 21:20:50 raspberrypi ntpd[514]: kernel reports TIME_ERROR: 0x41: Clock Unsynchronized
-admin@NTPSERVER01:~ $ sudo reboot
+admin@raspberrypi:~ $ sudo reboot
 ```
 
 
@@ -930,7 +930,7 @@ After a bit (15 minutes or so), you should see `SHM(0)` selected, which will be 
 It should display time from `SHM(0)` & `SHM(1)`.
 
 ```bash
-admin@NTPSERVER01:~ $ ntpq -p
+admin@raspberrypi:~ $ ntpq -p
      remote           refid      st t when poll reach   delay   offset  jitter
 ==============================================================================
  0.debian.pool.s .POOL.          16 p    -   64    0    0.000    0.000   0.002
@@ -960,7 +960,7 @@ Comment out all our `pool` lines in `/etc/ntp.conf`, because we are not using in
 
 ### Edit `/etc/ntp.conf`:
 ```bash
-admin@NTPSERVER01:~ $ sudo nano /etc/ntp.conf
+admin@raspberrypi:~ $ sudo nano /etc/ntp.conf
 (...)
 #pool 0.debian.pool.ntp.org iburst
 #pool 1.debian.pool.ntp.org iburst
@@ -972,7 +972,7 @@ Save and then issue `sudo reboot` once more.
 
 ### What does ntpq -p say now?
 ```bash
-admin@NTPSERVER01:~ $ ntpq -p
+admin@raspberrypi:~ $ ntpq -p
      remote           refid      st t when poll reach   delay   offset  jitter
 ==============================================================================
 *SHM(0)          .NMEA.           0 l   14   16    1    0.000  -50.303   0.002
@@ -985,29 +985,29 @@ admin@NTPSERVER01:~ $ ntpq -p
 ## lsmod
 Is pps modules loaded?
 ```bash
-admin@NTPSERVER01:~ $ lsmod | grep pps
+admin@raspberrypi:~ $ lsmod | grep pps
 pps_ldisc              16384  2
 pps_core               20480  2 pps_ldisc
 ```
 
 ```bash
-admin@NTPSERVER01:~ $ dmesg | grep pps
+admin@raspberrypi:~ $ dmesg | grep pps
 [    8.850684] pps_core: LinuxPPS API ver. 1 registered
 [    8.850698] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
 [    8.855854] pps_ldisc: PPS line discipline registered
 [    8.857858] pps pps0: new PPS source usbserial0
 [    8.857984] pps pps0: source "/dev/ttyUSB0" added
-admin@NTPSERVER01:~ $ 
+admin@raspberrypi:~ $ 
 ```
 
 ## Are you synchronized?
 ```
-admin@NTPSERVER01:~ $ ntpq -p
+admin@raspberrypi:~ $ ntpq -p
      remote           refid      st t when poll reach   delay   offset  jitter
 ==============================================================================
  SHM(1)          .PPS.            0 l    -   16    0    0.000    0.000   0.000
  SHM(0)          .NMEA.           0 l    -   16    0    0.000    0.000   0.000
-admin@NTPSERVER01:~ $ ntpq -pn
+admin@raspberrypi:~ $ ntpq -pn
      remote           refid      st t when poll reach   delay   offset  jitter
 ==============================================================================
  127.127.28.1    .PPS.            0 l    -   16    0    0.000    0.000   0.000
@@ -1018,7 +1018,7 @@ If you do not have a `*` to the left of either source, you are not synchronized.
 ## Check the GPS status
 Do your GPS have a 3D FIX?
 ```bash
-admin@NTPSERVER01:~ $ cgps -s
+admin@raspberrypi:~ $ cgps -s
 
 ┌───────────────────────────────────────────┐┌─────────────────────────────────┐
 │    Time:       2020-01-05T22:14:54.110Z   ││PRN:   Elev:  Azim:  SNR:  Used: │
@@ -1043,7 +1043,7 @@ Try to move your GPS receiver.
 ## gpsmon
 The `gpsmon` command connects to the `gpsd` server and displays output about the connected GPS.  You should see a list of satellites on the left (0 through 11) along with S/N ratios (some should be in the 30s or higher if you have good antenna placement).  You should see values for “Latitude” and “Longitude”.  If you have a good antenna positioning and you’re in the USA, you should see “FAA: D” in the middle box.  The middle bottom box should also indicate a PPS value (a decimal number, which should be very small if your time on your machine is close to correct).
 ```bash
-admin@NTPSERVER01:~ $ gpsmon
+admin@raspberrypi:~ $ gpsmon
 tcp://localhost:2947          SiRF>
 (82) {"class":"VERSION","release":"3.17","rev":"3.17","proto_major":3,"proto_minor":12}
 (198) {"class":"DEVICES","devices":[{"class":"DEVICE","path":"/dev/ttyUSB0","driver":"SiRF","activated":"2020-01-08T00:19:18.149Z","flags":1,"native":1,"bps":4800,"par
@@ -1078,7 +1078,7 @@ ity":"N","stopbits":1,"cycle":1.00}]}
 
 ## Check that things look right
 ```
-admin@NTPSERVER01:~ $ watch ntpq -p
+admin@raspberrypi:~ $ watch ntpq -p
 Every 2.0s: ntpq -p                                                                                                                                                                                                            raspberrypi: Sun Jan  5 21:50:50 2020
 
      remote           refid      st t when poll reach   delay   offset  jitter
@@ -1092,35 +1092,35 @@ Every 2.0s: ntpq -p                                                             
 
 ## ntpstat
 ```bash
-admin@NTPSERVER01:~ $ sudo apt-get install ntpstat
-admin@NTPSERVER01:~ $ ntpstat 
+admin@raspberrypi:~ $ sudo apt-get install ntpstat
+admin@raspberrypi:~ $ ntpstat 
 Unable to talk to NTP daemon. Is it running?
-admin@NTPSERVER01:~ $ ntpstat
+admin@raspberrypi:~ $ ntpstat
 synchronised to UHF radio at stratum 1 
    time correct to within 8002 ms
    polling server every 16 s
-admin@NTPSERVER01:~ $ 
+admin@raspberrypi:~ $ 
 
 ```
 
 ## ppscheck
 ```
-admin@NTPSERVER01:~ $ ppscheck /dev/ttyUSB0 
+admin@raspberrypi:~ $ ppscheck /dev/ttyUSB0 
 open(/dev/ttyUSB0) failed: 16 Device or resource busy
-admin@NTPSERVER01:~ $ sudo systemctl stop gpsd
+admin@raspberrypi:~ $ sudo systemctl stop gpsd
 Warning: Stopping gpsd.service, but it can still be activated by:
   gpsd.socket
-admin@NTPSERVER01:~ $ ppscheck /dev/ttyUSB0 
+admin@raspberrypi:~ $ ppscheck /dev/ttyUSB0 
 ```
 
 ## ppstest
 ```bash
-admin@NTPSERVER01:~ $ ls -l /dev/pps0 -l
+admin@raspberrypi:~ $ ls -l /dev/pps0 -l
 crw------- 1 root root 240, 0 Jan  7 01:13 /dev/pps0
-admin@NTPSERVER01:~ $ ppstest /dev/pps0
+admin@raspberrypi:~ $ ppstest /dev/pps0
 trying PPS source "/dev/pps0"
 unable to open device "/dev/pps0" (Permission denied)
-admin@NTPSERVER01:~ $ sudo ppstest /dev/pps0
+admin@raspberrypi:~ $ sudo ppstest /dev/pps0
 trying PPS source "/dev/pps0"
 found PPS source "/dev/pps0"
 ok, found 1 source(s), now start fetching data...
@@ -1128,17 +1128,17 @@ time_pps_fetch() error -1 (Connection timed out)
 time_pps_fetch() error -1 (Connection timed out)
 time_pps_fetch() error -1 (Connection timed out)
 ^C
-admin@NTPSERVER01:~ $ sudo systemctl stop gpsd
+admin@raspberrypi:~ $ sudo systemctl stop gpsd
 Warning: Stopping gpsd.service, but it can still be activated by:
   gpsd.socket
-admin@NTPSERVER01:~ $ sudo ppstest /dev/pps0
+admin@raspberrypi:~ $ sudo ppstest /dev/pps0
 trying PPS source "/dev/pps0"
 unable to open device "/dev/pps0" (No such file or directory)
-admin@NTPSERVER01:~ $ sudo ppstest /dev/pps0
+admin@raspberrypi:~ $ sudo ppstest /dev/pps0
 trying PPS source "/dev/pps0"
 unable to open device "/dev/pps0" (No such file or directory)
-admin@NTPSERVER01:~ $ sudo systemctl start gpsd
-admin@NTPSERVER01:~ $ sudo ppstest /dev/pps0
+admin@raspberrypi:~ $ sudo systemctl start gpsd
+admin@raspberrypi:~ $ sudo ppstest /dev/pps0
 trying PPS source "/dev/pps0"
 found PPS source "/dev/pps0"
 ok, found 1 source(s), now start fetching data...
