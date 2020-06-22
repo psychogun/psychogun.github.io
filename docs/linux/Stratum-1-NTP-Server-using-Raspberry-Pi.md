@@ -145,12 +145,21 @@ Sat 11 Jan 22:24:16 CET 2020
 ## Serial port
 The Ultimate GPS hat delivers its data over a serial port at 9600 bps, which uses pins 14 and 15 on the GPIO header.
 On the Raspberry Pi 2, this went directly to the hardware UART and was available to Linux on `/dev/ttyAMA0`. Assuming there was no serial console using it, GPS works great here.
-But on the Pi 3, the high-performance hardware UART is used by the Bluetooth subsystem, and the serial port supported on GPIO pins 14+15 is emulated much more weakly and is available on `/dev/ttyS0`. This is pretty much a software UART, and I don't like it. 
+But on the Pi 3, the high-performance hardware UART is used by the Bluetooth subsystem, and the serial port supported on GPIO pins 14+15 is emulated much more weakly and is available on `/dev/ttyS0`. 
+
+This is pretty much a software UART, and I don't like it. 
 
 Well, I do not know about that- most of these instructions were taken from this excellent guide [http://www.unixwiz.net/techtips/raspberry-pi3-gps-time.html](http://www.unixwiz.net/techtips/raspberry-pi3-gps-time.html).
 
-`/dev/ttyAMA0` - hardware UART for Bluetooth support
-`/dev/ttyS0` - software UART on GPIO 14+15
+```bash
+/dev/ttyAMA0
+```
+- hardware UART for Bluetooth support
+
+```bash
+/dev/ttyS0
+```
+- software UART on GPIO 14+15
 
 Fortunately, it's possible to shuffle around the hardware in software (!) to take back the hardware UART for our purposes.
 ### Disable the console getty programs
@@ -740,6 +749,7 @@ You should now see under Status > NTP that our NTP server at `192.168.28.2` is o
 
 
 # USB Dongle 
+The following information is now regarded deprecated; how I tried to do it with a USB dongle and the regular ntp daemon, not the secure one.
 ## Install GPS packages
 `gpsd` is a general-purpose daemon designed to interact with most types of GPS models using a wide variety of protocols. It is also capable of processing the PPS signals and sending timing information to ntpd via dedicated shared memory devices. One for pushing to ntpd absolute timestamp parsed from the NMEA messages (or supported equivalent), another for PPS timing data. 
 
