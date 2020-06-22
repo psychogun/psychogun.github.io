@@ -1145,7 +1145,7 @@ ok, found 1 source(s), now start fetching data...
 time_pps_fetch() error -1 (Connection timed out)
 ```
 ## Windows client settings
-```cmd
+```
 C:\Users\Don Pablo>w32tm /query /status
 Leap Indicator: 0(no warning)
 Stratum: 4 (secondary reference - syncd by (S)NTP)
@@ -1163,7 +1163,7 @@ C:\Users\Don Pablo>
 Start > Control Panel > Clock, Language, and Region.
 Click the icon Date and Time. There, switch to the tab named Internet Time. To adjust available settings, you need to click the button "Change settings..." and add the ip to your Raspberry Pi for testing:
 
-```cmd
+```
 C:\Users\Don Pablo>w32tm /query /status
 Leap Indicator: 0(no warning)
 Stratum: 2 (secondary reference - syncd by (S)NTP)
