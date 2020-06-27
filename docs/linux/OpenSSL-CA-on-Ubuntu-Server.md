@@ -596,7 +596,7 @@ localdomain
 
 
 ## Fault finding
-### hash
+### Hash
 In order for *service* to accept certificate, it should be used with the private key generated along with the CSR code submitted for the certificate activation.
 
 You can check whether the certificate matches the private key using the following openssl commands:
