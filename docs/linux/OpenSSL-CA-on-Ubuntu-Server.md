@@ -22,7 +22,7 @@ This is how I configured a CA server on Ubuntu. My main source of information is
 * Ubuntu 20.04
 * TLSv1.2
 
-## Set your time zone
+### Set your time zone
 ```bash
 rivest@shamir-adleman:~$ date
 Sat 11 Jan 21:22:53 GMT 2020
@@ -36,7 +36,7 @@ rivest@shamir-adleman:~$ $ date
 Sat 11 Jan 22:24:16 CET 2020
 ```
 
-## Disable IPv6
+### Disable IPv6
 ```bash
 rivest@shamir-adleman:~$ nano /etc/default/grub
 (...)
@@ -54,7 +54,7 @@ Then run:
 rivest@shamir-adleman:~$ sudo update grub
 ```
 
-## Change NTP server
+### Change NTP server
 ```bash
 rivest@shamir-adleman:~$ nano /etc/systemd/timesyncd.conf 
 (...)
@@ -73,7 +73,7 @@ Restart NTP service
 ```bash
 rivest@shamir-adleman:~$ sudo systemctl restart systemd-timesyncd
 ```
-## qemu-guest-agent
+### qemu-guest-agent
 ```bash
 rivest@shamir-adleman:~$ sudo apt update
 rivest@shamir-adleman:~$ sudo apt install qemu-guest-agent
