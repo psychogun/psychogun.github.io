@@ -523,7 +523,8 @@ Stop the jail and start the jail again.
 
 
 ## Mylar
-Here is another service I opted to encrypt using my newly created CA, first, we create the private key:
+Here is another service I opted to encrypt using my newly created CA.
+### Private key
 ```bash
 root@Mylar:/usr/local/mylar3 # mkdir ssl
 root@Mylar:/usr/local/mylar3 # chown mylar ssl
@@ -531,7 +532,7 @@ root@Mylar:/usr/local/mylar3 # cd ssl
 root@Mylar:/usr/local/mylar3/ssl # openssl ecparam -name secp384r1 -out secp384r1.pem
 root@Mylar:/usr/local/mylar3/ssl # openssl ecparam -in secp384r1.pem -genkey -noout -out Mylar.key
 ```
-CSR:
+### CSR
 ```bash
 root@Mylar:/usr/local/mylar3/ssl # openssl req -new -key Mylar.key -out Mylar.req
 You are about to be asked to enter information that will be incorporated
@@ -559,7 +560,7 @@ Copy `Mylar.req`:
 ```bash
 root@Mylar:/usr/local/mylar3/ssl # scp Mylar.req rivest@shamir-adleman:/tmp/Mylar.req
 ```
-SAN:
+### SAN
 ```bash
 rivest@shamir-adleman:~/easy-rsa/config$ nano Mylar
 authorityKeyIdentifier=keyid,issuer
@@ -572,6 +573,7 @@ DNS.1 = mylar
 DNS.2 = 192.168.14.45
 ```
 
+### Signature
 Sign and create `Mylar.crt`:
 ```bash
 rivest@shamir-adleman:~/easy-rsa$ openssl x509 -req -in /tmp/Mylar.req -CA pki/ca.crt -CAkey pki/private/ca.key -CAcreateserial -out config/Mylar.crt -days 825 -sha512 -extfile config/Mylar
