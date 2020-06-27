@@ -12,6 +12,8 @@ So, on a whim I googled syslog + pfsense, and I saw some images of some nice das
 
 These instructions will tell you what I have learned and how I installed the Elastic Stack (Elasticsearch, Logstash, Kibana, Beats and SHIELD) on Ubuntu with encrypted communication, so that I could have a nice visualization of my pfSense firewall logs with syslog and netflow.
 
+I have done this on a Proxmox host, so not all things may apply to your installation. 
+
 ## Table of contents
 {: .no_toc .text-delta }
 
@@ -57,30 +59,61 @@ pfSense is an open source firewall/router computer software distribution based o
 As with every how-to's, read through the entire thing before starting. 
 
 ### Prerequisites
-* Clean Ubuntu 18.04 LTS 
+* Clean Ubuntu 20.04 LTS 
 * Java 8
 * Elasticsearch 7.2 
-* Logstash 7.2
-* Kibana 7.2
+* Logstash 7.6.2
+* Kibana 7.
 * PFSene 2.4.4
 
+I am running the Elastic Stack on a 4 x Intel(R) Xeon(R) CPU E3-1225 v3 @ 3.20GHz (1 Socket) machine, with 2 cores and 8GB of RAM allocated to the virtual guest. 
+
+
 ## Installlation
+
 First and foremost, update and upgrade our Ubuntu installation:
 ```bash
 elk@stack:~$ sudo apt-get update
 elk@stack:~$ sudo apt-get upgrade
 ```
-### Installing Java
-Logstash requires Java 8 or Java 11, so we'll go ahead and install the OpenJDK Runtime Environment. I have used Java 8:
+
+Set the correct date and time:
 ```bash
-elk@stack:~$  sudo apt install -y openjdk-8-jdk
+elk@stack:~$ sudo dpkg-reconfigure tzdata
+```
+
+r/share/kibana/bin$ timedatectl set-ntp off
+udo nano /etc/systemd/timesyncd.conf 
+add `Servers=192.168.40.1`
+r/share/kibana/bin$ timedatectl set-ntp on
+
+### Install qemu-guest-agent
+The qemu-guest-agent is a helper daemon, which is installed in the guest. It is used to exchange information between the host and guest, and to execute command in the guest.
+
+In Proxmox VE, the qemu-guest-agent is used for mainly two things:
+
+To properly shutdown the guest, instead of relying on ACPI commands or windows policies
+To freeze the guest file system when making a backup (on windows, use the volume shadow copy service VSS).
+
+```bash
+elk@stack:~$ sudo apt-get install qemu-guest-agent
+elk@stack:~$ sudo shutdown now
+```
+In Proxmox, go to Options and Enable by selecting `Use QEMU Guest Agent`. Start your VM again. 
+
+### Installing Java
+Logstash requires Java 8 or Java 11, so we'll go ahead and install the OpenJDK Runtime Environment [https://www.elastic.co/de/support/matrix#matrix_jvm](https://www.elastic.co/de/support/matrix#matrix_jvm).
+
+I opted for Java 11:
+```bash
+elk@stack:~$  sudo apt install -y openjdk-11-jdk
 ```
 Was it installed properly?
 ```bash
 elk@stack:~$ java -version
-openjdk version "1.8.0_212"
-OpenJDK Runtime Environment (build 1.8.0_212-8u212-b03-0ubuntu1.18.04.1-b03)
-OpenJDK 64-Bit Server VM (build 25.212-b03, mixed mode)
+openjdk version "11.0.7" 2020-04-14
+OpenJDK Runtime Environment (build 11.0.7+10-post-Ubuntu-3ubuntu1)
+OpenJDK 64-Bit Server VM (build 11.0.7+10-post-Ubuntu-3ubuntu1, mixed mode, sharing)
 ```
 You'll have to ensure that your JAVA HOME environment is properly set up. To see your current JAVA HOME environment variable, issue command:
 ```bash
@@ -88,7 +121,7 @@ elk@stack:~$ echo $JAVA_HOME
 ```
 If nothing shows up, your JAVA_HOME environment path is not set. To set your JAVA_HOME path, run:
 ```bash
-elk@stack:~$ export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+elk@stack:~$ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ```
 Add JAVA bin directory to the PATH variable:
 ```bash
@@ -119,13 +152,13 @@ fs.file-max = 300000
 ```
 (For some more information about file handling, read [https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d](https://gist.github.com/luckydev/b2a6ebe793aeacf50ff15331fb3b519d)).
 
-To start Elasticsearch, write:
-```bash
-elk@stack:~$ sudo systemctl start elasticsearch
-```
 To enable Elasticsearch to start when you boot, write:
 ```bash
-elk@stack:~$ sudo systemctl enable elasticsearch
+elk@stack:~$ sudo /bin/systemctl enable elasticsearch.service
+```
+To start Elasticsearch, write:
+```bash
+elk@stack:~$ sudo systemctl start elasticsearch.service
 ```
 To see if Elasticsearch has been started as it should, your `curl` output should look something like this:
 ```bash
@@ -135,13 +168,13 @@ elk@stack:~$ curl -X GET http://localhost:9200
   "cluster_name" : "elasticsearch",
   "cluster_uuid" : "kEi4W1ffRcqYhab1ato3xQ",
   "version" : {
-    "number" : "7.2.0",
+    "number" : "7.6.2",
     "build_flavor" : "default",
     "build_type" : "deb",
     "build_hash" : "508c38a",
-    "build_date" : "2019-06-20T15:54:18.811730Z",
+    "build_date" : "2020-03-20T15:54:18.811730Z",
     "build_snapshot" : false,
-    "lucene_version" : "8.0.0",
+    "lucene_version" : "8.4.0",
     "minimum_wire_compatibility_version" : "6.8.0",
     "minimum_index_compatibility_version" : "6.0.0-beta1"
   },
@@ -383,7 +416,7 @@ PS: Remember to change your timezone to a correct zone `timezone => "Europe/Pari
 
 Since we have the Elastic stack installed on the same machine, our Logstash would connect to Elasticsearch (`30-outputs.conf`) like this:
 ```bash
-elk@stack:/etc/logstash/conf.d$ sudo wget https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/blob/master/etc/logstash/conf.d/30-outputs.conf
+elk@stack:/etc/logstash/conf.d$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/30-outputs.conf
 elk@stack:/etc/logstash/conf.d$ more 30-outputs.conf 
 output {
         elasticsearch {
@@ -413,11 +446,36 @@ elk@stack:/etc/logstash/conf.d$ tail -f /var/log/logstash/logstash-plain.log
 ```
 
 #### MaxMind GeoIP database
-Download and extract the MaxMind GeoIP database:
+Go to [https://www.maxmind.com](https://www.maxmind.com) and register for a free account to download this database. Take a note of your license key.
+
+Download and extract the MaxMind GeoIP database, replace `YOUR_LICENSE_KEY` with your license key:
 ```bash
 elk@stack:~$ cd /etc/logstash
-elk@stack:/etc/logstash$ sudo wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz
-elk@stack:/etc/logstash$ sudo gunzip GeoLite2-City.mmdb.gz
+elk@stack:/etc/logstash$ sudo wget "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=YOUR_LICENSE_KEY&suffix=tar.gz"
+elk@stack:/etc/logstash$ sudo mv 'geoip_download?edition_id=GeoLite2-City&license_key=YOUR_LICENSE_KEY&suffix=tar.gz' GeoLite2-City.tar.gz
+elk@stack:/etc/logstash$ sudo wget "https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=YOUR_LICENSE_KEY&suffix=tar.gz.sha256 "
+elk@stack:/etc/logstash$ sudo mv 'geoip_download?edition_id=GeoLite2-City&license_key=YOUR_LICENSE_KEY&suffix=tar.gz.sha256' GeoLite2-City.tar.gz.sha256
+```
+
+Was the download correct?
+```bash
+elk@stack:/etc/logstash$ sudo sha256sum -c GeoLite2-City.tar.gz.sha256
+sha256sum: GeoLite2-City_20200428.tar.gz: No such file or directory
+(...)
+elk@stack:/etc/logstash$ sudo mv GeoLite2-City.tar.gz GeoLite2-City_20200428.tar.gz
+elk@stack:/etc/logstash$ sudo sha256sum -c GeoLite2-City.tar.gz.sha256
+GeoLite2-City_202000428.tar.gz: OK
+```
+
+Unzip to fetch the `GeoLite2-City.mmdb` file and move it to the directory defined in `11-pfsense.conf`, `/etc/logstash/`:
+```bash
+elk@stack:/etc/logstash$ sudo tar xvzf GeoLite2-City_20200428.tar.gz
+elk@stack:/etc/logstash$ sudo mv GeoLite2-City_20200428/GeoLite2-City.mmdb .
+```
+
+Clean up:
+```bash
+elk@stack:/etc/logstash$ sudo rm -rf GeoLite2-City_20200428
 ```
 
 #### Grok
@@ -471,7 +529,7 @@ PS: Be sure to remember to enable logging in your firewall rules, 'Log packets t
 For example, Logstash typically creates a series of indices in the format logstash-YYYY.MMM.DD. To explore all of the log data from May 2018, you could specify the index pattern logstash-2018.05*.
 
 #### Discover
-*Discover* enables you to explore your data with Kibana’s data discovery functions. You have access to every document in every index that matches the selected index pattern. You can submit search queries, filter the search results, and view document data. Go to Discover to see your syslogs flowing in!
+*Discover* enables you to explore your data with Kibana’s data discovery functions. You have access to every document in every index that matches the selected index pattern. You can submit search queries, filter the search results, and view document data. 
 
 #### Visualization
 Kibana *visualizations* are based on Elasticsearch queries. By using a series of Elasticsearch aggregations to extract and process your data, you can create charts that show you the trends, spikes, and dips you need to know about.
@@ -479,7 +537,7 @@ Kibana *visualizations* are based on Elasticsearch queries. By using a series of
 #### Dashboard
 A Kibana *dashboard* displays a collection of visualizations, searches, and maps. You can arrange, resize, and edit the dashboard content and then export the dashboard so you can share it.
 
-Go to http://ip-adress:5601 and go to Management > Create Index Pattern (Kibana Index Patterns) > and our logstash service which we started have enabled us to select that indicies, so write "logstash*". Press 'Next step'.  Under 'Time Filter field name' choose '@timestamp' and then hit 'Create Index pattern'. 
+Go to http://ip-adress:5601 and go to Management > Index Patterns (Kibana) and click Create index pattern. Our `logstash` service which we started have enabled us to select that indicies, so write "logstash*". Press 'Next step'.  Under 'Time Filter field name' choose '@timestamp' and then hit 'Create Index pattern'. 
 
 #### Saved Objects
 With 'Saved Objects' you are able to import searches, dashboards and visualizations that has been made before. Let us do that.
@@ -839,8 +897,6 @@ elk@stack:/etc/logstash/conf.d$ sudo systemctl start logstash.service
 Hopefully, both netflow and logstash are working again in your Dashboards.
 
 
-
-
 ```bash
 root@stack:/usr/share/elasticsearch# bin/elasticsearch-certutil cert --ca \
 ```
@@ -863,7 +919,7 @@ For further information, go check out the excellent guide here: [https://www.ela
 
 
 ### BEATS
-Elastic produce a full range of log shippers known as ‘Beats’ which run as lightweight agents on the source devices and transmit data to a destination either running Elasticsearch or Logstash. If you are using Beats you can do this to make it use SSL to encrypt the communication between the Beat agent and Logstash:
+Elastic produce a full range of log shippers known as ‘Beats’ which run as lightweight agents on the source devices and transmit data to a destination either running Elasticsearch or Logstash. If you are using Beats you can do this to make Beats use SSL to encrypt the communication between the Beat agent and Logstash:
 
 ```bash
 elk@stack:/etc/ssl$ sudo openssl req -x509 -nodes -newkey rsa:2048 -days 365 -keyout logstash-forwarder.key -out logstash-forwarder.crt -subj /CN=stack.hb.local
@@ -923,6 +979,20 @@ stdout {
 
 ## Fault finding
 (...) More should come
+### Increasing JVM heap size
+You should always set the min and max JVM heap size to the same value. For example, to set the heap to 4 GB, set:
+
+-Xms4g
+-Xmx4g
+ 
+See https://www.elastic.co/guide/en/elasticsearch/reference/current/heap-size.html
+for more information
+
+```bash
+elk@stack:~$ sudo -u elasticsearch -H -s
+elasticsearch@stack:/home/elk$ nano /etc/elasticsearch/jvm.options 
+```
+
 ### Yellow cluster
 [http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html](http://chrissimpson.co.uk/elasticsearch-yellow-cluster-status-explained.html)
 ### Safari Can't Open the Page
@@ -930,12 +1000,26 @@ When trying to export Netflow data, in Safari, you'll get an error _"Safari can'
 ### Certificates
 `lk@stack:/usr/share/elasticsearch$ sudo bin/elasticsearch-certutil cert -out certs/elastic-certificates.p12 -pass ""`
 ### Version control
-To see which version of ELK Stack you have installed are, do:
+To see which version of `logstash` you have installed are, run:
 ```bash
 elk@stack:~$ sudo /usr/share/logstash/bin/logstash --version
-logstash 7.2.0
+logstash 7.6.0
 elk@stack:~$ su -i
 ```
+
+Elasticsearch:
+```bash
+elk@stack::/usr/share/elasticsearch/bin$ sudo ./elasticsearch --version
+OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
+Version: 7.6.2, Build: default/deb/ef48eb35cf30adf4db14086e8aabd07ef6fb113f/2020-03-26T06:34:37.794943Z, JVM: 13.0.2
+```
+
+Kibana:
+```bash
+elk@hstack:/usr/share/kibana/bin$ ./kibana --version
+7.6.2
+```
+
 ### Read-only index
 If suddenly Kibana stops showing input from Elasticsearch in your graphs, check your `logstash-plain.log` file.
 
@@ -984,9 +1068,9 @@ Then verify from `logstash-plain.log` that it is able to send logs again (you mi
 Index Management and select logstash and then press Manage index > Retry Lifecycle cycle. 
 
 ## Logstash with just Netflow
-If you are not using syslogs, doing the grok patterns and everything above, do this to quick and dirty populate netflow in your Kibana. 
+If you are not using syslogs, doing the grok patterns and everything above, do this to quick and dirty populate netflow in your Kibana:
 
-Stop logstash. Start with `--modules netflow --setup``
+Stop logstash. Start with `--modules netflow --setup`. Wait a minute. Or two. Grab a cup of coffee.
 Stop logstash.
 
 Edit `logstash.yml`:
@@ -1006,6 +1090,10 @@ modules:
     
 ```
 Start with `sudo systemctl start logstash.service`
+
+
+## Authors
+Mr. Johnson
 
 ## Acknowledgments 
 * [http://pfelk.3ilson.com](http://pfelk.3ilson.com)
