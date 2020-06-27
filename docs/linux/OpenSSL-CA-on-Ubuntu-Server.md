@@ -6,7 +6,7 @@ nav_order: 12
 ---
 # OpenSSL Certificate Authority on Ubuntu Server
 {: .no_toc }
-This is how I configured a CA server on Ubuntu. My main source of information is copied from [https://www.digitalocean.com/community/tutorials/how-to-set-up-and-configure-a-certificate-authority-ca-on-ubuntu-20-04](Digital Ocean). Check them out.
+This is how I configured a CA server on Ubuntu. My main source of information is copied from [Digital Ocean](https://www.digitalocean.com/community/tutorials/how-to-set-up-and-configure-a-certificate-authority-ca-on-ubuntu-20-04). Check them out.
 
 ## Table of contents
 {: .no_toc .text-delta }
