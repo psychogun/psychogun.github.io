@@ -6,7 +6,7 @@ nav_order: 13
 ---
 # Stratum 1 NTP Server using Raspberry Pi
 {: .no_toc }
-This is how I used a ~~GPS USB dongle~~ HAT (Hardware Attached on Top) connected to a Raspberry Pi 3 to work stand-alone, without any Internet servers, to provide a NTP service on my network. The Raspberry Pi 3 now works as a Stratum 1 NTP server [https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/](https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/). 
+This is how I used a GPS ~~USB dongle~~ HAT (Hardware Attached on Top) connected to a Raspberry Pi 3 to work stand-alone/and or with a secure (NTPSec) Internet server, to provide a NTP service on my network. The Raspberry Pi 3 now works as a Stratum 1 NTP server [https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/](https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/). 
 
 I used this is conjunction with my PfSense firewall and should the GPS fail, I have configured a fallback of which the Raspberry Pi will pull time through `NTPSec`. NTPSec provides a secure method of retrieving time from public ntp servers with the help of TLS. 
 
