@@ -2,7 +2,7 @@
 layout: default
 title: Stratum 1 NTP Server using Raspberry Pi
 parent: Linux
-nav_order: 13
+nav_order: 15
 ---
 # Stratum 1 NTP Server using Raspberry Pi
 {: .no_toc }
