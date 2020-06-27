@@ -314,7 +314,8 @@ $ sudo apt-get install -y make libudev-dev g++ libyaml-dev libdpkg-perl
 
 Restart Home Assistant through Configuration > Server Controls > and Server Management or with `sudo systemctl restart home-assistant@homeassistant`.
 
-The first time Home Assistant uses `zwave` it will download `python_openzwave` in the background (Z-Wave drivers). It might take some time. 
+The first time Home Assistant uses `zwave` it will download `python_openzwave` in the background (Z-Wave drivers). It might take some time- 5 minutes? 
+Wait until `options.xml` shows up in your directory. 
 
 Edit the newly downloaded `options.xml` file and add the same network key there as well:
 ```bash
@@ -444,7 +445,9 @@ Click `SET CONFIG PARAMETER`.
 * Make sure that also the entity `binary_sensor.aeon_labs_zw100_multisensor_6_sensor` also uses `Binary Sensor Report`, as stated as best practise here: [https://www.home-assistant.io/docs/z-wave/entities/](https://www.home-assistant.io/docs/z-wave/entities/).
 
 ## Fantem (Oomi) Unknown: type=0002, id=0070
-I have a door / window sensor from Fantem, which is not yet listed with configuration files on the OpenZwave project page. Anywhow, this is the same device as the Aeotec Zw112. So we'll just link this configuration file to that device.
+I have a door / window sensor from Fantem, which is not yet listed with configuration files on the OpenZwave project page. 
+
+Anywhow, this is the same device as the Aeotec Zw112. So you could just link this configuration file to that device;
 
 ```bash
 sudo nano /srv/homeassistant/lib/python3.8/site-packages/python_openzwave/ozw_config/manufacturer_specific.xml
@@ -466,9 +469,22 @@ Go to Configuration > Devices and delete all the unknown entities. Restart `sudo
 
 Go to Configuration > Z-Wave and `ADD NODE SECURE` and follow the inclusion settings for the device from the manual. Now it should show up as the ZW112 device. 
 
+Anyhow, I ended up following this article upgrading the firmware of the Fantem (Oomi) sensor, as it's the same device: [https://aeotec.freshdesk.com/support/solutions/articles/6000228743-how-to-update-door-window-sensor-6-z-wave-firmware-](https://aeotec.freshdesk.com/support/solutions/articles/6000228743-how-to-update-door-window-sensor-6-z-wave-firmware-). It now shows up as AEON Labs ZW112 Door Window Sensor 6.
+
+Go to Configuration, Z-Wave, selec AEON Labs ZW112 Door Window Sensor 6 (Node:2 Complete) and scroll down to Node Configuration Options. Set 121: Report Type to Send configuration parameter to Sensor Binary Report. 
 
 ## Remote access with TLS/SSL via Let's Encrypt
 Follow this excellent guide over here [https://www.home-assistant.io/docs/ecosystem/certificates/lets_encrypt/](https://www.home-assistant.io/docs/ecosystem/certificates/lets_encrypt/)
+
+You have to add the user `homeassistant` to the `etc/sudoers` file, so it can run the `certbot-auto` with nopassword.
+
+Adding the following line to the `etc/sudoers` at the bottom with `sudo visudo`:
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo visudo
+(...)
+homeassistant ALL=(ALL) NOPASSWD:SETENV: /home/homeassistant/certbot/certbot-auto
+```
+In this way you, only allow the user/systemuser that is running the homeassistant process (`hass`) only to run the cerbot for generating and renewing the certificate. This should be more secure in case of a security breach within the process hass.
 
 ## Change icons
 Change your icons by using `mdi:icon` - look at this list for reference: [https://cdn.materialdesignicons.com/3.2.89/](https://cdn.materialdesignicons.com/3.2.89/)
@@ -777,10 +793,16 @@ Radio Type: deconz
 
 deCONZ by dresden elektronik is a software that communicates with ConBee/RaspBee Zigbee gateways and exposes Zigbee devices that are connected to the gateway.
 
+## Unknown Node 3
+How to remove unknown node
+
+
 ## Authors
 Mr. Johnson
 
 ## Acknowledgments
+* [https://community.letsencrypt.org/t/certbot-command-not-found/16547/13](https://community.letsencrypt.org/t/certbot-command-not-found/16547/13)
+* [https://community.home-assistant.io/t/configuring-z-wave-door-sensor/107408/6?u=gsemet](https://community.home-assistant.io/t/configuring-z-wave-door-sensor/107408/6?u=gsemet)
 * [https://translate.google.com/translate?sl=auto&tl=en&u=https%3A%2F%2Fforum.jeedom.com%2Fviewtopic.php%3Ft%3D39395](https://translate.google.com/translate?sl=auto&tl=en&u=https%3A%2F%2Fforum.jeedom.com%2Fviewtopic.php%3Ft%3D39395)
 * [https://www.home-assistant.io/integrations/zha/](https://www.home-assistant.io/integrations/zha/)
 * [https://josiahvorst.com/a-superior-zigbee-experience-with-deconz-conbee-ii-home-assistant/](https://josiahvorst.com/a-superior-zigbee-experience-with-deconz-conbee-ii-home-assistant/)
