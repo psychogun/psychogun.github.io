@@ -207,6 +207,22 @@ Start the `airdcppd` daemon:
 root@Airdcpp:/usr/local/etc/rc.d # service airdcppd start
 ```
 
+## Add share
+
+## getfacl
+
+
+Create a group called dump with GID = 1049 in the iocage jail.
+```bash
+root@Airdcpp:~ # pw groupadd dump -g 1049
+root@Airdcpp:~ # groups zanko
+zanko
+root@Airdcpp:~ # pw usermod zanko -G dump
+root@Airdcpp:~ # groups zanko
+zanko dump
+root@Airdcpp:~ # 
+```
+
 ## Authors
 Mr. Johnson
 
