@@ -404,7 +404,7 @@ A Certificate Signing Request (CSR) consists of three parts: a public key, ident
 The first step that you need to complete to create a CSR is generating a private key. To create a private key using `openssl`, create a `ssl` directory and then generate a key inside it. We will make this request for a fictional server called `Deluge`, as opposed to creating a certificate that is used to identify a user or another CA.
 
 ### Private key
-Let us create the private key for a service:
+Let us create the private key for a service called Deluge:
 ```bash
 root@Deluge:~ # cd /home/deluge/.config/
 root@Deluge:/home/deluge/.config # mkdir ssl
@@ -606,7 +606,7 @@ openssl rsa -in /path/to/private.key -noout -modulus | openssl sha1
 
 They should be the same. 
 
-### #How to verify CSR for SAN?
+### How to verify CSR for SAN?
 It will be a good idea to check if your CSR contains the SAN, which you specified above in an *san.cnf* file.
 ```bash
 openssl req -noout -text -in sslcert.csr | grep DNS
