@@ -472,9 +472,9 @@ Continuing with the fictional scenario, now the CA Server needs to import the pr
 ~~Since we will be operating inside the CA’s PKI where the `easy-rsa` utility is available, the signing steps will use the `easy-rsa` utility to make things easier, as opposed to using the openssl directly like we did in the previous example.~~
 
 ~~The first step to sign the fictional CSR is to import the certificate request using the `easy-rsa` script:~~
-```bash
+~~```bash
 rivest@shamir-adleman:~/easy-rsa$ ./easyrsa import-req /tmp/Deluge.req Deluge
-```
+```~~
 ### Subject Alternate Naming (SAN)
 Create a Subject Alternate Naming (SAN) config file, specific for our fictional service Deluge:
 ```bash
