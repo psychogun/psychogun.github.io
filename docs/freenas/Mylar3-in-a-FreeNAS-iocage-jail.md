@@ -155,6 +155,11 @@ Type "help", "copyright", "credits" or "license" for more information.
 ```
 If it comes back with an error, it's not installed. If it just goes to the next line, it's installed.
 
+PS: In order to activate SSL/TLS for webgui access, you'll also have to install pyOpenSSL:
+```bash
+(mylar) [root@Mylar3 /tmp]# pip install pyopenssl
+```
+
 # Install mylar3
 Now since we have all the required dependencies, let us install Mylar.
 
@@ -386,6 +391,7 @@ zc.lockfile==2.0
 ```
 
 ## unrar.cffi
+This should come up blank if `unrar.cffi` is installed:
 ```bash
 (mylar) [mylar@Mylar3 /root]$ python
 Python 3.7.6 (default, Mar 21 2020, 01:17:29) 
@@ -452,6 +458,13 @@ root@Mylar3:~ # sudo -u mylar -s bash
 ```
 Then use `(mylar) [mylar@Mylar3 /root]$ tail -f /usr/local/mylar3/logs/mylar.log`.
 
+PS: You could also add `DEBUG` logging in your startup script, by adding the `--v` option:
+```bash
+(...)
+command_args="${mylar3_dir}/Mylar.py --daemon --nolaunch --pidfile $pidfile --config $mylar3_conf --v"
+(...)
+```
+
 ## Migrate 
 ### /cache
 ```bash
@@ -462,6 +475,7 @@ root@Freenas:~ # cp -rp /mnt/TankJr/iocage/jails/oldMylar3/root/usr/local/mylar3
 root@Freenas:~ # cp -p /mnt/TankJr/iocage/jails/oldMylar3/root/usr/local/mylar3/config.ini /mnt/TankJr/iocage/jails/newMylar3/root/usr/local/mylar3/
 ```
 ### mylar.db
+It is a prerequisite that your mount points are the same (I think).
 ```bash
 root@Freenas:~ # cp -p /mnt/TankJr/iocage/jails/oldMylar3/root/usr/local/mylar3/mylar.db /mnt/TankJr/iocage/jails/newMylar3/root/usr/local/mylar3/
 ```
