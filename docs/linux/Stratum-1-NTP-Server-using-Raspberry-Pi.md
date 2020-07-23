@@ -829,8 +829,8 @@ Once that is done the time via NMEA (the gps data strings) acts as time source f
 And also the ntp driver 22 for PPS virtual ip 127.127.28.0 starts to get being active from the view of ntp
 (the `/dev/pps0` is served by the kernel and is actively working all the time, only `ntp` takes notice of `PPS` after a gps client was connected to gpsd first).
 
-# Fault finding
-## /var/log/ntp.log
+## Fault finding
+### /var/log/ntp.log
 ```bash
 admin@raspberrypi:~ $ tail -f /var/log/ntp.log
 ```
@@ -849,8 +849,8 @@ admin@raspberrypi:~ $ tail -f /var/log/ntp.log
 ```
 Check your firewall settings. 
 
-## 123?
-administrator@H37BNTP01:~ $ sudo netstat -nlap | grep 'ntpd'
+### 123?
+admin@raspberrypi:~ :~ $ sudo netstat -nlap | grep 'ntpd'
 [sudo] password for administrator: 
 udp        0      0 192.168.28.2:123        0.0.0.0:*                           446/ntpd            
 udp        0      0 127.0.0.1:123           0.0.0.0:*                           446/ntpd            
@@ -860,8 +860,8 @@ udp6       0      0 ::1:123                 :::*                                
 udp6       0      0 :::123                  :::*                                446/ntpd            
 unix  2      [ ]         DGRAM                    12991    446/ntpd             
 
-## ntp?
-administrator@H37BNTP01:~ $ systemctl list-unit-files | grep 'ntp'
+### ntp?
+admin@raspberrypi:~ :~ $ systemctl list-unit-files | grep 'ntp'
 ntp-wait.service                       disabled       
 ntpd.service                           enabled        
 ntplogtemp.service                     static         
@@ -871,12 +871,12 @@ ntplogtemp.timer                       disabled
 ntpviz-daily.timer                     disabled       
 ntpviz-weekly.timer                    disabled   
 
-## Start ntpd with debug mode
+### Start ntpd with debug mode
 ```bash
-administrator@H37BNTP01:~ $ sudo ntpd -nD 4
+admin@raspberrypi:~ :~ $ sudo ntpd -nD 4
 ```
 
-## lsmod
+### lsmod
 Are `pps` modules loaded?
 ```bash
 admin@raspberrypi:~ $ lsmod | grep pps
@@ -894,7 +894,7 @@ admin@raspberrypi:~ $ dmesg | grep pps
 admin@raspberrypi:~ $ 
 ```
 
-## Are you synchronized?
+### Are you synchronized?
 ```
 admin@raspberrypi:~ $ ntpq -p
      remote           refid      st t when poll reach   delay   offset  jitter
@@ -909,7 +909,7 @@ admin@raspberrypi:~ $ ntpq -pn
 ```
 If you do not have a `*` to the left of either source, you are not synchronized.
 
-## Check the GPS status
+### Check the GPS status
 Do your GPS have a 3D FIX? At this point, you should be able to see a text-mode output from your GPS receiver by running the command `cgps -s`. 
 This will display the details of your current location with values, something like the following:
 ```bash
@@ -935,7 +935,7 @@ admin@raspberrypi:~ $ cgps -s
 ```
 If you have, after a while, `NO FIX`- try to move your GPS receiver to a better view of the sky. 
 
-## gpsmon
+### gpsmon
 The `gpsmon` command connects to the `gpsd` server and displays output about the connected GPS.  You should see a list of satellites on the left (0 through 11) along with S/N ratios (some should be in the 30s or higher if you have good antenna placement).  You should see values for “Latitude” and “Longitude”.  If you have a good antenna positioning and you’re in the USA, you should see “FAA: D” in the middle box.  The middle bottom box should also indicate a PPS value (a decimal number, which should be very small if your time on your machine is close to correct).
 ```bash
 admin@raspberrypi:~ $ gpsmon
@@ -970,7 +970,7 @@ ity":"N","stopbits":1,"cycle":1.00}]}
 
 ```
 
-## ntpstat
+### ntpstat
 ```bash
 admin@raspberrypi:~ $ sudo apt-get install ntpstat
 admin@raspberrypi:~ $ ntpstat 
@@ -982,9 +982,10 @@ synchronised to UHF radio at stratum 1
 admin@raspberrypi:~ $ 
 ```
 
-Wait some minutes, and then you'll see that `time correct to within 8002 ms` will (hopefully) drop down to within 1 ms. 
+Wait some minutes, and then you'll see that `time correct to within 8002 ms` will (hopefully) 
+drop down to within 1 ms. 
 
-## ppscheck
+### ppscheck
 ```
 admin@raspberrypi:~ $ ppscheck /dev/ttyUSB0 
 open(/dev/ttyUSB0) failed: 16 Device or resource busy
@@ -994,7 +995,7 @@ Warning: Stopping gpsd.service, but it can still be activated by:
 admin@raspberrypi:~ $ ppscheck /dev/ttyUSB0 
 ```
 
-## ppstest
+### ppstest
 ```bash
 admin@raspberrypi:~ $ ls -l /dev/pps0 -l
 crw------- 1 root root 240, 0 Jan  7 01:13 /dev/pps0
@@ -1026,10 +1027,10 @@ ok, found 1 source(s), now start fetching data...
 time_pps_fetch() error -1 (Connection timed out)
 ```
 
-# Client settings
-## Linux
+## Client settings
+### Linux
 
-## Windows 
+### Windows 
 ```
 C:\Users\Don Pablo>w32tm /query /status
 Leap Indicator: 0(no warning)
