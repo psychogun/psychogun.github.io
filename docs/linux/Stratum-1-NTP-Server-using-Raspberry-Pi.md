@@ -6,13 +6,11 @@ nav_order: 15
 ---
 # Stratum 1 NTP Server using Raspberry Pi
 {: .no_toc }
-This is how I used a GPS ~~USB dongle~~ HAT (Hardware Attached on Top) connected to a Raspberry Pi 3 to work stand-alone/and or with a secure (NTPSec) Internet server, to provide a NTP service on my network. The Raspberry Pi 3 now works as a Stratum 1 NTP server [https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/](https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/). 
+This is how I used a GPS HAT (Hardware Attached on Top) connected to a Raspberry Pi 3 to work stand-alone/and or with a secure (NTPSec) Internet server, to provide a NTP service on my network. The Raspberry Pi 3 now works as a Stratum 1 NTP server [https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/](https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/). 
 
-I used this is conjunction with my PfSense firewall and should the GPS fail, I have configured a fallback of which the Raspberry Pi will pull time through `NTPSec`. NTPSec provides a secure method of retrieving time from public ntp servers with the help of TLS. 
+I used the signal from the GPS in conjunction with my PfSense firewall and should the GPS fail, I have configured a fallback of which the Raspberry Pi will pull time through `NTPSec`. `NTPSec` provides a secure method of retrieving time from public ntp servers with the help of TLS. You will find plenty of useful information in the Acknowledgments section, but I suggest you start with reading this excellent blogpost: [https://blog.cloudflare.com/secure-time/](https://blog.cloudflare.com/secure-time/).
 
-~~Please realize that connecting a consumer-grade (designed for location, not for time keeping) GPS unit over USB serial does not have the accuracy of “proper” GPS synchronization due to significant and inconsistent delays in the serial line itself, as well as in the USB system. Your notion of time will likely be delayed by tens of milliseconds if not hundreds of milliseconds.~~ 
-
-~~Any such-configured NTP server certainly can serve as a backup for local timekeeping when Internet connectivity is not available, but should never be advertised on the Internet as a Stratum 1 clock.~~
+Please realize that connecting a consumer-grade (designed for location, not for time keeping) GPS unit over USB serial does not have the accuracy of “proper” GPS synchronization due to significant and inconsistent delays in the serial line itself, as well as in the USB system. Your notion of time will likely be delayed by tens of milliseconds if not hundreds of milliseconds. Any such-configured NTP server certainly can serve as a backup for local timekeeping when Internet connectivity is not available, but should never be advertised on the Internet as a Stratum 1 clock.
 
 Proper GPS synchronization uses a PPS output (or similar) from the device, fed directly into an interrupt-generating line, for example a GPIO or parallel port. A GPSDO (GPS Disciplined Oscillator) is typically used which locks a temperature-compensated oscillator to the GPS time and provides a stable, reliable reference.
 
@@ -27,10 +25,10 @@ Proper GPS synchronization uses a PPS output (or similar) from the device, fed d
 
 ## Prerequisites
 * Raspberry Pi Model 3
-* ~~Globalsat BU-353S4 (`lsusb` shows `ID 067b:2303`)~~
-* ~~Globalsat BU-353 USB GPS receiver originally used the SiRF Star III chipset, now also available with the SiRF Star IV chipset which offers enhanced performance (BU-353-S4 variant). Both versions use the Prolific PL2303 serial/USB chipset. This howto was done with the S4 variant. It is a high-quality device, readily available (Ebay etc.) for around $30.~~
 * The GPS antenna will need to have a good view of GPS satellites 
 * Adafruit Ultimate GPS HAT
+* ntpd ntpsec-1.1.9+ 2020-07-20T23:57:14Z (git rev 6f72d3bfb)
+* OpenSSL 1.1.1d  10 Sep 2019
 * This was done from MacOS
 
 ## Installation instructions
@@ -274,6 +272,8 @@ The purpose of NMEA is to give equipment users the ability to mix and match hard
 There are a number of services that can decode and interpret the NMEA data coming from your Ultimate GPS hat, but the most popular by a fair measure is the open source `gpsd`. 
 `gpsd` is a general-purpose daemon designed to interact with most types of GPS models using a wide variety of protocols. It is also capable of processing the PPS signals and sending timing information to `ntpd` via dedicated shared memory devices. One for pushing to `ntpd` absolute timestamp parsed from the NMEA messages (or supported equivalent), another for PPS timing data.
 
+ntpd will see them as two different SHM devices (Shared Host Memory).
+
 For more information about NMEA data, visit [https://www.gpsworld.com/what-exactly-is-gps-nmea-data/](https://www.gpsworld.com/what-exactly-is-gps-nmea-data/).
 
 ```bash
@@ -308,7 +308,8 @@ GPSD_OPTIONS="-n"
 ```
 
 Key valus here are the `DEVICES=`, which provides the name of the serial port feeding NMEA data (`/dev/ttyAMA0`) and the pulse-per-second (`/dev/pps0`); they must appear in that order.
-Also important is the `-n` value in `GPSD_OPTIONS=` this tells GPSD to start talking to the GPS device on startup and not to wait for the first client to attach.
+Also important is the `-n` value in `GPSD_OPTIONS=`. This tells GPSD to start talking to the GPS device on startup and not to wait for the first client to attach. 
+
 Since we have a fulltime connection via the hardware serial port, there's no need not to start talking with the GPS unit immediately.
 
 ### Configure gpsd service
@@ -342,6 +343,7 @@ Here we're looking for the status is enabled and active and running, possibly wi
 
 At this point, if all is well, the `gpsd` service will be running and syncing with the GPS device. That doesn't necessarily mean that the GPS module has a fix on the satellites; that you can tell by looking at the Ultimate GPS hat for a brief red LED flash every 15 seconds. A LED that's flashing one second on/one second off has not yet acquired a fix.
 
+#### gpsmon
 Now for the moment of truth: we're going to install the `gpsmon` program to see what the daemon is doing. The `gpsmon` command connects to the `gpsd` server and displays output about the connected GPS.  You should see a list of satellites on the left (0 through 11) along with S/N ratios (some should be in the 30s or higher if you have good antenna placement).  You should see values for “Latitude” and “Longitude”.  If you have a good antenna positioning and you’re in the USA, you should see “FAA: D” in the middle box.  
 
 The middle bottom box should also indicate a PPS value (a decimal number, which should be very small if your time on your machine is close to correct).
@@ -386,16 +388,44 @@ If the top of the `gpsmon` display shows:
 ```
 
 The lack of Lat/Lon indicates the GPS receiver has not obtained a satellite fix, and the time in `1980` (or `n/a`) indicates that it doesn't see one satellite to get a rough time.
+
 Always check for the fix LED on the GPS hat itself, which should flash once every 15 seconds; if instead it's one second on/one second off, then it doesn't have a fix and there's not much that `gpsmon` can do for you.
 
 Do not proceed to the next section until you get valid PPS input and valid GPS data showing up via gpsmon.
 
+
+#### cgps -s
+This will display the details of your current location with values, something like the following:
+
+At this point, you should be able to see a text-mode output from your GPS receiver by running the command `cgps -s`. 
+```bash
+admin@raspberrypi:~ $ cgps -s
+
+┌───────────────────────────────────────────┐┌─────────────────────────────────┐
+│    Time:       2020-01-05T16:11:12.000Z   ││PRN:   Elev:  Azim:  SNR:  Used: │
+│    Latitude:    00.00000000 N             ││  33    12    009    23      Y   │
+│    Longitude:   00.00000000 E             ││  21    41    066    38      Y   │
+│    Altitude:   900.100 m                  ││  55    46    098    19      Y   │
+│    Speed:      0.96 kph                   ││  25    07    237    31      Y   │
+│    Heading:    180.0 deg (true)           ││  28    13    061    35      Y   │
+│    Climb:      6.00 m/min                 ││  10    18    281    00      N   │
+│    Status:     3D FIX (4 secs)            ││  12    45    224    00      N   │
+│    Longitude Err:   +/- 19 m              ││  13    03    159    00      N   │
+│    Latitude Err:    +/- 18 m              ││  15    21    184    00      N   │
+│    Altitude Err:    +/- 62 m              ││  22    03    255    00      N   │
+│    Course Err:      n/a                   ││  24    77    217    00      N   │
+│    Speed Err:       +/- 139 kph           ││  32    21    315    00      N   │
+│    Time offset:     -4344444.984          ││                                 │
+│    Grid Square:     Q071pq                ││                                 │
+└───────────────────────────────────────────┘└─────────────────────────────────┘
+```
+
 ## Build and configure NTPsec
 The stock `ntpd` shipped with your distribution is intended to be used as a client instance, not a server. It doesn't do 1PPS, and thereforce can't be used for precision timekeeping. Thus, we're going to build a better version from source. That version is NTPsec, which runs lighter and more securely and can do more accurate time stepping.
 
-To read more about NTPSec vs NTP, go to https://www.ntpsec.org
+To read more about NTPSec vs NTP, go to [https://www.ntpsec.org](https://www.ntpsec.org).
 
-To ensure the correct functioning of NTPsec, we should also disable the local time synchronization service. 
+To ensure the correct functioning of NTPsec, we should also disable the local time synchronization service:
 ```bash
 administrator@raspberrypi:~ $ sudo systemctl stop systemd-timesyncd.service
 [sudo] password for administrator: 
@@ -405,15 +435,12 @@ Removed /etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service.
 Removed /etc/systemd/system/dbus-org.freedesktop.timesync1.service.
 ```
 
-
-
 Install the build prerequisites:
-
 ```bash
 admin@raspberrypi:~ $ sudo apt install bison libcap-dev libssl-dev libreadline-dev git python-dev bc
 ```
 
-Build NTPsec. The `--refclock` option says to include only shared-memory refclock support, excluding all other drivers (GPS, PTP, SHM, etc) `--refclock=all`:
+Build `NTPsec`. The `--refclock` option says to include only shared-memory refclock support, excluding all other drivers (GPS, PTP, SHM, etc) `--refclock=all`:
 
 ```bash
 admin@raspberrypi:~ $ cd /home/pi/
@@ -441,14 +468,14 @@ administrator@raspberrypi:~ $ rm -r -f ntpsec/
 Let’s check the NTPsec version number:
 ```bash
 administrator@raspberrypi:~ $ sudo /usr/local/sbin/ntpd -V
-ntpd ntpsec-1.1.8+ 2020-03-06T23:05:21Z (git rev f0bd02b25)
+ntpd ntpsec-1.1.9+ 2020-07-20T23:57:14Z (git rev 6f72d3bfb)
 ```
 ### Setting up the NTP Service (Systemd)
-Perfect. Next, we set up NTPsec as a system service. For this, we create an `ntp` user and an `ntp` group with restricted rights. We also create folders for log files and certificates.
+Perfect. Next, we set up `NTPsec` as a system service. For this, we create an `ntp` user and an `ntp` group with restricted rights. We also create folders for log files and certificates.
 
 Because Raspbian no longer includes `ntpd`, we need to add a user for our NTPSec `ntpd` to run as, and create a couple of directories `ntpd` needs in place before running.
 
-Create ntp directories:
+Create `ntp` directories:
 ```bash
 administrator@raspberrypi:~ $ sudo mkdir -p /var/lib/ntp/certs
 administrator@raspberrypi:~ $ sudo mkdir -p /var/log/ntpstats
@@ -474,7 +501,9 @@ Enable the NTPsec service:
 administrator@raspberrypi:~ $ sudo systemctl enable ntpd
 Created symlink /etc/systemd/system/multi-user.target.wants/ntpd.service → /lib/systemd/system/ntpd.service.
 ```
-Now NTPsec is executed automatically when rebooting the system. At the moment the service is not running yet, because we have to configure it first.
+Now NTPsec is executed automatically when rebooting the system. 
+
+At the moment the service is not running yet, because we have to configure it first.
 
 ### Feeding NTPD
 The final part of this project configures the NTP (Network Time Protocol) daemon to consume the GPS time, possibly correlate it with other sources, and make accurate time available to the local machine and the rest of the network.
@@ -493,7 +522,7 @@ sample NTP2 1579299791.000212137 1579299791.000017137 1579299791.000000000 0 -30
 sample NTP2 1579299792.000893131 1579299792.000016570 1579299792.000000000 0 -30
 (...)
 ```
-The key values here are `NTP0` (which represents the time, but not displayed here), and `NTP2`, which represents the PPS; I believe the "Prec" (precision) column is what identifies this but am not sure. These NTP# values are key for the next step.
+The key values here are `NTP0` (which represents the time, but not displayed here), and `NTP2`, which represents the PPS; I believe the "Prec" (precision) column is what identifies this but am not sure. These `NTP#` values are key for the next step.
 
 Create your own NTP configuration with this content as `ntp.conf`:
 
@@ -510,6 +539,8 @@ admin@raspberrypi:~/ntpsec $ sudo nano /etc/ntp.conf
 # pool.ntp.org maps to about 1000 low-stratum NTP servers.  Your server will
 # pick a different set every time it starts up.  Please consider joining the
 # pool: <http://www.pool.ntp.org/join.html>
+
+# Example 0: unsecured NTP
 #pool 0.debian.pool.ntp.org iburst
 #pool 1.debian.pool.ntp.org iburst
 #pool 2.debian.pool.ntp.org iburst
@@ -527,13 +558,17 @@ server ntp1.glypnod.com iburst minpoll 3 maxpoll 6 nts
 # Example 4: NTS-secured NTP (skip DNS check)
 #server nts3-e.ostfalia.de:443 iburst minpoll 3 maxpoll 6 nts ca /var/lib/ntp/certs/rootCaBundle.pem noval
 
+# Example 5&6: NTS-secured NTP
+server time.cloudflare.com:1234 nts
+server nts.ntp.se:4443 nts 
+
 # GPS PPS reference
 server 127.127.28.2 prefer
 fudge  127.127.28.2 refid PPS
 
 # get time from SHM from gpsd; this seems working
 server 127.127.28.0
-fudge  127.127.28.0 refid GPS
+fudge  127.127.28.0 refid NMEA
 
  
 # optional: allows a fast frequency error correction on startup
@@ -592,7 +627,7 @@ restrict source notrap nomodify noquery
 admin@raspberrypi:~/ntpsec $ 
 ```
 
-In the first example, the Raspberry Pi synchronizes its clock with a public NTPsec time server using a classical unsecured NTP connection.
+In the first example (Example 1) the Raspberry Pi synchronizes its clock with a public NTPsec time server using a classical unsecured NTP connection. Which is the same as (Example #0).
 
 In the second example, the client communicates with the same time server via an NTS-secured NTP connection. The initial channel to the NTS-KE server uses the default port 123 TCP (currently implementation-specific). Since the NTPsec time server uses certificates issued by Let’s Encrypt, we do not need to set any additional parameters. To check the certificates, the client uses the local root CA pool (`/etc/ssl/certs/ca-certificates.crt`), which also allows the verification of certificates issued by Let’s Encrypt.
 
@@ -604,6 +639,9 @@ sudo wget http://nts3-e.ostfalia.de/homePi/CLIENT/rootCaBundle.pem -P /var/lib/n
 Caution: The time server of the Ostfalia University also publishes its private key, as it is a public test server. This time server should not be used for clock synchronization of productive systems.
 
 The fourth example differs from the third one only from the deactivated domain validation. This can be useful when we running a local NTS server with certificates without a registered domain.
+
+The fift example is using the pool from cloudflare to sync time. CloudFlare supports only TLS 1.3. To use TLS 1.3, you must have OpenSSL 1.1.1 or higher installed.
+* Check with `openssl version`.
 
 The other entries in the configuration file are optional and are used to record statistics and log files. The descriptions as well as the complete parameter list (incl. NTS) can be found in `ntp_conf.adoc`. Here only very briefly described:
 
@@ -620,7 +658,7 @@ noval:          [NTS] Skips the DNS verification
 Even though GPS provides highly accurate time, it's a best practice to have multiple time sources and let `ntpd` sort it out: if the GPS antenna gets disloged or blocked or something, we want at least some semblance of accurate time rather than just freewheeling with no real time source. 
 
 
-We've also added in some fake server lines that hook into the shared memory portion. This is done with "servers" using IP addresses in the 127.127.t.u range, where "t" is the clock driver type and "x" is the unit number within that type. The type numbers are hardcoded in the program with several dozen driver numbers assigned.
+We've also added in some "fake" server lines that hook into the shared memory portion. This is done with "servers" using IP addresses in the 127.127.t.u range, where "t" is the clock driver type and "x" is the unit number within that type. The type numbers are hardcoded in the program with several dozen driver numbers assigned.
 
 A small sample of drivers:
 * 127.127.4.u; Spectracom receiver-based clock
@@ -629,7 +667,7 @@ A small sample of drivers:
 * 127.127.28.u; SHM driver
 * 127.127.29.u; Trimble Palisade GPS
 
-We only care about 127.127.28.u, which is the Shared Memory driver supported by `gpsd`, but these are not real IP addresses; don't bother trying to ping them.
+We only care about `127.127.28.u`, which is the Shared Memory driver supported by `gpsd`, but these are not real IP addresses; don't bother trying to ping them.
 
 The key values here are the final octets: the number represents the NTP# tag in shared memory, so 127.127.28.0 refers to NTP0 (the time source) and 127.127.28.2 represents NTP2 (the PPS signal). 
 
@@ -637,13 +675,12 @@ The refid tags are actually free text (1-4 chars) and can be anything you like; 
 
 * A reliable source has suggested that putting the PPS server+fudge stanzas first, followed by GPS, and then only preferring PPS, will yield a more reliable clock.
 
-
 ### Disable NTP support in DHCP
 DHCP on many networks delivers time server config to their clients, allowing them to synchronize time properly along with the rest of the network. 
+
 This is a good thing except for NTP time servers themselves.
 
 Remove `ntp-servers` from `/etc/dhcp/dhclient.conf`:
-
 ```bash
 admin@raspberrypi:~ $ sudo nano /etc/dhcp/dhclient.conf 
 (...)
@@ -664,17 +701,23 @@ It probably requires reboot for this to take effect. At this point, you will be 
 admin@raspberrypi:~ $ sudo reboot
 ```
 ### Status of ntp
-After the reboot, check the `ntp` status with `ntpq -p`:
+After the reboot and 15 minutes or so, you should see `SHM(2)`, the `PPS` signal, selected, which will be indicated by an asterisk in front of that line. Check the `ntp` status with `ntpq -p`:
 ```bash
 admin@raspberrypi:~ $ ntpq -p
      remote                                   refid      st t when poll reach   delay   offset   jitter
 =======================================================================================================
-+ntp1.glypnod.com                        204.123.2.72     2 7   66   64    2 180.8374  -1.0179   0.0000                                                                     
-*SHM(2)                                  .PPS.            0 l   56   64    1   0.0000  -0.0181   0.0000
-xSHM(0)                                  .GPS.            0 l   15   64    3   0.0000 -506.770 300.2489
-admin@raspberrypi:~ $ 
++ntp1.glypnod.com                        204.123.2.72     2 7   80   64   42 175.9103  -0.5480   0.2508
+ ntsts.sth.ntp.se                        .NTS.           16 2    - 1024    0   0.0000   0.0000   0.0019
++time.cloudflare.com                     10.83.8.81       3 8   58   64  377   1.6859  -0.4668   0.0661
+*SHM(2)                                  .PPS.            0 l   27   64  377   0.0000  -0.1515   0.0268
+xSHM(0)                                  .NMEA.           0 l   26   64  377   0.0000 -510.768  20.7178
 ```
 * `*` means that this is the preferred time server
+* `x` in front of the `NMEA` means that `ntpd` detect `NMEA` as falseticked.
+
+* You could also use `watch ntpq -p`
+
+A more thorough explanation of the output of `ntpq` can be found here [https://detailed.wordpress.com/2017/10/22/understanding-ntpq-output/](https://detailed.wordpress.com/2017/10/22/understanding-ntpq-output/), and here [https://www.thegeekdiary.com/what-is-the-refid-in-ntpq-p-output/](https://www.thegeekdiary.com/what-is-the-refid-in-ntpq-p-output/).
 
 ### ntpstat
 But how good is our time, compared to other sources? Install `ntpstat` to get an idea; `sudo apt-get install ntpstat`:
@@ -707,6 +750,7 @@ udp6       0      0 fe80::f347:77da:42d:ntp [::]:*
 udp6       0      0 localhost:ntp           [::]:*                             
 udp6       0      0 [::]:ntp                [::]:*    
 ```
+`0.0.0.0:ntp` means that `ntp` (port 123) is served on every interface, to any ip adresses and remote ports, `0.0.0.0:*`. This is UDP traffic. 
 
 ### Configure PfSense
 Interfaces > Assignments > VLANs > Click Add.
@@ -740,260 +784,100 @@ Go to Services > NTP and Add our NTP server with an address of 192.168.28.2 and 
 
 You should now see under Status > NTP that our NTP server at `192.168.28.2` is our active Peer. 
 
+In NTP, there exist two states for an NTP server. A "truechimer", which is providing accurate time, and a "false ticker", which is providing inaccurate time. NTP has a selection process for which it works to eliminate "false tickers" by checking the time offsets received from a number of sources. It works to enter into an agreement over which system likely has the most accurate time. Therefore, you should not delete the default pool of NTP servers in the PfSense configuration. Better yet, is to add some geographical Stratum 1 servers to your list: [http://support.ntp.org/bin/view/Servers/StratumOneTimeServers](http://support.ntp.org/bin/view/Servers/StratumOneTimeServers).
+
+You should configure your non-GPS time source systems to use 5 NTP upstream servers. If you sync to a single upstream time source, NTP will trust this time source's clock. It could be 10 seconds off, 10 minutes off, 10 days off, or 10 years off. NTP can trust it and sync to it. 
 
 
+## Standalone connection
+Comment out all the _external_ `pool`/`server` lines in `/etc/ntp.conf`, because we are not using internet for time sync anymore.
 
+It is written in the documentation, that the PPS is taken in account only in cases when a "normal" time source is reached - because a PPS itself serves only a signal, not a date & time. __PPS believed only if prefer peer correct and within 128 ms.__ Our other time source would then be the NMEA. Also, from the documentation [http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html](http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html) __Note: you must add a preferred server or PPS doesn’t work.__
 
+The NMEA gps data are not very accurate in sync by nature of gps NMEA string handling (the strings arrives not very syncroniusly via serial port and there are many additional gps data where its amount depends on how many satelites are in view and the baud rate of serial connection). So its jitter can be up to 500ms, in average it is something around 300 ms. That is good enough, to set the local date time to a correct value, but is far away to be very accurate as it should for a stratum1 ntp server.
 
+The `ntp` keeps to stay at the NMEA source and will therefore never switck to the very precise PPS clock source, because of it's time is out of bounds. 
 
-
-
-# USB Dongle 
-The following information is now regarded deprecated; how I tried to do it with a USB dongle and the regular ntp daemon, not the secure one.
-## Install GPS packages
-`gpsd` is a general-purpose daemon designed to interact with most types of GPS models using a wide variety of protocols. It is also capable of processing the PPS signals and sending timing information to ntpd via dedicated shared memory devices. One for pushing to ntpd absolute timestamp parsed from the NMEA messages (or supported equivalent), another for PPS timing data. 
-
-ntpd will see them as two different SHM devices (Shared Host Memory).
-
-```bash
-admin@raspberrypi:~ $ sudo apt-get install gpsd gpsd-clients python-gps ntp pps-tools
-Reading package lists... Done
-Building dependency tree       
-Reading state information... Done
-The following additional packages will be installed:
-  adwaita-icon-theme fontconfig fontconfig-config fonts-dejavu-core gtk-update-icon-cache hicolor-icon-theme libatk1.0-0 libatk1.0-data libavahi-client3 libblas3 libbluetooth3 libcairo2 libcroco3 libcups2 libdatrie1 libevent-core-2.1-6
-  libevent-pthreads-2.1-6 libfontconfig1 libgail-common libgail18 libgdk-pixbuf2.0-0 libgdk-pixbuf2.0-bin libgdk-pixbuf2.0-common libgfortran5 libgps23 libgraphite2-3 libgtk2.0-0 libgtk2.0-bin libgtk2.0-common libharfbuzz0b libjbig0 liblapack3 libopts25
-  libpango-1.0-0 libpangocairo-1.0-0 libpangoft2-1.0-0 libpixman-1-0 librsvg2-2 librsvg2-common libthai-data libthai0 libtiff5 libwebp6 libxcb-render0 libxcb-shm0 libxcomposite1 libxcursor1 libxdamage1 libxfixes3 libxi6 libxinerama1 libxrandr2 libxrender1
-  python-cairo python-gobject-2 python-gtk2 python-numpy python-pkg-resources sntp
-Suggested packages:
-  cups-common gvfs librsvg2-bin ntp-doc python-gobject-2-dbg python-gtk2-doc gfortran python-dev python-pytest python-numpy-dbg python-numpy-doc python-setuptools
-The following NEW packages will be installed:
-  adwaita-icon-theme fontconfig fontconfig-config fonts-dejavu-core gpsd gpsd-clients gtk-update-icon-cache hicolor-icon-theme libatk1.0-0 libatk1.0-data libavahi-client3 libblas3 libbluetooth3 libcairo2 libcroco3 libcups2 libdatrie1 libevent-core-2.1-6
-  libevent-pthreads-2.1-6 libfontconfig1 libgail-common libgail18 libgdk-pixbuf2.0-0 libgdk-pixbuf2.0-bin libgdk-pixbuf2.0-common libgfortran5 libgps23 libgraphite2-3 libgtk2.0-0 libgtk2.0-bin libgtk2.0-common libharfbuzz0b libjbig0 liblapack3 libopts25
-  libpango-1.0-0 libpangocairo-1.0-0 libpangoft2-1.0-0 libpixman-1-0 librsvg2-2 librsvg2-common libthai-data libthai0 libtiff5 libwebp6 libxcb-render0 libxcb-shm0 libxcomposite1 libxcursor1 libxdamage1 libxfixes3 libxi6 libxinerama1 libxrandr2 libxrender1
-  ntp pps-tools python-cairo python-gobject-2 python-gps python-gtk2 python-numpy python-pkg-resources sntp
-0 upgraded, 64 newly installed, 0 to remove and 1 not upgraded.
-Need to get 37.7 MB of archives.
-After this operation, 110 MB of additional disk space will be used.
-Do you want to continue? [Y/n] y
-
-```
-### Reboot
-```bash
-admin@raspberrypi:~ $ sudo reboot
-```
-
-## LSUSB
-```bash
-ubuntu@ubuntu:~$ lsusb
-Bus 001 Device 003: ID 0424:ec00 Standard Microsystems Corp. SMSC9512/9514 Fast Ethernet Adapter
-Bus 001 Device 002: ID 0424:9514 Standard Microsystems Corp. SMC9514 Hub
-Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-ubuntu@ubuntu:~$ 
-```
-
-### Insert USB GPS dongle
-```bash
-ubuntu@ubuntu:~$ lsusb
-Bus 001 Device 006: ID 067b:2303 Prolific Technology, Inc. PL2303 Serial Port
-Bus 001 Device 003: ID 0424:ec00 Standard Microsystems Corp. SMSC9512/9514 Fast Ethernet Adapter
-Bus 001 Device 002: ID 0424:9514 Standard Microsystems Corp. SMC9514 Hub
-Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
-ubuntu@ubuntu:~$ 
-```
-
-## Edit “/etc/default/gpsd”
-```bash
-admin@raspberrypi:~ $ sudo nano /etc/default/gpsd
-
-# Default settings for the gpsd init script and the hotplug wrapper.
-
-# Start the gpsd daemon automatically at boot time
-START_DAEMON="true"
-
-# Use USB hotplugging to add new USB devices automatically to the daemon
-USBAUTO="true"
-
-# Devices gpsd should collect to at boot time.
-# They need to be read/writeable, either by user gpsd or the group dialout.
-DEVICES="/dev/ttyUSB0"
-
-# Other options you want to pass to gpsd
-GPSD_OPTIONS="-F /var/run/gpsd.sock -b -n"
-
-#GPSD_SOCKET="/var/run/gpsd.sock"
-```
-
-## Restart the gpsd Service     
-```bash
-admin@raspberrypi:~ $ sudo systemctl enable gpsd
-Synchronizing state of gpsd.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable gpsd
-Created symlink /etc/systemd/system/multi-user.target.wants/gpsd.service → /lib/systemd/system/gpsd.service.
-admin@raspberrypi:~ $ sudo systemctl start gpsd
-admin@raspberrypi:~ $ sudo systemctl status gpsd
-● gpsd.service - GPS (Global Positioning System) Daemon
-   Loaded: loaded (/lib/systemd/system/gpsd.service; enabled; vendor preset: enabled)
-   Active: active (running) since Sun 2020-01-05 21:18:31 GMT; 4s ago
-  Process: 694 ExecStart=/usr/sbin/gpsd $GPSD_OPTIONS $DEVICES (code=exited, status=0/SUCCESS)
- Main PID: 695 (gpsd)
-    Tasks: 2 (limit: 2200)
-   Memory: 1.5M
-   CGroup: /system.slice/gpsd.service
-           └─695 /usr/sbin/gpsd -F /var/run/gpsd.sock -b -n /dev/ttyUSB0
-
-Jan 05 21:18:31 raspberrypi systemd[1]: Starting GPS (Global Positioning System) Daemon...
-Jan 05 21:18:31 raspberrypi systemd[1]: Started GPS (Global Positioning System) Daemon.
-admin@raspberrypi:~ $ 
-```
-
-### cgps -s
-At this point, you should be able to see a text-mode output from your GPS receiver by running the command `cgps -s`. 
-This will display the details of your current location with values, something like the following:
-```bash
-admin@raspberrypi:~ $ cgps -s
-
-┌───────────────────────────────────────────┐┌─────────────────────────────────┐
-│    Time:       2020-01-05T16:11:12.000Z   ││PRN:   Elev:  Azim:  SNR:  Used: │
-│    Latitude:    00.00000000 N             ││  33    12    009    23      Y   │
-│    Longitude:   00.00000000 E             ││  21    41    066    38      Y   │
-│    Altitude:   900.100 m                  ││  55    46    098    19      Y   │
-│    Speed:      0.96 kph                   ││  25    07    237    31      Y   │
-│    Heading:    180.0 deg (true)           ││  28    13    061    35      Y   │
-│    Climb:      6.00 m/min                 ││  10    18    281    00      N   │
-│    Status:     3D FIX (4 secs)            ││  12    45    224    00      N   │
-│    Longitude Err:   +/- 19 m              ││  13    03    159    00      N   │
-│    Latitude Err:    +/- 18 m              ││  15    21    184    00      N   │
-│    Altitude Err:    +/- 62 m              ││  22    03    255    00      N   │
-│    Course Err:      n/a                   ││  24    77    217    00      N   │
-│    Speed Err:       +/- 139 kph           ││  32    21    315    00      N   │
-│    Time offset:     -4344444.984          ││                                 │
-│    Grid Square:     Q071pq                ││                                 │
-└───────────────────────────────────────────┘└─────────────────────────────────┘
-```
-
-## Telling NTP the seconds from the GPS
-Now that gpsd is working, we can edit the NTP configuration to add a type 28 reference clock which will make NTP look at the shared memory created by `gpsd`. 
-
-While we are at it, we comment out all our `pool` lines as well, because we are not using internet for time sync anymore.
-
-Edit `/etc/ntp.conf`:
+In combination with the `man ntp` documentation, change `/etc/ntp.conf` file:
 ```bash
 admin@raspberrypi:~ $ sudo nano /etc/ntp.conf
+# GPS PPS reference
+server 127.127.28.2 
+fudge  127.127.28.2 refid PPS
 
-(...)
-
-# You do need to talk to an NTP server or two (or three).
-#server ntp.your-provider.example
-
-# pool.ntp.org maps to about 1000 low-stratum NTP servers.  Your server will
-# pick a different set every time it starts up.  Please consider joining the
-# pool: <http://www.pool.ntp.org/join.html>
-pool 0.debian.pool.ntp.org iburst
-pool 1.debian.pool.ntp.org iburst
-pool 2.debian.pool.ntp.org iburst
-pool 3.debian.pool.ntp.org iburst
-
-# GPS NTP
-server 127.127.28.0 minpoll 4
-fudge 127.127.28.0  time1 0.183 refid NMEA
-server 127.127.28.1 minpoll 4 prefer
-fudge 127.127.28.1  time1 0.183 refid PPS
-
-# Use Ubuntu's ntp server as a fallback.
-# pool ntp.ubuntu.com
-
+# get time from SHM from gpsd; this seems working
+server 127.127.28.0 minpoll 4 maxpoll 4 prefer
+fudge  127.127.28.0 refid NMEA
 ```
-## Restart the ntp service
+
+It takes the NMEA data to initially sync date & time, and few seconds later the `PPS` will be activated and `ntpd` takes PPS into account.
+
+The `ntpd` driver 28 for the virtual ip 127.127.28.0 starts to work only when a `gpsd` client connects to `gpsd` once. 
+
+To auto start the `gpsd`, add an additional entry `gpspipe -r -n 1 &` in the `/etc/rc.local` file, just before the `exit 0`:
 ```bash
-admin@raspberrypi:~ $ sudo systemctl enable ntp
-Synchronizing state of ntp.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable ntp
-admin@raspberrypi:~ $ sudo systemctl start ntp
-admin@raspberrypi:~ $ sudo systemctl status ntp
-● ntp.service - Network Time Service
-   Loaded: loaded (/lib/systemd/system/ntp.service; enabled; vendor preset: enabled)
-   Active: active (running) since Sun 2020-01-05 21:14:58 GMT; 8min ago
-     Docs: man:ntpd(8)
- Main PID: 514 (ntpd)
-    Tasks: 2 (limit: 2200)
-   Memory: 1.9M
-   CGroup: /system.slice/ntp.service
-           └─514 /usr/sbin/ntpd -p /var/run/ntpd.pid -g -u 109:114
-
-Jan 05 21:15:02 raspberrypi ntpd[514]: Soliciting pool server 37.44.185.42
-Jan 05 21:15:03 raspberrypi ntpd[514]: Soliciting pool server 91.189.182.32
-Jan 05 21:15:03 raspberrypi ntpd[514]: Soliciting pool server 162.159.200.123
-Jan 05 21:15:03 raspberrypi ntpd[514]: Soliciting pool server 162.159.200.1
-Jan 05 21:15:04 raspberrypi ntpd[514]: Soliciting pool server 185.42.170.200
-Jan 05 21:15:04 raspberrypi ntpd[514]: Soliciting pool server 2001:67c:24e4:33::36
-Jan 05 21:15:17 raspberrypi ntpd[514]: receive: Unexpected origin timestamp 0xe1bcd05a.605a299f does not match aorg 0000000000.00000000 from server@193.150.22.36 xmt 0xe1bcd065.5cb17fde
-Jan 05 21:15:17 raspberrypi ntpd[514]: receive: Unexpected origin timestamp 0xe1bcd05a.605492a6 does not match aorg 0000000000.00000000 from server@51.174.198.198 xmt 0xe1bcd065.5d08dbe7
-Jan 05 21:15:17 raspberrypi ntpd[514]: receive: Unexpected origin timestamp 0xe1bcd05a.605763a9 does not match aorg 0000000000.00000000 from server@192.36.143.130 xmt 0xe1bcd065.5e6f150d
-Jan 05 21:20:50 raspberrypi ntpd[514]: kernel reports TIME_ERROR: 0x41: Clock Unsynchronized
-admin@raspberrypi:~ $ sudo reboot
+# /etc/rc.local
+...
+gpspipe -r -n 1 &
+exit 0
 ```
 
+On a reboot/startup, this will connect a gps client for exactly one NMEA output and then it disconnect itself gracely from the `gpsd`. `gpsd` keeps active in the background and will now serve `ntpd` with proper GPS data.
 
-## ntpq -p
-After a bit (15 minutes or so), you should see `SHM(0)` selected, which will be indicated by an asterisk in front of that line.
-It should display time from `SHM(0)` & `SHM(1)`.
+Once that is done the time via NMEA (the gps data strings) acts as time source for ntp.
 
-```bash
-admin@raspberrypi:~ $ ntpq -p
-     remote           refid      st t when poll reach   delay   offset  jitter
-==============================================================================
- 0.debian.pool.s .POOL.          16 p    -   64    0    0.000    0.000   0.002
- 1.debian.pool.s .POOL.          16 p    -   64    0    0.000    0.000   0.002
- 2.debian.pool.s .POOL.          16 p    -   64    0    0.000    0.000   0.002
- 3.debian.pool.s .POOL.          16 p    -   64    0    0.000    0.000   0.002
-#SHM(0)          .NMEA.           0 l   15   16   77    0.000  -194.69  19.948
- SHM(1)          .PPS.            0 l    -   16    0    0.000    0.000   0.000
-+198.51-174-198. 195.106.111.68   2 u   36   64   17    3.068  308.754   0.368
--77-95-77-250.bb 194.58.202.20    2 u   34   64   17    5.036  308.356   0.469
-+time100.stupi.s .PPS.            1 u   31   64   17   15.548  308.568   0.385
--ntp.coreless.ne 194.58.203.148   2 u   32   64   17    1.555  308.768   0.282
-#87.248.15.31 (i 194.58.203.148   2 u   34   64   17    4.355  308.928   0.444
-+162.159.200.123 10.83.8.95       3 u   37   64    7    1.250  308.311   0.299
-+162.159.200.1   10.83.8.95       3 u   38   64    7    1.347  308.351   0.264
--ntp.ixo.no      77.40.226.114    2 u   37   64    7    1.980  308.689   0.226
-#ntp-ext.cosng.n 146.213.3.180    2 u   31   64   17    4.414  308.696   0.088
-*time.bjolab.net .GPS.            1 u   35   64   17   23.462  308.589   0.333
-+ntp.fnutt.net   192.36.143.150   2 u   32   64   17    2.141  308.595   0.158
-#ntp-ext.cosng.n 146.213.3.180    2 u   36   64   17    4.297  308.389   0.251
-+nux.hackeriet.n 77.40.226.114    2 u   34   64   17    1.902  308.382   0.458
-#ntp-ext.cosng.n 146.213.3.180    2 u   34   64   17    4.398  308.790   0.159
-```
-
-## Make it standalone
-Comment out all our `pool` lines in `/etc/ntp.conf`, because we are not using internet for time sync anymore.
-
-### Edit `/etc/ntp.conf`:
-```bash
-admin@raspberrypi:~ $ sudo nano /etc/ntp.conf
-(...)
-#pool 0.debian.pool.ntp.org iburst
-#pool 1.debian.pool.ntp.org iburst
-#pool 2.debian.pool.ntp.org iburst
-#pool 3.debian.pool.ntp.org iburst
-(...)
-```
-Save and then issue `sudo reboot` once more.
-
-### What does ntpq -p say now?
-```bash
-admin@raspberrypi:~ $ ntpq -p
-     remote           refid      st t when poll reach   delay   offset  jitter
-==============================================================================
-*SHM(0)          .NMEA.           0 l   14   16    1    0.000  -50.303   0.002
- SHM(1)          .PPS.            0 l    -   16    0    0.000    0.000   0.000
-```
+And also the ntp driver 22 for PPS virtual ip 127.127.28.0 starts to get being active from the view of ntp
+(the `/dev/pps0` is served by the kernel and is actively working all the time, only `ntp` takes notice of `PPS` after a gps client was connected to gpsd first).
 
 # Fault finding
+## /var/log/ntp.log
+```bash
+admin@raspberrypi:~ $ tail -f /var/log/ntp.log
+```
+Open up a new console session;
+```bash
+admin@raspberrypi:~ $ sudo systemctl restart ntpd
+```
+```
+admin@raspberrypi:~ $ tail -f /var/log/ntp.log
+## 
+2020-07-23T17:35:57 ntpd[1622]: NTSc: DNS lookup of time.cloudflare.com:1234 took 0.014 sec
+2020-07-23T17:35:57 ntpd[1622]: NTSc: connecting to time.cloudflare.com:1234 => 162.159.200.1:123
+2020-07-23T17:36:00 ntpd[1622]: NTSc: connect_TCP_socket: timeout
+2020-07-23T17:36:00 ntpd[1622]: DNS: dns_check: processing time.cloudflare.com:1234, 1, 21921
+2020-07-23T17:36:00 ntpd[1622]: DNS: dns_take_status: time.cloudflare.com:1234=>error, 12
+```
+Check your firewall settings. 
 
+## 123?
+administrator@H37BNTP01:~ $ sudo netstat -nlap | grep 'ntpd'
+[sudo] password for administrator: 
+udp        0      0 192.168.28.2:123        0.0.0.0:*                           446/ntpd            
+udp        0      0 127.0.0.1:123           0.0.0.0:*                           446/ntpd            
+udp        0      0 0.0.0.0:123             0.0.0.0:*                           446/ntpd            
+udp6       0      0 fe80::f337:776a:44d:123 :::*                                446/ntpd            
+udp6       0      0 ::1:123                 :::*                                446/ntpd            
+udp6       0      0 :::123                  :::*                                446/ntpd            
+unix  2      [ ]         DGRAM                    12991    446/ntpd             
+
+## ntp?
+administrator@H37BNTP01:~ $ systemctl list-unit-files | grep 'ntp'
+ntp-wait.service                       disabled       
+ntpd.service                           enabled        
+ntplogtemp.service                     static         
+ntpviz-daily.service                   static         
+ntpviz-weekly.service                  static         
+ntplogtemp.timer                       disabled       
+ntpviz-daily.timer                     disabled       
+ntpviz-weekly.timer                    disabled   
+
+## Start ntpd with debug mode
+```bash
+administrator@H37BNTP01:~ $ sudo ntpd -nD 4
+```
 
 ## lsmod
-Is pps modules loaded?
+Are `pps` modules loaded?
 ```bash
 admin@raspberrypi:~ $ lsmod | grep pps
 pps_ldisc              16384  2
@@ -1026,7 +910,8 @@ admin@raspberrypi:~ $ ntpq -pn
 If you do not have a `*` to the left of either source, you are not synchronized.
 
 ## Check the GPS status
-Do your GPS have a 3D FIX?
+Do your GPS have a 3D FIX? At this point, you should be able to see a text-mode output from your GPS receiver by running the command `cgps -s`. 
+This will display the details of your current location with values, something like the following:
 ```bash
 admin@raspberrypi:~ $ cgps -s
 
@@ -1048,7 +933,7 @@ admin@raspberrypi:~ $ cgps -s
 │    Grid Square:     n/a                   ││                                 │
 └───────────────────────────────────────────┘└─────────────────────────────────┘
 ```
-Try to move your GPS receiver. 
+If you have, after a while, `NO FIX`- try to move your GPS receiver to a better view of the sky. 
 
 ## gpsmon
 The `gpsmon` command connects to the `gpsd` server and displays output about the connected GPS.  You should see a list of satellites on the left (0 through 11) along with S/N ratios (some should be in the 30s or higher if you have good antenna placement).  You should see values for “Latitude” and “Longitude”.  If you have a good antenna positioning and you’re in the USA, you should see “FAA: D” in the middle box.  The middle bottom box should also indicate a PPS value (a decimal number, which should be very small if your time on your machine is close to correct).
@@ -1085,21 +970,6 @@ ity":"N","stopbits":1,"cycle":1.00}]}
 
 ```
 
-
-## Check that things look right
-```
-admin@raspberrypi:~ $ watch ntpq -p
-Every 2.0s: ntpq -p                                                                                                                                                                                                            raspberrypi: Sun Jan  5 21:50:50 2020
-
-     remote           refid      st t when poll reach   delay   offset  jitter
-==============================================================================
- SHM(1)          .PPS.            0 l    -   16    0    0.000    0.000   0.000
-*SHM(0)          .NMEA.           0 l   50   16  270    0.000  -23.769   7.782
-
-```
-`*` is the source you are synchronized to (syspeer).
-
-
 ## ntpstat
 ```bash
 admin@raspberrypi:~ $ sudo apt-get install ntpstat
@@ -1110,8 +980,9 @@ synchronised to UHF radio at stratum 1
    time correct to within 8002 ms
    polling server every 16 s
 admin@raspberrypi:~ $ 
-
 ```
+
+Wait some minutes, and then you'll see that `time correct to within 8002 ms` will (hopefully) drop down to within 1 ms. 
 
 ## ppscheck
 ```
@@ -1154,7 +1025,11 @@ found PPS source "/dev/pps0"
 ok, found 1 source(s), now start fetching data...
 time_pps_fetch() error -1 (Connection timed out)
 ```
-## Windows client settings
+
+# Client settings
+## Linux
+
+## Windows 
 ```
 C:\Users\Don Pablo>w32tm /query /status
 Leap Indicator: 0(no warning)
@@ -1190,7 +1065,6 @@ C:\Users\Don Pablo>
 ```
 
 
-
 ## Authors
 Mr. Johnson
 
@@ -1224,3 +1098,13 @@ Mr. Johnson
 * [https://www.systutorials.com/docs/linux/man/1-gpsmon/](https://www.systutorials.com/docs/linux/man/1-gpsmon/)
 * [https://www.roundsolutions.com/forum/index.php?thread/4077-pps-signal-without-fix/](https://www.roundsolutions.com/forum/index.php?thread/4077-pps-signal-without-fix/)
 * [https://www.gpsworld.com/what-exactly-is-gps-nmea-data/](https://www.gpsworld.com/what-exactly-is-gps-nmea-data/)
+* [https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html](https://daker.me/2014/10/how-to-fix-perl-warning-setting-locale-failed-in-raspbian.html)
+* [https://www.reddit.com/r/sysadmin/comments/3pyy52/how_do_you_do_ntp/](https://www.reddit.com/r/sysadmin/comments/3pyy52/how_do_you_do_ntp/)
+* [https://www.reddit.com/r/linuxadmin/comments/83w8m8/large_gps_time_offset_with_ntp/](https://www.reddit.com/r/linuxadmin/comments/83w8m8/large_gps_time_offset_with_ntp/)
+* [https://serverfault.com/questions/184257/seemingly-poor-quality-of-ntp-time-synchronization-using-a-gps-clock](https://serverfault.com/questions/184257/seemingly-poor-quality-of-ntp-time-synchronization-using-a-gps-clock)
+* [https://www.raspberrypi.org/forums/viewtopic.php?t=140585](https://www.raspberrypi.org/forums/viewtopic.php?t=140585)
+* [https://www.eecis.udel.edu/~mills/database/brief/precise/precise.pdf](https://www.eecis.udel.edu/~mills/database/brief/precise/precise.pdf)
+* [https://blog.cloudflare.com/secure-time/](https://blog.cloudflare.com/secure-time/)
+* [https://docs.ntpsec.org/latest/NTS-QuickStart.html](https://docs.ntpsec.org/latest/NTS-QuickStart.html)
+* [https://www.openssl.org/source/](https://www.openssl.org/source/)
+* [https://www.howtoforge.com/tutorial/how-to-install-openssl-from-source-on-linux/](https://www.howtoforge.com/tutorial/how-to-install-openssl-from-source-on-linux/)
