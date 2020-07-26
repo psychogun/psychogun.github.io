@@ -1029,6 +1029,74 @@ time_pps_fetch() error -1 (Connection timed out)
 
 ## Client settings
 ### Linux
+```bash
+admin@raspberrypi:~$ timedatectl status
+                      Local time: Fri 2020-07-24 23:54:55 CEST
+                  Universal time: Fri 2020-07-24 21:54:55 UTC
+                        RTC time: Fri 2020-07-24 21:54:56
+                       Time zone: Europe/Oslo (CEST, +0200)
+       System clock synchronized: yes
+systemd-timesyncd.service active: yes
+                 RTC in local TZ: no
+```
+
+```bash
+admin@raspberrypi:~$ sudo nano /etc/systemd/timesyncd.conf 
+#  This file is part of systemd.
+#
+#  systemd is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
+#
+# Entries in this file show the compile time defaults.
+# You can change settings by editing this file.
+# Defaults can be restored by simply deleting this file.
+#
+# See timesyncd.conf(5) for details.
+
+[Time]
+NTP=192.168.53.234
+#FallbackNTP=ntp.ubuntu.com
+#RootDistanceMaxSec=5
+#PollIntervalMinSec=32
+#PollIntervalMaxSec=2048
+```
+
+```bash
+admin@raspberrypi:~$ date
+Sat Jul 25 00:07:02 CEST 2020
+admin@raspberrypi:~$ 
+```
+
+To see exact upstream IP address of ntp server run
+```bash
+admin@raspberrypi:~$ systemctl status systemd-timesyncd
+● systemd-timesyncd.service - Network Time Synchronization
+   Loaded: loaded (/lib/systemd/system/systemd-timesyncd.service; enabled; vendor preset: enabled)
+   Active: active (running) since Fri 2020-07-10 21:53:07 CEST; 2 weeks 0 days ago
+     Docs: man:systemd-timesyncd.service(8)
+ Main PID: 616 (systemd-timesyn)
+   Status: "Synchronized to time server 91.189.89.198:123 (ntp.ubuntu.com)."
+    Tasks: 2 (limit: 3176)
+   CGroup: /system.slice/systemd-timesyncd.service
+           └─616 /lib/systemd/systemd-timesyncd
+
+Jul 24 19:50:54 raspberrypi systemd-timesyncd[616]: Network configuration changed, trying to establish connection.
+Jul 24 19:50:54 raspberrypi systemd-timesyncd[616]: Synchronized to time server 91.189.89.198:123 (ntp.ubuntu.com).
+Jul 24 20:50:55 raspberrypi systemd-timesyncd[616]: Network configuration changed, trying to establish connection.
+Jul 24 20:50:55 raspberrypi systemd-timesyncd[616]: Synchronized to time server 91.189.89.198:123 (ntp.ubuntu.com).
+Jul 24 21:50:53 raspberrypi systemd-timesyncd[616]: Network configuration changed, trying to establish connection.
+Jul 24 21:50:53 raspberrypi systemd-timesyncd[616]: Synchronized to time server 91.189.89.198:123 (ntp.ubuntu.com).
+Jul 24 22:50:52 raspberrypi systemd-timesyncd[616]: Network configuration changed, trying to establish connection.
+Jul 24 22:50:52 raspberrypi systemd-timesyncd[616]: Synchronized to time server 91.189.89.198:123 (ntp.ubuntu.com).
+Jul 24 23:50:51 raspberrypi systemd-timesyncd[616]: Network configuration changed, trying to establish connection.
+Jul 24 23:50:51 raspberrypi systemd-timesyncd[616]: Synchronized to time server 91.189.89.198:123 (ntp.ubuntu.com).
+```
+```bash
+admin@raspberrypi:~$ sudo systemctl restart systemd-timesyncd
+```
+
 
 ### Windows 
 ```
@@ -1065,6 +1133,19 @@ Poll Interval: 10 (1024s)
 C:\Users\Don Pablo>
 ```
 
+## Mac OS / iOS 
+
+The easiest way with Apple devices is to use your DNS Resolver and add host overrides and point them to an address which serves NTP. 
+
+On PfSense, add these under Services > DNS Resolver:
+
+Host | Parent domain of host | IP to return for host | Description
+------------ | ------------- | ------------ | -------------
+ntp | euro.apple.com	| 192.168.53.234	| ntp.euro.apple.com
+time |	euro.apple.com	| 192.168.53.234	| time.euro.apple.com	 
+time |	asia.apple.com | 192.168.53.234	| time.asia.apple.com	 
+time |	apple.com |	192.168.53.234 | time.apple.com	 
+time-ios	| apple.com	| 192.168.53.234 | time-ios.apple.com
 
 ## Authors
 Mr. Johnson
