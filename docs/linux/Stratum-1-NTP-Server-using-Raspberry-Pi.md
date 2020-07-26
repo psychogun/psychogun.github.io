@@ -1133,7 +1133,7 @@ Poll Interval: 10 (1024s)
 C:\Users\Don Pablo>
 ```
 
-## Mac OS / iOS 
+### Mac OS / iOS 
 
 The easiest way with Apple devices is to use your DNS Resolver and add host overrides and point them to an address which serves NTP. 
 
