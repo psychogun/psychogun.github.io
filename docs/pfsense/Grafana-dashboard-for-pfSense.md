@@ -7,7 +7,7 @@ nav_order: 2
 
 # Grafana dashboard for pfSense
 {: .no_toc }
-This is how I used Grafana to display dashboard for vitals from my PfSense firewall. I was able to do this because of this VictorRobellini's work (https://github.com/VictorRobellini/pfSense-Dashboard). 
+This is how I used Grafana to display dashboard for vitals from my PfSense firewall. I was able to do this because of this VictorRobellini's work [https://github.com/VictorRobellini/pfSense-Dashboard](https://github.com/VictorRobellini/pfSense-Dashboard). 
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -316,7 +316,7 @@ torkel@gaard:/usr/local/etc/ssl$ scp grafana.req ronald@shamir:/tmp/grafana.req
 #### -extfile
 ```bash
 ronald@shamir:~$ cd ~/easy-rsa/config/
-ronald@shamir:~/easy-rsa/config$ more Grafana 
+ronald@shamir:~/easy-rsa/config$ nano Grafana 
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
 keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
@@ -335,11 +335,11 @@ Getting CA Private Key
 Enter pass phrase for ../pki/private/ca.key:
 ```
 ### Copy certificate back to Grafana
-Copy .crt file to grafana
+Copy `.crt` file to grafana
 ```bash
 ronald@shamir:~/easy-rsa/config$ scp grafana.crt torkel@gaard:/tmp/grafana.crt
 ```
-MOve the file to an appropriate folder:
+Move the file to an appropriate folder:
 ```bash
 torkel@gaard:~$ mv /tmp/grafana.crt /usr/local/etc/ssl
 ```
