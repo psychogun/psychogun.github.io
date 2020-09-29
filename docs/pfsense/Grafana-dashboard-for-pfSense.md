@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Grafana dashboard for pfSense
-parent: pfsense
+parent: pfSense
 nav_order: 2
 ---
 
