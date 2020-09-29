@@ -293,7 +293,7 @@ autogen  0s       168h0m0s           1        true
 
 ### Import pfSense-Grafana-Dashboard.json
 
-* https://raw.githubusercontent.com/VictorRobellini/pfSense-Dashboard/master/pfSense-Grafana-Dashboard.json
+[https://raw.githubusercontent.com/VictorRobellini/pfSense-Dashboard/master/pfSense-Grafana-Dashboard.json](https://raw.githubusercontent.com/VictorRobellini/pfSense-Dashboard/master/pfSense-Grafana-Dashboard.json)
 
 
 Now you should be all done. Restart the `Telegraf` service on your pfSense firewall and the data should begin populating!
