@@ -6,7 +6,7 @@ has_children: true
 permalink: /docs/pfsense
 ---
 
-# Linux
+# pfSense
 
 Everything related to pfSense is collected here.
 {: .fs-6 .fw-300 }
