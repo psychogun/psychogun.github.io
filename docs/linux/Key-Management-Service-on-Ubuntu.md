@@ -42,6 +42,20 @@ administrator@kms:~$ sudo shutdown now
 ```
 In Proxmox, go to Options and Enable by selecting `Use QEMU Guest Agent`. Start your VM again. 
 
+### Set your time zone
+```bash
+administrator@kms:~$ date
+Sat 11 Jan 21:22:53 GMT 2020
+administrator@kms:~$ sudo dpkg-reconfigure tzdata
+
+Current default time zone: 'Europe/Paris'
+Local time is now:      Sat Jan 11 22:24:07 CET 2020.
+Universal Time is now:  Sat Jan 11 21:24:07 UTC 2020.
+
+administrator@kms:~$ date
+Sat 11 Jan 22:24:16 CET 2020
+```
+
 ## Installing the KMS server
 The KMS server is available as binaries or source code that needs to be compiled. Let us use the source code.
 
