@@ -27,8 +27,8 @@ I must master it as I must master my life. Without me, my guide is useless. With
 ### Prerequsites
 
 * Proxmox Virtual Environment 6.1-5
-* Ubuntu 18.04.3 Server
-* Home Assistant 0.104.3
+* Ubuntu 20.04 LTS
+* Home Assistant 0.113.3
 * Deconz Docker
 
 * Aeotec ZW090 Z-Stick Gen5 EU
@@ -52,23 +52,116 @@ Remember to select to install `OpenSSH server` under the installation of Ubuntu.
 ### update && upgrade
 Update and upgrade:
 ```bash
-sudo apt-get update
-sudo apt-get upgrade
+assistant@linuxbabe:~$ sudo apt-get update
+assistant@linuxbabe:~$ sudo apt-get upgrade
+```
+
+### Set your time zone
+```bash
+assistant@linuxbabe:~$date
+Sat 11 Jan 21:22:53 GMT 2020
+assistant@linuxbabe:~$ sudo dpkg-reconfigure tzdata
+
+Current default time zone: 'Europe/Paris'
+Local time is now:      Sat Jan 11 22:24:07 CET 2020.
+Universal Time is now:  Sat Jan 11 21:24:07 UTC 2020.
+
+assistant@linuxbabe:~$ date
+Sat 11 Jan 22:24:16 CET 2020
+```
+
+### Disable IPv6
+```bash
+assistant@linuxbabe:~$ sudo nano /etc/default/grub
+(...)
+GRUB_CMDLINE_LINUX_DEFAULT="maybe-ubiquity"
+GRUB_CMDLINE_LINUX=""
+```
+Change to:
+```bash
+(...)
+GRUB_CMDLINE_LINUX_DEFAULT="maybe-ubiquity ipv6.disable=1"
+GRUB_CMDLINE_LINUX="ipv6.disable=1"
+```
+Then run:
+```bash
+assistant@linuxbabe:~$ sudo update-grub
+```
+
+### Change NTP (?)
+Add your preferred NTP server:
+```bash
+assistant@linuxbabe:~$  sudo nano /etc/systemd/timesyncd.conf 
+[sudo] password for assistant:
+#  This file is part of systemd.
+#
+#  systemd is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU Lesser General Public License as published by
+#  the Free Software Foundation; either version 2.1 of the License, or
+#  (at your option) any later version.
+#
+# Entries in this file show the compile time defaults.
+# You can change settings by editing this file.
+# Defaults can be restored by simply deleting this file.
+#
+# See timesyncd.conf(5) for details.
+
+[Time]
+NTP=192.168.78.1
+#FallbackNTP=ntp.ubuntu.com
+#RootDistanceMaxSec=5
+#PollIntervalMinSec=32
+#PollIntervalMaxSec=2048 
+```
+Restart the `systemd-timesyncd` daemon:
+```bash
+assistant@linuxbabe:~$ sudo systemctl restart systemd-timesyncd
+```
+
+Check NTP status:
+```bash
+assistant@linuxbabe:~$ systemctl status systemd-timesyncd
+● systemd-timesyncd.service - Network Time Synchronization
+   Loaded: loaded (/lib/systemd/system/systemd-timesyncd.service; enabled; vendor preset: enabled)
+   Active: active (running) since Mon 2020-07-27 13:54:28 CEST; 50s ago
+     Docs: man:systemd-timesyncd.service(8)
+ Main PID: 626 (systemd-timesyn)
+   Status: "Synchronized to time server 192.168.78.1:123 (192.168.78.1)."
+    Tasks: 2 (limit: 2317)
+   CGroup: /system.slice/systemd-timesyncd.service
+           └─626 /lib/systemd/systemd-timesyncd
+
+Jul 27 13:54:28 linuxbabe systemd[1]: Starting Network Time Synchronization...
+Jul 27 13:54:28 linuxbabe systemd[1]: Started Network Time Synchronization.
+Jul 27 13:54:32 linuxbabe systemd-timesyncd[626]: No network connectivity, watching for changes.
+Jul 27 13:54:32 linuxbabe systemd-timesyncd[626]: No network connectivity, watching for changes.
+Jul 27 13:54:32 linuxbabe systemd-timesyncd[626]: No network connectivity, watching for changes.
+Jul 27 13:54:32 linuxbabe systemd-timesyncd[626]: No network connectivity, watching for changes.
+Jul 27 13:54:32 linuxbabe systemd-timesyncd[626]: No network connectivity, watching for changes.
+Jul 27 13:54:32 linuxbabe systemd-timesyncd[626]: No network connectivity, watching for changes.
+Jul 27 13:54:59 linuxbabe systemd-timesyncd[626]: Synchronized to time server 192.168.78.1:123 (192.168.78.1).
+assistant@linuxbabe:~$ 
+```
+### Qemu-guest-agent
+```bash
 assistant@linuxbabe:~$ sudo apt-get install qemu-guest-agent
 ```
-Set the correct date and time:
-```bash
-assistant@linuxbabe:~$ sudo dpkg-reconfigure tzdata
-```
+
 Issue `sudo shutdown now` to power of the guest and go to the Proxmox web gui and enable QEMU Guest Agent under Options, then start it again.
 
-### Upgrade Python
+
+### python3 version
 Which version do you currently have?
+```bash
+assistant@linuxbabe:~$ python3 -V
+Python 3.8.2
+```
+#### (Optional) upgrade python
 ```bash
 assistant@linuxbabe:~$ python3 -V
 Python 3.6.9
 ```
-Install `python3.8`:
+Install `python3.8` (Python 3.7 and above is required).
 ```bash
 assistant@linuxbabe:~$ sudo apt-get install python3.8
 ```
@@ -103,6 +196,7 @@ Test the version of python:
 assistant@linuxbabe:~$ python3 -V
 Python 3.8.0
 ```
+
 ### Install the dependencies
 Install all the required dependencies for running Home Assistant in an python virtual environment:
 ```bash
@@ -158,20 +252,15 @@ Start Home Assistant for the first time. This will complete the installation for
 
 When you run the hass command for the first time, it will download, install and cache the necessary libraries/dependencies. This procedure may take anywhere between 5 to 10 minutes. During that time, you may get “site cannot be reached” error when accessing the web interface. This will only happen for the first time, and subsequent restarts will be much faster.
 
-You can now reach your installation on your Raspberry Pi over the web interface on `http://ipaddress:8123`. 
+You can now reach your installation over the web interface on `http://ipaddress:8123`. 
 
 Hop on in and configure a user, set your timezone, location and metrics. It will also be possible to set up integrations discovered on the network. 
 
-
-
-Further more, you are able to set up integrations from the web service, but that did not work out, at least for me when I tried to install Z-Wave, it just hangs on `2020-01-29 16:50:52 INFO (SyncWorker_2) [homeassistant.util.package] Attempting install of homeassistant-pyozw==0.1.7` ..
-
-I takes a while, but then you are able to configure Z-Wave:
-USB Path: /dev/ttyACM0
-Network Key: 
+### Enable advanced mode
+Click on your username on the down left. Enable Advanced Mode. Go to Configuration and `STOP` our Home Assistant from the Server Controls page. 
 
 ### Home Assistant as a daemon
-Stop `hass` with your keyboard, CTRL + C. 
+Stop `hass` with your keyboard, CTRL + C or through Configuration > Server Controls and `STOP`.
 
 Do this if you would like Home Assistant to start on boot.
 ```bash
@@ -277,6 +366,143 @@ Bus 001 Device 002: ID 0627:0001 Adomax Technology Co., Ltd
 Bus 001 Device 001: ID 1d6b:0001 Linux Foundation 1.1 root hub
 ```
 It is configured as `/dev/ttyACM0`.
+
+
+## Migrate to OpenZWave (beta)
+
+Let's do this.
+
+### mosquitto
+[https://www.vultr.com/docs/how-to-install-mosquitto-mqtt-broker-server-on-ubuntu-16-04](https://www.vultr.com/docs/how-to-install-mosquitto-mqtt-broker-server-on-ubuntu-16-04)
+
+### Portainer prerequisites
+We install the necessary packages to be able to install Docker:
+```bash
+igor@h1anginx01:~$ sudo apt install apt-transport-https ca-certificates curl software-properties-common
+```
+We add the official Docker GPG key:
+```bash
+igor@h1anginx01:~$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+OK
+```
+We activate Docker repository and update it:
+```bash
+igor@h1anginx01:~$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+igor@h1anginx01:~$ sudo apt update
+```
+We install the latest Docker version:
+```bash
+igor@h1anginx01:~$ sudo apt install docker-ce
+```
+
+### Portainer installation
+As we mentioned at the beginning of this article, installing Portainer is very simple since it works in a Docker container, for this we will execute:
+```bash
+igor@h1anginx01:~$ sudo docker volume create portainer_data
+igor@h1anginx01:~$ sudo docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
+```
+```bash
+assistant@h37bhomeassistant02:/$ cd /opt/
+assistant@h37bhomeassistant02:/opt$ sudo mkdir ozw
+assistant@h37bhomeassistant02:/opt$ cd ozw/
+assistant@h37bhomeassistant02:/opt/ozw$ sudo mkdir config
+```
+
+### Admin user
+Create an admin user through interface http://ip-adress:90000, after which you have opted for `Connect local`.
+
+### Make portainer start at boot
+Go to Containers, select the portainer container and under `Container details`, select `Restart policies` and use `Unless stopped` and press `Update`. 
+Connect locally. 
+
++Add Container
+* Name: ozwdaemon
+
+* Image: docker.io openzwave/ozwdaemon:allinone-latest
+
+Network ports configuration
+1983:1983
+5901:5901
+7800:7800
+
+* Volumes: 
++map additional volume
+* container: /opt/ozw/config <click Bind>
+* host: /opt/ozw/config
+
+change time of container:
+* container: /etc/localtime <click Bind>
+* host: /etc/localtime
+
+
+* Env:
++ add environment variable
+
+MQTT_SERVER: "192.168.0.1"
+MQTT_USERNAME: "my-username"
+MQTT_PASSWORD: "my-password"
+USB_PATH: "/dev/ttyACM0"
+OZW_NETWORK_KEY: "0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00"
+
+Runtime & Resources:
+Devices +add device
+* host: /dev/ttyACM0
+* container: /dev/ttyACM0
+
+
+
+Deploy the container.
+
+Check: http://localhost:7800 for VNC web-based
+
+
+
+https://community.home-assistant.io/t/home-assistant-add-on-openzwave/204034
+
+https://community.home-assistant.io/t/get-openzwave-beta-working/200121
+
+### Integrations
+MQTT 
+
+* Broker: localhost 
+
+## Z-Wave
+```bash
+# Boss used the door
+binary_sensor:
+  - platform: template
+    sensors:
+      boss_is_home:
+       friendly_name: "Boss is home"
+       value_template: >-
+         {{ is_state('sensor.id_150_z_wave_module_user_code', '63') }}
+```
+
+```bash
+# Which user opened the door
+binary_sensor:
+  - platform: template
+    sensors:
+      id_150_user_code_john:
+       friendly_name: "John opened the door"
+       value_template: >-
+         {{ is_state('sensor.id_150_z_wave_module_user_code', '63') }}
+  - platform: template
+    sensors:         
+      id_150_user_code_sarah:
+       friendly_name: "Sarah opened the door"
+       value_template: >-
+         {{ is_state('sensor.id_150_z_wave_module_user_code', '62') }}
+  - platform: template
+    sensors:
+      id_150_user_code_michael:
+       friendly_name:  "Michael opened the door"
+       value_template: >-
+         {{ is_state('sensor.id_150_z_wave_module_user_code', '61') }}
+```
+
+
+
 
 We want to configure this device. Add this above `group: !include groups.yaml` in the `configuration.yaml` file:
 
@@ -399,6 +625,11 @@ assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo nano configuration.
 system_health:
 ```
 
+## binary_sensor.routing_binary_sensor_instance_1_sensor
+
+
+
+
 ## Adding a tampering sensor
 In the Home Assistant GUI, go to Configuration and select Entities. There you'll see that you have a sensor which is called `AEON Labs ZW100 MultiSensor 6 Burglar`. This is the motion sensor on the AEON Lab ZW100 device. Click on it, and you'll see what the entity is named: `sensor.aeon_labs_zw100_multisensor_6_burglar`. This gives us a value `3` for tampering with the device, `8` for motion and `254` for sleep. We're going to add a binary sensor to be able to get notifications in Apple Home for tampering.
 
@@ -484,7 +715,7 @@ assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo visudo
 (...)
 homeassistant ALL=(ALL) NOPASSWD:SETENV: /home/homeassistant/certbot/certbot-auto
 ```
-In this way you, only allow the user/systemuser that is running the homeassistant process (`hass`) only to run the cerbot for generating and renewing the certificate. This should be more secure in case of a security breach within the process hass.
+In this way you, only allow the user/systemuser that is running the homeassistant process (`hass`) only to run the cerbot for generating and renewing the certificate. This should be more secure in case of a security breach within the process `hass`.
 
 ## Change icons
 Change your icons by using `mdi:icon` - look at this list for reference: [https://cdn.materialdesignicons.com/3.2.89/](https://cdn.materialdesignicons.com/3.2.89/)
@@ -546,7 +777,10 @@ homeassistant@linuxbabe:/srv/homeassistant$ source bin/activate
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ 
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl | grep home
   home-assistant@homeassistant.service                                                               loaded active running   Home Assistant                                                               
-  system-home\x2dassistant.slice                                                                     loaded active active    system-home\x2dassistant.slice                       
+  system-home\x2dassistant.slice                                                                     loaded active active    system-home\x2dassistant.slice             
+```
+Remember to stop `homeassistant` if it is running:
+``´bash
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl status home-assistant@homeassistant
 ● home-assistant@homeassistant.service - Home Assistant
    Loaded: loaded (/etc/systemd/system/home-assistant@homeassistant.service; enabled; vendor preset: enabled)
@@ -561,6 +795,9 @@ Authentication is required to stop 'home-assistant@homeassistant.service'.
 Authenticating as: Home Assistant (assistant)
 Password: 
 ==== AUTHENTICATION COMPLETE ===
+```
+Upgrade `homeassistant`:
+```bash
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ pip3 install --upgrade homeassistant
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl start home-assistant@homeassistant
 ```
@@ -773,7 +1010,7 @@ Install Home Assistant Companion from your App Store, but only do it after you h
 
 ## Zigbee
 
-There are different ways to connect your Zigbee devices to Home Assistant (Zigbee2mqtt, deCONZ, ZHA). I opted for using ZHA (the integrated one). 
+There are different ways to connect your Zigbee devices to Home Assistant (Zigbee2mqtt, deCONZ, ZHA). I opted for using Zigbee Home Automation (the integrated one). 
 
 Shut the proxmox guest from proxmox. Attach the USB physically, add it to the guest and start home assistant again. My device showed up as `FT230X Basic UART (0403:6015)` in proxmox. 
 
@@ -793,12 +1030,133 @@ Radio Type: deconz
 
 deCONZ by dresden elektronik is a software that communicates with ConBee/RaspBee Zigbee gateways and exposes Zigbee devices that are connected to the gateway.
 
+### IKEA Tradfri
+#### IKEA of Sweden TRADFRI on/off switch
+Unscrew the lock. Go to Configuration > Integrations >  and click `CONFIGURE` on your ZHA integration and then the yellow `+` sign down on the right. Click 4 times (within 5 seconds (?)) on the reset button on the on/off switch. After 15 seconds or more it will show up as a new entity.
+
+If you have more switches, I recommend marking them and changing the name of the switch / adding e.g. "_1" or sonething and mark the switch with a pen, so you know which ones is which.
+
+
 ## Unknown Node 3
 How to remove unknown node
 
+## Camera
+Stop Home Assistant:
+
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ cd /srv/
+assistant@linuxbabe:/srv$ cd homeassistant
+assistant@linuxbabe:/srv/homeassistant$ sudo -u homeassistant -H -s
+[sudo] password for assistant: 
+homeassistant@linuxbabe:/srv/homeassistant$ source bin/activate
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ 
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl | grep home
+  home-assistant@homeassistant.service                                                               loaded active running   Home Assistant                                                               
+  system-home\x2dassistant.slice                                                                     loaded active active    system-home\x2dassistant.slice                       
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl status home-assistant@homeassistant
+● home-assistant@homeassistant.service - Home Assistant
+   Loaded: loaded (/etc/systemd/system/home-assistant@homeassistant.service; enabled; vendor preset: enabled)
+   Active: active (running) since Mon 2020-03-02 00:08:17 CET; 1 months 3 days ago
+ Main PID: 994 (hass)
+    Tasks: 40 (limit: 3194)
+   CGroup: /system.slice/system-home\x2dassistant.slice/home-assistant@homeassistant.service
+           └─994 /srv/homeassistant/bin/python3 /srv/homeassistant/bin/hass -c /home/homeassistant/.homeassistant
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl stop home-assistant@homeassistant
+==== AUTHENTICATING FOR org.freedesktop.systemd1.manage-units ===
+Authentication is required to stop 'home-assistant@homeassistant.service'.
+Authenticating as: Home Assistant (assistant)
+Password: 
+==== AUTHENTICATION COMPLETE ===
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$
+```
+
+Follow this guide [https://www.home-assistant.io/integrations/uvc/](https://www.home-assistant.io/integrations/uvc/);
+```bash
+
+# UniFi Network Video Recorder
+# https://www.home-assistant.io/integrations/uvc/
+camera:
+  - platform: uvc
+    nvr: ip-address-to-NVR
+    key: !secret uvc_api
+    password: !secret password_to_camera
+```
+
+
+Install `ffmpeg`:
+```bash
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ exit
+assistant@linuxbabe:/srv/homeassistant$  sudo apt-get install ffmpeg
+```
+Start Home Assistant:
+```bash
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ sudo -u homeassistant -H -s
+assistant@linuxbabe:/srv/homeassistant$ systemctl start home-assistant@homeassistant
+```
+
+OK?
+```bash
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ exit
+assistant@linuxbabe:/srv/homeassistant$ sudo journalctl -f -u home-assistant@homeassistant
+```
+
+## Fault finding
+### ModuleNotFoundError: No module named 'apt_pkg'
+```bash
+assistant@h37bhomeassistant01:~$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+Traceback (most recent call last):
+  File "/usr/bin/add-apt-repository", line 11, in <module>
+    from softwareproperties.SoftwareProperties import SoftwareProperties, shortcut_handler
+  File "/usr/lib/python3/dist-packages/softwareproperties/SoftwareProperties.py", line 28, in <module>
+    import apt_pkg
+ModuleNotFoundError: No module named 'apt_pkg'
+```
+```bash
+assistant@h37bhomeassistant01:~$ ls -l /usr/lib/python3/dist-packages/apt_pkg*
+-rw-r--r-- 1 root root 346784 Jan 24  2020 /usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so
+-rw-r--r-- 1 root root   8900 Jan 24  2020 /usr/lib/python3/dist-packages/apt_pkg.pyi
+```
+
+
+```bash
+assistant@h37bhomeassistant01:~$ sudo update-alternatives --config python3
+There are 2 choices for the alternative python3 (providing /usr/bin/python3).
+
+  Selection    Path                Priority   Status
+------------------------------------------------------------
+  0            /usr/bin/python3.7   2         auto mode
+  1            /usr/bin/python3.6   1         manual mode
+* 2            /usr/bin/python3.7   2         manual mode
+
+Press <enter> to keep the current choice[*], or type selection number:  <enter> 
+update-alternatives: warning: forcing reinstallation of alternative /usr/bin/python3.7 because link group python3 is broken
+```
+```bash
+assistant@h37bhomeassistant01:~$ sudo apt remove python3.6*
+```
+sudo apt install python3-apt
+sudo apt install software-properties-common
+```bash
+assistant@h37bhomeassistant01:~$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+Hit:1 http://no.archive.ubuntu.com/ubuntu bionic InRelease
+Hit:2 http://no.archive.ubuntu.com/ubuntu bionic-updates InRelease
+Hit:3 http://no.archive.ubuntu.com/ubuntu bionic-backports InRelease                  
+Hit:4 http://no.archive.ubuntu.com/ubuntu bionic-security InRelease                   
+Get:5 https://download.docker.com/linux/ubuntu bionic InRelease [64.4 kB]             
+Get:6 https://download.docker.com/linux/ubuntu bionic/stable amd64 Packages [12.5 kB]
+Fetched 76.9 kB in 1s (147 kB/s)      
+Reading package lists... Done
+```x
+
+## Person traker
+
+Configuration > Customization
+
+ entity_picture: URL
 
 ## Authors
 Mr. Johnson
+
 
 ## Acknowledgments
 * [https://community.letsencrypt.org/t/certbot-command-not-found/16547/13](https://community.letsencrypt.org/t/certbot-command-not-found/16547/13)
@@ -818,3 +1176,7 @@ Mr. Johnson
 * [https://www.home-assistant.io/components/logger/](https://www.home-assistant.io/components/logger/)
 * [https://aeotec.freshdesk.com/support/solutions/articles/6000121947-how-to-manually-factory-reset-z-stick-gen5-](https://aeotec.freshdesk.com/support/solutions/articles/6000121947-how-to-manually-factory-reset-z-stick-gen5-)
 * [https://help.ubuntu.com/community/How%20to%20Create%20a%20Network%20Share%20Via%20Samba%20Via%20CLI%20(Command-line%20interface/Linux%20Terminal)%20-%20Uncomplicated,%20Simple%20and%20Brief%20Way!](https://help.ubuntu.com/community/How%20to%20Create%20a%20Network%20Share%20Via%20Samba%20Via%20CLI%20(Command-line%20interface/Linux%20Terminal)%20-%20Uncomplicated,%20Simple%20and%20Brief%20Way!)
+* [https://community.home-assistant.io/t/integration-with-id-lock-150/78645/30](https://community.home-assistant.io/t/integration-with-id-lock-150/78645/30)
+* [https://community.home-assistant.io/t/setting-up-openzwave-from-0-110/197709/13](https://community.home-assistant.io/t/setting-up-openzwave-from-0-110/197709/13)
+* [https://community.home-assistant.io/t/so-when-is-openzwave-ozw-version-1-6-coming-to-home-assistant/127731/44](https://community.home-assistant.io/t/so-when-is-openzwave-ozw-version-1-6-coming-to-home-assistant/127731/44)
+* [https://github.com/OpenZWave/Zwave2Mqtt/issues/413](https://github.com/OpenZWave/Zwave2Mqtt/issues/413)
