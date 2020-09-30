@@ -2,7 +2,7 @@
 layout: default
 title: Suricata installation and configuration
 parent: pfSense
-nav_order: 1
+nav_order: 4
 ---
 # Suricata installation and configuration
 {: .no_toc }
