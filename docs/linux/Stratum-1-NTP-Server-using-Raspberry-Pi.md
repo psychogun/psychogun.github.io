@@ -558,9 +558,30 @@ server ntp1.glypnod.com iburst minpoll 3 maxpoll 6 nts
 # Example 4: NTS-secured NTP (skip DNS check)
 #server nts3-e.ostfalia.de:443 iburst minpoll 3 maxpoll 6 nts ca /var/lib/ntp/certs/rootCaBundle.pem noval
 
-# Example 5&6: NTS-secured NTP
+# Example 5 and beyond: NTS-secured NTP
+server nts.ntp.se:4443 nts
 server time.cloudflare.com:1234 nts
-server nts.ntp.se:4443 nts 
+server ntpmon.dcs1.biz nts
+server ntp2.glypnod.com nts
+
+# kong.rellim.com
+server spidey.rellim.com nts maxpoll 5 
+
+# Sanjeev Gupta <ghane0@gmail.com>
+server ntpmon.dcs1.biz nts
+
+# Mike Simpson <mikie.simpson@gmail.com>
+server khronos.mikieboy.net nts
+
+# Netnod
+server -4 zoo.weinigel.se:4446 nts maxpoll 5
+
+# Redhat, chrony
+server -4 nts-test.strangled.net:443 nts maxpoll 2
+
+# Univ Ostfalia
+server nts3-e.ostfalia.de:443 nts noval
+
 
 # GPS PPS reference
 server 127.127.28.2 prefer
@@ -1151,6 +1172,7 @@ time-ios	| apple.com	| 192.168.53.234 | time-ios.apple.com
 Mr. Johnson
 
 ## Acknowledgments
+* [https://kong.rellim.com](https://kong.rellim.com)
 * [https://www.cyberciti.biz/faq/linux-unix-bsd-is-ntp-client-working/](https://www.cyberciti.biz/faq/linux-unix-bsd-is-ntp-client-working/)
 * [http://www.linuxpps.org/pipermail/discussions/2008-July/002068.html](http://www.linuxpps.org/pipermail/discussions/2008-July/002068.html)
 * [http://lkml.iu.edu/hypermail/linux/kernel/0902.0/03213.html](http://lkml.iu.edu/hypermail/linux/kernel/0902.0/03213.html)
