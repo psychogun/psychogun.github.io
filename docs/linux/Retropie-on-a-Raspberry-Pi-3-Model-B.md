@@ -16,10 +16,31 @@ This is how I used a DVB-T+DVB+FM dongle to scan for various things in my neighb
 ---
 ## Getting started
 
+### Download premade image.
 
+[https://retropie.org.uk/download/#Pre-made_images_for_the_Raspberry_Pi](https://retropie.org.uk/download/#Pre-made_images_for_the_Raspberry_Pi)
 
-## Cell phone
+### Enable SSH
 
+From a system with an SD-card reader, access the `/boot/` directory and create an empty file called `ssh`.
+```bash
+super:~ teddy$ cd /Volumes/boot
+super:boot teddy$ touch ssh
+```
+
+### Enable WiFi
+```bash
+super:boot teddy$ nano wpa_supplicant.conf
+country=FR # Your 2-digit country code
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+network={
+    ssid="YOUR_NETWORK_NAME"
+    psk="YOUR_PASSWORD"
+    key_mgmt=WPA-PSK
+}
+```
 
 * [https://retropie.org.uk/forum/topic/19769/xsession-unable-to-start-x-session/4](https://retropie.org.uk/forum/topic/19769/xsession-unable-to-start-x-session/4)
 * [https://cordcutting.com/how-to/how-to-install-kodi-on-retropie/](https://cordcutting.com/how-to/how-to-install-kodi-on-retropie/)
+* [https://retropie.org.uk/docs/SSH/](https://retropie.org.uk/docs/SSH/)
+* [https://howchoo.com/g/ndy1zte2yjn/how-to-set-up-wifi-on-your-raspberry-pi-without-ethernet](https://howchoo.com/g/ndy1zte2yjn/how-to-set-up-wifi-on-your-raspberry-pi-without-ethernet)
