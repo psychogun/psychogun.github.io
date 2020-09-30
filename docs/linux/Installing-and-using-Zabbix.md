@@ -380,7 +380,7 @@ MariaDB [(none)]>
 
 ### Show version
 ```bash
-root@zabbix:/home/merovingian# zabbix_server --version
+merovingian@zabbix:/home/merovingian# zabbix_server --version
 zabbix_server (Zabbix) 4.4.5
 Revision b93f5c4fc0 28 January 2020, compilation time: Jan 30 2020 11:27:03
 
@@ -409,9 +409,43 @@ drwxr-xr-x 4 root     root     4.0K Feb 11 14:35 ..
 merovingian@zabbix:/etc/zabbix/web$ sudo nano zabbix.conf.php 
 ```
 
+### Upgrade 
+https://www.zabbix.com/documentation/current/manual/installation/upgrade/packages/debian_ubuntu
+
+```bash
+merovingian@zabbix:~$ sudo apt-get update
+merovingian@zabbix:~$ sudo apt-get upgrade
+```
+PHP:
+```bash
+merovingian@zabbix:~$ php -v
+PHP 7.2.24-0ubuntu0.18.04.6 (cli) (built: May 26 2020 13:09:11) ( NTS )
+Copyright (c) 1997-2018 The PHP Group
+Zend Engine v3.2.0, Copyright (c) 1998-2018 Zend Technologies
+    with Zend OPcache v7.2.24-0ubuntu0.18.04.6, Copyright (c) 1999-2018, by Zend Technologies
+```
+MariaDB:
+```bash
+merovingian@zabbix:~$ sudo su
+[sudo] password for merovingian: 
+root@zabbix:/home/merovingian# mysql
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 16462
+Server version: 10.1.44-MariaDB-0ubuntu0.18.04.1 Ubuntu 18.04
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]> Ctrl-C -- exit!
+Aborted
+```
 
 
 bzip2 -d dbdump.bz2 
+
+## Authors
+Mrs. Johnson
 
 ## Acknowledgments
 * [https://www.zabbix.com/documentation/current/manual/config/items/itemupdate](https://www.zabbix.com/documentation/current/manual/config/items/itemupdate)
