@@ -4,7 +4,7 @@ title: ELK Stack on Ubuntu for pfSense
 parent: Linux
 nav_order: 3
 ---
-*WORK IN PROGRESS as of 2019-07-31*
+
 # How to install the ELK Stack on Ubuntu for pfSense
 {: .no_toc }
 So, on a whim I googled syslog + pfsense, and I saw some images of some nice dashboards (Kibana) for the firewall logs from PFSense. The tutorials I found did not tell me exactly how this all works, particularly how Elasticsearch, Logstash and Kibana works together. 
@@ -81,11 +81,16 @@ Set the correct date and time:
 ```bash
 elk@stack:~$ sudo dpkg-reconfigure tzdata
 ```
+```bash
+elk@stack:~$ timedatectl set-ntp off
+elk@stack:~$ sudo nano /etc/systemd/timesyncd.conf 
+```
 
-r/share/kibana/bin$ timedatectl set-ntp off
-udo nano /etc/systemd/timesyncd.conf 
-add `Servers=192.168.40.1`
-r/share/kibana/bin$ timedatectl set-ntp on
+Add `Servers=192.168.40.1`
+```bash
+elk@stack:~$ usr/share/kibana/bin$ timedatectl set-ntp on
+```
+
 
 ### Install qemu-guest-agent
 The qemu-guest-agent is a helper daemon, which is installed in the guest. It is used to exchange information between the host and guest, and to execute command in the guest.
@@ -115,11 +120,11 @@ openjdk version "11.0.7" 2020-04-14
 OpenJDK Runtime Environment (build 11.0.7+10-post-Ubuntu-3ubuntu1)
 OpenJDK 64-Bit Server VM (build 11.0.7+10-post-Ubuntu-3ubuntu1, mixed mode, sharing)
 ```
-You'll have to ensure that your JAVA HOME environment is properly set up. To see your current JAVA HOME environment variable, issue command:
+You'll have to ensure that your `JAVA_HOME` environment is properly set up. To see your current `JAVA_HOME` environment variable, issue command:
 ```bash
 elk@stack:~$ echo $JAVA_HOME 
 ```
-If nothing shows up, your JAVA_HOME environment path is not set. To set your JAVA_HOME path, run:
+If nothing shows up, your `JAVA_HOME` environment path is not set. To set your JAVA_HOME path, run:
 ```bash
 elk@stack:~$ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ```
@@ -236,7 +241,7 @@ input {
   }
 }
 ```
-This input file listens for syslog's on both TCP and UDP at port 5140. 
+This particular input file listens for syslog's on both TCP and UDP at port 5140. 
 
 
 Download and configure the syslog filter file `/etc/logstash/conf.d/10-syslog.conf`:
@@ -593,8 +598,8 @@ You can do that by yourself, `sudo nano /etc/logstash/conf.d/netflow.conf` or ju
 
 PS: Remember to edit the output section of `netflow.conf` so it matches your network. 
 ```bash
-elk@stack:/usr/share/logstash$ cd conf.d/
-elk@stack:/usr/share/logstash$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/netflow.conf
+elk@stack:/etc/logstash$ cd conf.d/
+elk@stack:/etc/logstash/conf.d$ sudo wget https://raw.githubusercontent.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense/master/etc/logstash/conf.d/netflow.conf
 ```
 Let's start `logstash.service` and check in Kibana that both the netflow and pfSense dashboards are populating logdata (depending on how heavy the traffic is to your pfSense, this might take some minutes to confirm that all dashboards are working).
 ```bash
@@ -604,6 +609,9 @@ elk@stack:/usr/share/logstash$ sudo systemctl start logstash.service
 Voilà. Netflow and syslogs in Kibana from pfSense. Another congratulations is in order! :)
 
 <img src="{{site.url}}/docs/linux/img/ELK-stack-on-Ubuntu-with-pfSense-2.png" style="display: block; margin: auto;" />
+
+
+
 
 ## Securing our Elastic Stack
 ### Enable HTTPS on Kibana
@@ -657,8 +665,8 @@ Starting with Elastic Stack 6.8 and 7.1, security features like TLS encrypted co
 
 The simplest way that Kibana and/or application servers can authenticate to an Elasticsearch cluster is by embedding a username and password in their configuration files or source code.
 
-Elasticsearch has two levels of communications, transport communications and http communications. 
-The transport protocol is used for internal communications between Elasticsearch nodes, and the http protocol is used for communications from clients (Logstash, Kibana, etc.) to the Elasticsearch cluster.
+Elasticsearch has two levels of communications, `transport` communications and `http` communications. 
+The `transport` protocol is used for internal communications between Elasticsearch nodes, and the `http` protocol is used for communications from clients (Logstash, Kibana, etc.) to the Elasticsearch cluster.
 
 #### Generate certificates
 ```bash
@@ -978,7 +986,38 @@ stdout {
 ```
 
 ## Fault finding
+### netflow.var.kibana.ssl.enabled=false
+```bash
+sudo /usr/share/logstash/bin/logstash --modules netflow --setup -M "netflow.var.kibana.ssl.enabled=false"
+```
+The error below is because you have not used SSL:
+```bash
+:/etc/logstash/conf.d$ sudo /usr/share/logstash/bin/logstash --modules netflow --setup 
+OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by com.headius.backport9.modules.Modules (file:/usr/share/logstash/logstash-core/lib/jars/jruby-complete-9.2.11.1.jar) to method sun.nio.ch.NativeThread.signal(long)
+WARNING: Please consider reporting this to the maintainers of com.headius.backport9.modules.Modules
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+WARNING: Could not find logstash.yml which is typically located in $LS_HOME/config or /etc/logstash. You can specify the path using --path.settings. Continuing using the defaults
+Could not find log4j2 configuration at path /usr/share/logstash/config/log4j2.properties. Using default config which logs errors to the console
+[WARN ] 2020-08-28 00:57:48.385 [LogStash::Runner] multilocal - Ignoring the 'pipelines.yml' file because modules or command line options are specified
+[INFO ] 2020-08-28 00:57:48.393 [LogStash::Runner] runner - Starting Logstash {"logstash.version"=>"7.8.1", "jruby.version"=>"jruby 9.2.11.1 (2.5.7) 2020-03-25 b1f55b1a40 OpenJDK 64-Bit Server VM 11.0.8+10-post-Ubuntu-0ubuntu120.04 on 11.0.8+10-post-Ubuntu-0ubuntu120.04 +indy +jit [linux-x86_64]"}
+[INFO ] 2020-08-28 00:57:49.087 [Agent thread] modulescommon - Setting up the netflow module
+[ERROR] 2020-08-28 00:57:49.691 [Agent thread] kibanaclient - Error when executing Kibana client request {:error=>#<Manticore::UnknownException: Unsupported or unrecognized SSL message>}
+[ERROR] 2020-08-28 00:57:49.811 [Agent thread] kibanaclient - Error when executing Kibana client request {:error=>#<Manticore::UnknownException: Unsupported or unrecognized SSL message>}
+[WARN ] 2020-08-28 00:57:49.858 [Agent thread] logstashconfig - The Netflow module has been deprecated in favor of the Beats Netflow module and may be removed in a future release. Learn more about the Beats Netflow module at https://www.elastic.co/guide/en/beats/filebeat/master/filebeat-module-netflow.html
+[ERROR] 2020-08-28 00:57:49.884 [Agent thread] sourceloader - Could not fetch all the sources {:exception=>LogStash::ConfigLoadingError, :message=>"Failed to import module configurations to Elasticsearch and/or Kibana. Module: netflow has Elasticsearch hosts: [\"localhost:9200\"] and Kibana hosts: [\"localhost:5601\"]", :backtrace=>["/usr/share/logstash/logstash-core/lib/logstash/config/modules_common.rb:124:in `block in pipeline_configs'", "org/jruby/RubyArray.java:1809:in `each'", "/usr/share/logstash/logstash-core/lib/logstash/config/modules_common.rb:70:in `pipeline_configs'", "/usr/share/logstash/logstash-core/lib/logstash/config/source/modules.rb:30:in `pipeline_configs'", "/usr/share/logstash/logstash-core/lib/logstash/config/source_loader.rb:77:in `block in fetch'", "org/jruby/RubyArray.java:2572:in `collect'", "/usr/share/logstash/logstash-core/lib/logstash/config/source_loader.rb:76:in `fetch'", "/usr/share/logstash/logstash-core/lib/logstash/agent.rb:177:in `converge_state_and_update'", "/usr/share/logstash/logstash-core/lib/logstash/agent.rb:113:in `execute'", "/usr/share/logstash/logstash-core/lib/logstash/runner.rb:395:in `block in execute'", "/usr/share/logstash/vendor/bundle/jruby/2.5.0/gems/stud-0.0.23/lib/stud/task.rb:24:in `block in initialize'"]}
+[ERROR] 2020-08-28 00:57:49.890 [Agent thread] agent - An exception happened when converging configuration {:exception=>RuntimeError, :message=>"Could not fetch the configuration, message: Failed to import module configurations to Elasticsearch and/or Kibana. Module: netflow has Elasticsearch hosts: [\"localhost:9200\"] and Kibana hosts: [\"localhost:5601\"]"}
+[INFO ] 2020-08-28 00:57:50.207 [Api Webserver] agent - Successfully started Logstash API endpoint {:port=>9600}
+[INFO ] 2020-08-28 00:57:55.083 [LogStash::Runner] runner - Logstash shut down.
+```
+
+
 (...) More should come
+
+### Update
+
 ### Increasing JVM heap size
 You should always set the min and max JVM heap size to the same value. For example, to set the heap to 4 GB, set:
 
@@ -1009,7 +1048,7 @@ elk@stack:~$ su -i
 
 Elasticsearch:
 ```bash
-elk@stack::/usr/share/elasticsearch/bin$ sudo ./elasticsearch --version
+elk@stack:/usr/share/elasticsearch/bin$ sudo ./elasticsearch --version
 OpenJDK 64-Bit Server VM warning: Option UseConcMarkSweepGC was deprecated in version 9.0 and will likely be removed in a future release.
 Version: 7.6.2, Build: default/deb/ef48eb35cf30adf4db14086e8aabd07ef6fb113f/2020-03-26T06:34:37.794943Z, JVM: 13.0.2
 ```
@@ -1090,6 +1129,7 @@ modules:
     
 ```
 Start with `sudo systemctl start logstash.service`
+
 
 
 ## Authors
