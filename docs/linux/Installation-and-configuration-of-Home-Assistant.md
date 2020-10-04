@@ -780,7 +780,7 @@ homeassistant@linuxbabe:/srv/homeassistant$ source bin/activate
   system-home\x2dassistant.slice                                                                     loaded active active    system-home\x2dassistant.slice             
 ```
 Remember to stop `homeassistant` if it is running:
-``´bash
+```bash
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl status home-assistant@homeassistant
 ● home-assistant@homeassistant.service - Home Assistant
    Loaded: loaded (/etc/systemd/system/home-assistant@homeassistant.service; enabled; vendor preset: enabled)
