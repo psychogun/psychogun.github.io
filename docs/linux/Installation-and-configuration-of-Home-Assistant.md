@@ -378,34 +378,34 @@ Let's do this.
 ### Portainer prerequisites
 We install the necessary packages to be able to install Docker:
 ```bash
-igor@h1anginx01:~$ sudo apt install apt-transport-https ca-certificates curl software-properties-common
+assistant@linuxbabe:~$ sudo apt install apt-transport-https ca-certificates curl software-properties-common
 ```
 We add the official Docker GPG key:
 ```bash
-igor@h1anginx01:~$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+assistant@linuxbabe:~$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 OK
 ```
 We activate Docker repository and update it:
 ```bash
-igor@h1anginx01:~$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-igor@h1anginx01:~$ sudo apt update
+assistant@linuxbabe:~$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+assistant@linuxbabe:~$ sudo apt update
 ```
 We install the latest Docker version:
 ```bash
-igor@h1anginx01:~$ sudo apt install docker-ce
+assistant@linuxbabe:~$ sudo apt install docker-ce
 ```
 
 ### Portainer installation
 As we mentioned at the beginning of this article, installing Portainer is very simple since it works in a Docker container, for this we will execute:
 ```bash
-igor@h1anginx01:~$ sudo docker volume create portainer_data
-igor@h1anginx01:~$ sudo docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
+assistant@linuxbabe:~$ sudo docker volume create portainer_data
+assistant@linuxbabe:~$ sudo docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
 ```
 ```bash
-assistant@h37bhomeassistant02:/$ cd /opt/
-assistant@h37bhomeassistant02:/opt$ sudo mkdir ozw
-assistant@h37bhomeassistant02:/opt$ cd ozw/
-assistant@h37bhomeassistant02:/opt/ozw$ sudo mkdir config
+assistant@linuxbabe:/$ cd /opt/
+assistant@linuxbabe:/opt$ sudo mkdir ozw
+assistant@linuxbabe:/opt$ cd ozw/
+assistant@linuxbabe:/opt/ozw$ sudo mkdir config
 ```
 
 ### Admin user
@@ -438,11 +438,11 @@ change time of container:
 * Env:
 + add environment variable
 
-MQTT_SERVER: "192.168.0.1"
-MQTT_USERNAME: "my-username"
-MQTT_PASSWORD: "my-password"
-USB_PATH: "/dev/ttyACM0"
-OZW_NETWORK_KEY: "0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00"
+* `MQTT_SERVER: "192.168.0.1"`
+* `MQTT_USERNAME: "my-username"`
+* `MQTT_PASSWORD: "my-password"`
+* `USB_PATH: "/dev/ttyACM0"`
+* `OZW_NETWORK_KEY: "0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00"`
 
 Runtime & Resources:
 Devices +add device
@@ -460,6 +460,41 @@ Check: http://localhost:7800 for VNC web-based
 https://community.home-assistant.io/t/home-assistant-add-on-openzwave/204034
 
 https://community.home-assistant.io/t/get-openzwave-beta-working/200121
+
+#### Upgrade portainer
+List our containers:
+```
+assistant@linuxbabe:/$ sudo docker container ls
+[sudo] password for assistant: 
+CONTAINER ID        IMAGE                                 COMMAND             CREATED             STATUS              PORTS                                                                    NAMES
+f6f62aef31b1        openzwave/ozwdaemon:allinone-latest   "/init"             10 minutes ago      Up 10 minutes       0.0.0.0:1983->1983/tcp, 0.0.0.0:5901->5901/tcp, 0.0.0.0:7800->7800/tcp   ozwdaemon
+855186d94b34        portainer/portainer                   "/portainer"        2 months ago        Up 4 weeks          0.0.0.0:9000->9000/tcp                                                   mystifying_rubin
+```
+Stop  our portainer container:
+```bash
+assistant@linuxbabe:/$ sudo docker stop 855186d94b34
+```
+Remove portainer:
+```bash
+sudo docker rm 855186d94b34
+```
+
+Pull:
+```bash
+assistant@linuxbabe:/$ sudo docker pull portainer/portainer-ce
+Using default tag: latest
+latest: Pulling from portainer/portainer-ce
+d1e017099d17: Already exists 
+b0718b1ef1b0: Pull complete 
+Digest: sha256:0ab9d25e9ac7b663a51afc6853875b2055d8812fcaf677d0013eba32d0bf0e0d
+Status: Downloaded newer image for portainer/portainer-ce:latest
+docker.io/portainer/portainer-ce:latest
+```
+Run:
+```bash
+assistant@linuxbabe:/$ sudo docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce
+423debb02a73ef7275e4e221e3e2fb276387b0ca00e12c271254ce4c4e03d424
+```
 
 ### Integrations
 MQTT 
@@ -1146,7 +1181,7 @@ Get:5 https://download.docker.com/linux/ubuntu bionic InRelease [64.4 kB]
 Get:6 https://download.docker.com/linux/ubuntu bionic/stable amd64 Packages [12.5 kB]
 Fetched 76.9 kB in 1s (147 kB/s)      
 Reading package lists... Done
-```x
+```
 
 ## Person traker
 
@@ -1180,3 +1215,6 @@ Mr. Johnson
 * [https://community.home-assistant.io/t/setting-up-openzwave-from-0-110/197709/13](https://community.home-assistant.io/t/setting-up-openzwave-from-0-110/197709/13)
 * [https://community.home-assistant.io/t/so-when-is-openzwave-ozw-version-1-6-coming-to-home-assistant/127731/44](https://community.home-assistant.io/t/so-when-is-openzwave-ozw-version-1-6-coming-to-home-assistant/127731/44)
 * [https://github.com/OpenZWave/Zwave2Mqtt/issues/413](https://github.com/OpenZWave/Zwave2Mqtt/issues/413)
+* [https://linuxize.com/post/how-to-list-docker-containers/](https://linuxize.com/post/how-to-list-docker-containers/)
+* [https://www.reddit.com/r/portainer/comments/inyjvd/how_to_upgrade_to_20/](https://www.reddit.com/r/portainer/comments/inyjvd/how_to_upgrade_to_20/)
+* [https://www.youtube.com/watch?v=Of1gpoKP2mQ](https://www.youtube.com/watch?v=Of1gpoKP2mQ)
