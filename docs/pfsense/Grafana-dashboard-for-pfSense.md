@@ -7,7 +7,7 @@ nav_order: 2
 
 # Grafana dashboard for pfSense
 {: .no_toc }
-This is how I used Grafana to display dashboard for vitals from my PfSense firewall. I was able to do this because of this VictorRobellini's work [https://github.com/VictorRobellini/pfSense-Dashboard](https://github.com/VictorRobellini/pfSense-Dashboard). 
+This is how I used Grafana to display dashboard for vitals from my PfSense firewall. I was able to do this because of this VictorRobellini's work: [https://github.com/VictorRobellini/pfSense-Dashboard](https://github.com/VictorRobellini/pfSense-Dashboard)
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -133,12 +133,12 @@ torkel@gaard:~$ sudo apt-get install qemu-guest-agent
 Issue `sudo shutdown now` to power of the guest and go to the Proxmox web gui and enable QEMU Guest Agent under Options, then start it again.
 
 ## Install Grafana
-https://grafana.com/docs/grafana/latest/installation/debian/
+[https://grafana.com/docs/grafana/latest/installation/debian/](https://grafana.com/docs/grafana/latest/installation/debian/)
 
 After the install, hop on in to `http://ip-adress:3000` and use `admin/admin` and then change the password. For now, do not do anything and proceed with installation of `InfluxDB`. 
 
 ## Install InfluxDB
-https://docs.influxdata.com/influxdb/v1.8/introduction/install/
+[https://docs.influxdata.com/influxdb/v1.8/introduction/install/](https://docs.influxdata.com/influxdb/v1.8/introduction/install/)
 ```bash
 torkel@gaard:~$ sudo systemctl start influxdb
 torkel@gaard:~$ sudo systemctl status influxdb

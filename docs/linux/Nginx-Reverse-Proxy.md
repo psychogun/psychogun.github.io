@@ -2,7 +2,7 @@
 layout: default
 title: Nginx Reverse Proxy
 parent: Linux
-nav_order: 12
+nav_order: 13
 ---
 # Nginx Reverse Proxy
 {: .no_toc }

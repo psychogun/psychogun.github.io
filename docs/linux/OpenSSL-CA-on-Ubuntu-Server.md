@@ -2,7 +2,7 @@
 layout: default
 title: OpenSSL Certificate Authority on Ubuntu Server
 parent: Linux
-nav_order: 12
+nav_order: 14
 ---
 # OpenSSL Certificate Authority on Ubuntu Server
 {: .no_toc }
@@ -51,7 +51,7 @@ GRUB_CMDLINE_LINUX="ipv6.disable=1"
 ```
 Then run:
 ```bash
-rivest@shamir-adleman:~$ sudo update grub
+rivest@shamir-adleman:~$ sudo update-grub
 ```
 
 ### Change NTP server

@@ -232,7 +232,6 @@ Issue command for starting DHCP on the VLAN 120 interface:
 root@MineOS:~ # dhclient epair0b.120
 ```
 
-
 ## Create VLAN
 ### ADD VLAN
 FreeNAS gui > Network > VLANs. 
@@ -274,7 +273,6 @@ interfaces
 vnet0:bridge120
 
 ### Configure jail's default gateway
-
 ```bash
 root@freenas:~ # iocage set defaultrouter=192.168.120.1 MineOS
 ```
@@ -295,7 +293,7 @@ root@MineOS:/usr/local/games/minecraft # echo "CXX=c++ npm install" | sh
 Mr. Johnson
 
 
-## Acknowløedgements
+## Acknowledgements
 * [https://devpro.media/minecraft-server-freenas/#preparing-the-jail](https://devpro.media/minecraft-server-freenas/#preparing-the-jail)
 * [https://www.freebsd.org/doc/handbook/network-vlan.html](https://www.freebsd.org/doc/handbook/network-vlan.html)
 * [https://www.freebsd.org/doc/handbook/config-network-setup.html](https://www.freebsd.org/doc/handbook/config-network-setup.html)

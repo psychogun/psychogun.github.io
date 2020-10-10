@@ -2,7 +2,7 @@
 layout: default
 title: RTL-SDR notes
 parent: Linux
-nav_order: 14
+nav_order: 16
 ---
 # RTL-SDR notes
 {: .no_toc }
