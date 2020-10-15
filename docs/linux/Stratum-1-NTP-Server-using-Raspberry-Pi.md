@@ -6,9 +6,14 @@ nav_order: 17
 ---
 # Stratum 1 NTP Server using Raspberry Pi
 {: .no_toc }
-This is how I used a GPS HAT (Hardware Attached on Top) connected to a Raspberry Pi 3 to work stand-alone/and or with a secure (NTPSec) Internet server, to provide a NTP service on my network. The Raspberry Pi 3 now works as a Stratum 1 NTP server [https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/](https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/). 
+This is how I used a GPS HAT (Hardware Attached on Top) connected to a Raspberry Pi 3 to work stand-alone/and or with a secure (NTPSec) Internet server, to provide a NTP service on my network. 
 
-I used the signal from the GPS in conjunction with my PfSense firewall and should the GPS fail, I have configured a fallback of which the Raspberry Pi will pull time through `NTPSec`. `NTPSec` provides a secure method of retrieving time from public ntp servers with the help of TLS. You will find plenty of useful information in the Acknowledgments section, but I suggest you start with reading this excellent blogpost: [https://blog.cloudflare.com/secure-time/](https://blog.cloudflare.com/secure-time/).
+By accomplishing this, the Raspberry Pi 3 works as a Stratum 1 NTP server on my network. It is comparing time with public NTP servers which are secured with the use of Network Time Security (NTS). 
+
+* [https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/](https://timetoolsltd.com/ntp/what-is-a-stratum-1-time-server/)
+* [https://developers.cloudflare.com/time-services/nts](https://developers.cloudflare.com/time-services/nts)
+
+I used the signal from the GPS in conjunction with my PfSense firewall and should the GPS fail, I have configured a fallback of which the Raspberry Pi will pull time through `NTPSec`. `NTPSec` provides a secure method of retrieving time from **public** ntp servers with the help of TLS. You will find plenty of useful information in the Acknowledgments section, but I suggest you start with reading this excellent blogpost: [https://blog.cloudflare.com/secure-time/](https://blog.cloudflare.com/secure-time/).
 
 Please realize that connecting a consumer-grade (designed for location, not for time keeping) GPS unit over USB serial does not have the accuracy of “proper” GPS synchronization due to significant and inconsistent delays in the serial line itself, as well as in the USB system. Your notion of time will likely be delayed by tens of milliseconds if not hundreds of milliseconds. Any such-configured NTP server certainly can serve as a backup for local timekeeping when Internet connectivity is not available, but should never be advertised on the Internet as a Stratum 1 clock.
 
@@ -34,7 +39,7 @@ Proper GPS synchronization uses a PPS output (or similar) from the device, fed d
 ## Installation instructions
 I am using Raspbian Buster lite. 
 
-I downloaded `2019-09-26-raspbian-buster-lite.img` from [https://www.raspberrypi.org/downloads/raspbian/](https://www.raspberrypi.org/downloads/raspbian/).
+I downloaded <kbd>2019-09-26-raspbian-buster-lite.img</kbd> from [https://www.raspberrypi.org/downloads/raspbian/](https://www.raspberrypi.org/downloads/raspbian/).
 
 Follow the installation instructions provided here [https://www.raspberrypi.org/documentation/installation/installing-images/README.md](https://www.raspberrypi.org/documentation/installation/installing-images/README.md) to install the image/flash your SD card.
 
@@ -48,7 +53,7 @@ First, reinsert your microSD card to your MacOS powered device. When your comput
 zamba:~ don$ cd /Volumes/boot/
 zamba:boot don$ touch ssh
 ```
-Insert the microSDHC card to your Raspberry Pi, connect your network cable and finally your power supply. Go to your DHCP server and find out which IP adress the Raspberry Pi was given. Use SSH to connect, the default username and password is `pi` and `raspberry`. 
+Insert the microSDHC card to your Raspberry Pi, connect your network cable and finally your power supply. Go to your DHCP server and find out which IP adress the Raspberry Pi was given. Use <kbd>SSH</kbd> to connect, the default username and password is `pi` and `raspberry`. 
 
 ### Change password for user pi
 ```bash
@@ -117,7 +122,8 @@ passwd: password expiry information changed.
 ```
 
 ### Change hostname
-Use `raspi-config` and enter the `Network Options` menu and change the `Hostname` to something of your liking. This will require a reboot.
+Use `raspi-config` and enter the `Network Options` menu and change the `Hostname` to something of your liking. 
+* This will require a reboot.
 
 ### Update & Upgrade
 ```bash
@@ -147,19 +153,21 @@ But on the Pi 3, the high-performance hardware UART is used by the Bluetooth sub
 
 This is pretty much a software UART, and I don't like it. 
 
-Well, I do not know about that- most of these instructions were taken from this excellent guide [http://www.unixwiz.net/techtips/raspberry-pi3-gps-time.html](http://www.unixwiz.net/techtips/raspberry-pi3-gps-time.html).
+Well, I do not know about that- most of these instructions were taken from this excellent guide:
+* [http://www.unixwiz.net/techtips/raspberry-pi3-gps-time.html](http://www.unixwiz.net/techtips/raspberry-pi3-gps-time.html).
 
+
+- **Hardware UART for Bluetooth support:**
 ```bash
 /dev/ttyAMA0
 ```
-- hardware UART for Bluetooth support
 
+- **Software UART on GPIO 14+15:**
 ```bash
 /dev/ttyS0
 ```
-- software UART on GPIO 14+15
 
-Fortunately, it's possible to shuffle around the hardware in software (!) to take back the hardware UART for our purposes.
+Fortunately, it's possible to shuffle around the hardware in software (!) to take back the hardware UART for our purposes. More on this in the next section. 
 ### Disable the console getty programs
 This refers to the serial console, which is generally useful, but as we prefer to use the UART for our GPS Hat, we have to disable the consoles. This is done in several steps.
 
@@ -168,7 +176,7 @@ admin@raspberrypi:~ $ sudo systemctl stop serial-getty@ttyAMA0.service
 admin@raspberrypi:~ $ sudo systemctl disable serial-getty@ttyAMA0.service
 ```
 
-This prevents the serial console programs from starting, but does not keep the Linux kernel from attempting to use it. This must be disabled by editing `/boot/cmdline.txt` and removing the serial portions shown in strikeout text (~~console=serial0,115200~~):
+This prevents the serial console programs from starting, but does not keep the Linux kernel from attempting to use it. This must be disabled by editing `/boot/cmdline.txt` and removing the serial portions shown in strikeout text: (~~console=serial0,115200~~):
 ```bash
 admin@raspberrypi:~ $ sudo nano /boot/cmdline.txt
 admin@raspberrypi:~ $ more /boot/cmdline.txt 
@@ -179,7 +187,7 @@ admin@raspberrypi:~ $
 Change to `console=tty1 root=PARTUUID=6c586e13-02 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait`.
 
 ### Disable Bluetooth and steal the hardware UART
-I didn't care about Bluetooth so was happy to disable it entirely and use the `/dev/ttyAMA0` serial port for the GPS, and this is easy to do with the Device Tree Overlay facility: these allow easy tailoring of low-level device behavior with a simple config file.
+I didn't care about Bluetooth so was happy to disable it entirely and use the `/dev/ttyAMA0` serial port for the GPS, and this is easy to do with the Device Tree Overlay facility: these allow easy tailoring of low-level device behavior with a simple config file.<br>
 Edit `/boot/config.txt` and add the lines:
 ```bash
 admin@raspberrypi:~ $ sudo nano /boot/config.txt
@@ -195,7 +203,7 @@ dtoverlay=pi3-miniuart-bt
 ```
 
 All changes to `/boot/config.txt` require a reboot to make it so. My configs do not use Bluetooth at all.
-Though not strictly necessary, we can also disable the hciuart service that nominally attempts to talk to the UART; this may prevent some warnings in the logfiles:
+Though not strictly necessary, we can also disable the `hciuart` service that nominally attempts to talk to the UART; this may prevent some warnings in the logfiles:
 
 ```bash
 admin@raspberrypi:~ $ sudo systemctl disable hciuart
@@ -234,7 +242,7 @@ admin@raspberrypi:~ $ sudo nano /boot/config.txt
 dtoverlay=pps-gpio,gpiopin=4
 ```
 
-NOTE: different GPS hats use different GPIO pins for PPS; check your documentation to see whether it's using GPIO #4 or GPIO #18 and edit above as needed.
+<kbd>NOTE:</kbd> different GPS hats use different GPIO pins for PPS; check your documentation to see whether it's using GPIO #4 or GPIO #18 and edit above as needed.
 
 Do a `sudo reboot` after this editing.
 
@@ -272,7 +280,7 @@ The purpose of NMEA is to give equipment users the ability to mix and match hard
 There are a number of services that can decode and interpret the NMEA data coming from your Ultimate GPS hat, but the most popular by a fair measure is the open source `gpsd`. 
 `gpsd` is a general-purpose daemon designed to interact with most types of GPS models using a wide variety of protocols. It is also capable of processing the PPS signals and sending timing information to `ntpd` via dedicated shared memory devices. One for pushing to `ntpd` absolute timestamp parsed from the NMEA messages (or supported equivalent), another for PPS timing data.
 
-ntpd will see them as two different SHM devices (Shared Host Memory).
+<kbd>ntpd</kbd> will see them as two different SHM devices (Shared Host Memory).
 
 For more information about NMEA data, visit [https://www.gpsworld.com/what-exactly-is-gps-nmea-data/](https://www.gpsworld.com/what-exactly-is-gps-nmea-data/).
 
@@ -310,7 +318,7 @@ GPSD_OPTIONS="-n"
 Key valus here are the `DEVICES=`, which provides the name of the serial port feeding NMEA data (`/dev/ttyAMA0`) and the pulse-per-second (`/dev/pps0`); they must appear in that order.
 Also important is the `-n` value in `GPSD_OPTIONS=`. This tells GPSD to start talking to the GPS device on startup and not to wait for the first client to attach. 
 
-Since we have a fulltime connection via the hardware serial port, there's no need not to start talking with the GPS unit immediately.
+Since we have a fulltime connection via the hardware serial port, there's no need **not** to start talking with the GPS unit immediately.
 
 ### Configure gpsd service
 ```bash
@@ -341,10 +349,10 @@ admin@raspberrypi:~ $
 ```
 Here we're looking for the status is enabled and active and running, possibly with a few snippets of logfiles after.
 
-At this point, if all is well, the `gpsd` service will be running and syncing with the GPS device. That doesn't necessarily mean that the GPS module has a fix on the satellites; that you can tell by looking at the Ultimate GPS hat for a brief red LED flash every 15 seconds. A LED that's flashing one second on/one second off has not yet acquired a fix.
+At this point, if all is well, the `gpsd` service will be running and syncing with the GPS device. That doesn't necessarily mean that the GPS module has a fix on the satellites; that you can tell by looking physically at the Ultimate GPS hat for a brief red LED flash every 15 seconds. A LED that's flashing one second on/one second off has not yet acquired a fix.
 
 #### gpsmon
-Now for the moment of truth: we're going to install the `gpsmon` program to see what the daemon is doing. The `gpsmon` command connects to the `gpsd` server and displays output about the connected GPS.  You should see a list of satellites on the left (0 through 11) along with S/N ratios (some should be in the 30s or higher if you have good antenna placement).  You should see values for “Latitude” and “Longitude”.  If you have a good antenna positioning and you’re in the USA, you should see “FAA: D” in the middle box.  
+Now for the moment of truth: we're going to install the `gpsmon` program to see what the daemon is doing. The `gpsmon` command connects to the `gpsd` server and displays output about the connected GPS.  You should see a list of satellites on the left (0 through 11) along with S/N ratios (some should be in the 30s or higher if you have good antenna placement).  You should see values for <kbd>Latitude</kbd> and <kbd>Longitude</kbd>.  If you have a good antenna positioning and you’re in the USA, you should see <kbd>FAA: D</kbd> in the middle box.  
 
 The middle bottom box should also indicate a PPS value (a decimal number, which should be very small if your time on your machine is close to correct).
 ```bash
@@ -375,7 +383,7 @@ admin@raspberrypi:~ $ gpsmon
 └────── GSV ───────┘└──────── GSA + PPS ─────────┘└─────────── GST ────────────┘
 
 ```
-PS: Use CTRL + S to freeze the picture.
+<kbd>PS:</kbd> Use CTRL + S to freeze the picture.
 
 The top line summarizes the best information collected from the GPS receiver, including the time (in UTC) and the current location, and the bottom portion of the screen shows the more or less raw data from the GPS unit.
 Of particular import are the lines ---- PPS offset --- because they indicate proper handling of the pulse-per-second input.
