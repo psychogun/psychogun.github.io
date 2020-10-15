@@ -168,7 +168,7 @@ Copy over all the plugins from https://github.com/VictorRobellini/pfSense-Dashbo
 
 * Enable SSH on your pfSense
 * Log in to pfSense through SSH
-* `cd /usr/local/bin`
+Change directory with `cd /usr/local/bin`, and then `fetch` the required files.
 ```bash
 [2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_gateways-3.7.py`
 [2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_netifinfo_plugin
@@ -176,7 +176,7 @@ Copy over all the plugins from https://github.com/VictorRobellini/pfSense-Dashbo
 [2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_pfinterface.php
 [2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_temperature.sh
 [2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_unbound.sh
-[2.4.5-RELEASE][admin@H37BPFSENSE01.localdomain]/root: chmod 555 telegraf_*
+[2.4.5-RELEASE][admin@H37BPFSENSE01.localdomain]/root: chmod 500 telegraf_*
 ```
 
 ### Configure Telegraf
