@@ -6,7 +6,9 @@ nav_order: 4
 ---
 # Suricata installation and configuration
 {: .no_toc }
-What is the only reason for not running Snort? If you are using Suricata instead. This is how I installed Suricata and used it as a IDS/IPS on my pfSense firewall and logged events to my Elastic Stack.
+What is the only reason for not running Snort? If you are using Suricata instead. 
+
+This is how I installed <kbd>Suricata</kbd> and used it as a IDS/IPS on my pfSense firewall and logged events to my Elastic Stack.
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -15,7 +17,7 @@ What is the only reason for not running Snort? If you are using Suricata instead
 {:toc}
 ---
 ## Getting started
-Install the Suricata package by navigating to System > Package Manager > Available Packages.
+Install the Suricata package by navigating to <kbd>System</kbd>, <kbd>Package Manager</kbd> and select <kbd>Available Packages</kbd>.
 
 ## Prerequisites
 * pfSense 2.4.4-RELEASE-p3 (amd64)
@@ -23,18 +25,23 @@ Install the Suricata package by navigating to System > Package Manager > Availab
 * elastic stack 5.6.8
 
 ## Configuration
-Navigate to Suricata by clicking Services > Suricata.
+Navigate to Suricata by clicking <kbd>Services</kbd>, <kbd>Suricata</kbd>.
 
 ### Global Settings
 #### Please Choose The Type Of Rules You Wish To Download
-Install ETOpen Emerging Threats rules: [v] ETOpen is a free open source set of Suricata rules whose coverage is more limited than ETPro.
+Install ETOpen Emerging Threats rules: 
+- [x] ETOpen is a free open source set of Suricata rules whose coverage is more limited than ETPro.
 
-Install Snort rules: [v] Snort free Registered User or paid Subscriber rules
+Install Snort rules: 
+- [x] Snort free Registered User or paid Subscriber rules
+
 Snort Rules Filename: snortrules-snapshot-29151.tar.gz
 Snort Oinkmaster Code: d3fb58191766f206a2a444buid8fc289sd89uz6c
 
-Install Snort GPLv2 Community rules: [v] The Snort Community Ruleset is a GPLv2 Talos-certified ruleset that is distributed free of charge without any Snort Subscriber License restrictions.
-Hide Deprecated Rules Categories: [v] Hide deprecated rules categories in the GUI and remove them from the configuration. Default is Not Checked.
+Install Snort GPLv2 Community rules: 
+- [x] The Snort Community Ruleset is a GPLv2 Talos-certified ruleset that is distributed free of charge without any Snort Subscriber License restrictions.
+Hide Deprecated Rules Categories: 
+- [x] Hide deprecated rules categories in the GUI and remove them from the configuration. Default is Not Checked.
 
 #### Rules Update Settings
 Update Interval: 12 HOURS
