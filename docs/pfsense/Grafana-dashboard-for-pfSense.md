@@ -176,7 +176,7 @@ Copy over all the plugins from https://github.com/VictorRobellini/pfSense-Dashbo
 [2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_pfinterface.php
 [2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_temperature.sh
 [2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_unbound.sh
-[2.4.5-RELEASE][admin@H37BPFSENSE01.localdomain]/root: chmod 500 telegraf_*
+[2.4.5-RELEASE][clark@pfsense.arpa]/root: chmod 500 telegraf_*
 ```
 
 ### Configure Telegraf
