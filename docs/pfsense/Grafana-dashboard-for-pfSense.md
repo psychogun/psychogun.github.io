@@ -158,6 +158,50 @@ InfluxDB shell version: 1.8.2
 > exit
 ```
 
+### Retention policy
+How long do you want to keep this data? 
+
+When you create a database, InfluxDB creates a retention policy called `autogen` with an infinite duration, a replication factor set to one, and a shard group duration set to seven days.
+
+### Show current retention policy
+```bash
+torkel@gaard:~$ influx
+Connected to http://localhost:8086 version 1.8.2
+InfluxDB shell version: 1.8.2
+> show databases
+name: databases
+name
+----
+_internal
+pf_firewall
+> show retention policies on pf_firewall
+name    duration shardGroupDuration replicaN default
+----    -------- ------------------ -------- -------
+autogen 0s       168h0m0s           1        true
+> 
+```
+### Create retention policy
+```bash
+> CREATE RETENTION POLICY 4weeks ON pf_firewall DURATION 4w REPLICATION 1 
+> 
+> show retention policies on pf_firewall
+name     duration shardGroupDuration replicaN default
+----     -------- ------------------ -------- -------
+autogen  0s       168h0m0s           1        true
+4weeks   672h0m0s 24h0m0s            1        false
+```
+
+### Alter retention policy ON database
+```bash
+> ALTER RETENTION POLICY twoweeks ON pf_firewall DURATION 4w REPLICATION 1 DEFAULT
+>  
+> show retention policies on pf_firewall
+name     duration shardGroupDuration replicaN default
+----     -------- ------------------ -------- -------
+autogen  0s       168h0m0s           1        true
+4weeks   336h0m0s 24h0m0s            1        false
+```
+
 ## PfSense
 ### Install Telegraf
 System `>` Package Manager `>` Available Packages, install `Telegraf`. 
@@ -242,50 +286,6 @@ torkel@gaard:~$ sudo grafana-cli plugins install grafana-worldmap-panel
 ### Grafana piechart-panel
 ```bash
 torkel@gaard:~$ sudo grafana-cli plugins install grafana-piechart-panel
-```
-
-### Retention policy
-How long do you want to keep this data? 
-
-When you create a database, InfluxDB creates a retention policy called `autogen` with an infinite duration, a replication factor set to one, and a shard group duration set to seven days.
-
-### Show current retention policy
-```bash
-torkel@gaard:~$ influx
-Connected to http://localhost:8086 version 1.8.2
-InfluxDB shell version: 1.8.2
-> show databases
-name: databases
-name
-----
-_internal
-pf_firewall
-> show retention policies on pf_firewall
-name    duration shardGroupDuration replicaN default
-----    -------- ------------------ -------- -------
-autogen 0s       168h0m0s           1        true
-> 
-```
-### Create retention policy
-```bash
-> CREATE RETENTION POLICY 4weeks ON pf_firewall DURATION 4w REPLICATION 1 
-> 
-> show retention policies on pf_firewall
-name     duration shardGroupDuration replicaN default
-----     -------- ------------------ -------- -------
-autogen  0s       168h0m0s           1        true
-4weeks   672h0m0s 24h0m0s            1        false
-```
-
-### Alter retention policy ON database
-```bash
-> ALTER RETENTION POLICY twoweeks ON pf_firewall DURATION 4w REPLICATION 1 DEFAULT
->  
-> show retention policies on pf_firewall
-name     duration shardGroupDuration replicaN default
-----     -------- ------------------ -------- -------
-autogen  0s       168h0m0s           1        true
-4weeks   336h0m0s 24h0m0s            1        false
 ```
 
 ### Import pfSense-Grafana-Dashboard.json
