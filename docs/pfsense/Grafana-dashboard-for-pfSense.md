@@ -226,10 +226,10 @@ Hit <kbd>Save</kbd>.
 ## Configure Grafana
 Configuraton `>` Data Sources 
 
-- Add data source
-- Select InfluxDB
-- Name: **pf_firewall**
-- URL: http://localhost:8086
+* Add data source
+* Select _InfluxDB_
+** Name: **pf_firewall**
+** URL: http://localhost:8086
 
 * Database: pf_firewall
 * User: pf_firewall_read
@@ -242,7 +242,9 @@ Configuraton `>` Data Sources
 torkel@gaard:~$ sudo grafana-cli plugins install grafana-worldmap-panel
 ```
 ### Grafana piechart-panel
+```bash
 torkel@gaard:~$ sudo grafana-cli plugins install grafana-piechart-panel
+```
 
 ### Retention policy
 How long do you want to keep this data? 
