@@ -169,7 +169,7 @@ Copy over all the plugins from [https://github.com/VictorRobellini/pfSense-Dashb
 2. Log in to pfSense through SSH
 3. Change directory with `cd /usr/local/bin`, and then `fetch` the required files:
 ```bash
-[2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_gateways-3.7.py`
+[2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_gateways-3.7.py
 [2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_netifinfo_plugin
 [2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_netifinfo_plugin.go
 [2.4.5-RELEASE][clark@pfsense.arpa]/root: fetch https://github.com/VictorRobellini/pfSense-Dashboard/blob/master/plugins/telegraf_pfinterface.php
