@@ -34,8 +34,8 @@ Install ETOpen Emerging Threats rules:
 
 Install Snort rules: 
 - [x] Snort free Registered User or paid Subscriber rules
-** Snort Rules Filename: snortrules-snapshot-29151.tar.gz
-** Snort Oinkmaster Code: d3fb58191764f206a2a444buid8fd289sd891z6c
+* Snort Rules Filename: **snortrules-snapshot-29151.tar.gz**
+* Snort Oinkmaster Code: **d3fb58191764f206a2a444buid8fd289sd891z6c**
 
 Install Snort GPLv2 Community rules: 
 - [x] The Snort Community Ruleset is a GPLv2 Talos-certified ruleset that is distributed free of charge without any Snort Subscriber License restrictions.
@@ -74,16 +74,16 @@ Send Alerts to System Log:
 * Log Priority: NOTICE
 
 Enable Tracked-Files Log:
-- [x] Suricata will log tracked files in JavaScript Object Notation (JSON) format. Default is Not Checked.
+- [x] Suricata will log tracked files in JavaScript Object Notation (JSON) format. Default is Not Checked.<br>
 Append Tracked-Files Log: 
 - [x] Suricata will append-to instead of clearing Tracked Files log file when restarting. Default is Checked.
 
 #### EVE Output Settings
-EVE JSON Log: [v] Suricata will output selected info in JSON format to a single file or to syslog. Default is Not Checked.
-EVE Output Type: SYSLOG 
-Let the rest be default. 
+- EVE JSON Log: 
+- [x] Suricata will output selected info in JSON format to a single file or to syslog. Default is Not Checked.<br>
+- EVE Output Type: SYSLOG 
 
-Click Save. 
+Let the rest be default, click <kbd>Save</kbd>. 
 
 ## 10-suricata.conf
 ```bash
