@@ -6,7 +6,7 @@ nav_order: 4
 ---
 # Suricata installation and configuration
 {: .no_toc }
-What is the only reason for not running Snort? If you are using Suricata instead. 
+What is the only reason for not running Snort? If you are using **Suricata** instead. 
 
 This is how I installed <kbd>Suricata</kbd> and used it as a IDS/IPS on my pfSense firewall and logged events to my Elastic Stack.
 
@@ -38,7 +38,7 @@ Install Snort rules:
 * Snort Oinkmaster Code: **d3fb58191764f206a2a444buid8fd289sd891z6c**
 
 Install Snort GPLv2 Community rules: 
-- [x] The Snort Community Ruleset is a GPLv2 Talos-certified ruleset that is distributed free of charge without any Snort Subscriber License restrictions.
+- [x] The Snort Community Ruleset is a GPLv2 Talos-certified ruleset that is distributed free of charge without any Snort Subscriber License restrictions.<br>
 Hide Deprecated Rules Categories: 
 - [x] Hide deprecated rules categories in the GUI and remove them from the configuration. Default is Not Checked.
 
@@ -51,7 +51,7 @@ Hide Deprecated Rules Categories:
 
 #### General Settings
 * Remove Blocked Hosts Interval: NEVER
-* Log to System Log: [] Copy Suricata messages to the firewall system log.
+* Log to System Log: [x] Copy Suricata messages to the firewall system log.
 * Keep Suricata Settings After Deinstall: [v] Settings will not be removed during package deinstallation.
 
 Click <kbd>Save</kbd>. 
@@ -81,7 +81,7 @@ Append Tracked-Files Log:
 #### EVE Output Settings
 - EVE JSON Log: 
 - [x] Suricata will output selected info in JSON format to a single file or to syslog. Default is Not Checked.<br>
-- EVE Output Type: SYSLOG 
+- EVE Output Type: <kbd>SYSLOG</kbd> 
 
 Let the rest be default, click <kbd>Save</kbd>. 
 
