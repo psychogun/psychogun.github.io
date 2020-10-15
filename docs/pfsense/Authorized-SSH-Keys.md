@@ -71,7 +71,7 @@ Remember the passphrase.
 ## Public Key
 Navigate to System > User Management and edit the user you want to log in to pfSense with. 
 
-Copy the output from `id_rsa.pub` under "Keys" for the user in question:
+Copy the output from `id_rsa.pub` under <kbd>Keys</kbd> for the user in question:
 ```bash
 ┌─[jd@asdf]─[~]
 └──╼ $cat /home/jd/.ssh/id_rsa.pub 
@@ -84,7 +84,8 @@ Copy the output from `id_rsa.pub` under "Keys" for the user in question:
 Enter passphrase for key '/home/jd/.ssh/id_rsa':
 ```
 
-
+## Authors
+Mr. Johnson
 
 
 ## Acknowledgments
