@@ -20,7 +20,6 @@ This is how I used Grafana to display dashboard for vitals from my PfSense firew
 I am using an Ubuntu 20.04 installation on a virtual machine deployed from Proxmox. 
 
 ### Prerequsites
-
 * Proxmox Virtual Environment 6.1-5
 * Ubuntu 20.04 LTS
 * PfSense 2.4.5-RELEASE-p1 (amd64) 
@@ -76,7 +75,7 @@ Then run:
 torkel@gaard:~$ sudo update-grub
 ```
 
-### Change NTP (?)
+### Change NTP
 Add your preferred NTP server:
 ```bash
 torkel@gaard:~$  sudo nano /etc/systemd/timesyncd.conf 
@@ -145,7 +144,7 @@ torkel@gaard:~$ sudo systemctl status influxdb
 torkel@gaard:~$ sudo systemctl enable influxdb.service
 ```
 
-Connect to InfluxDB and create a new database and two users. One user, which has write permissions (pfSense) and one user which has read permissions (Grafana).
+Connect to InfluxDB and create a new database and two users. One user, which has **write** permissions (pfSense) and one user which has **read** permissions (Grafana).
 
 ```bash
 torkel@gaard:~$ influx
@@ -161,7 +160,7 @@ InfluxDB shell version: 1.8.2
 
 ## PfSense
 ### Install Telegraf
-System > Package Manager > Available Packages, install `Telegraf`. 
+System `>` Package Manager `>` Available Packages, install `Telegraf`. 
 
 ### Plugins
 Copy over all the plugins from [https://github.com/VictorRobellini/pfSense-Dashboard/tree/master/plugins](https://github.com/VictorRobellini/pfSense-Dashboard/tree/master/plugins) and place them in `/usr/local/bin` on your pfSense firewall. 
