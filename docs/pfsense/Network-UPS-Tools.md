@@ -6,7 +6,7 @@ nav_order: 2
 ---
 # Network UPS Tools (NUT)
 {: .no_toc }
-This is how I used Network UPS Tools (NUT) for pfSense through USB and safely shut down my firewall and remotely told my proxmox host to also shut down.
+This is how I used Network UPS Tools (NUT) for pfSense through USB and safely shut down my firewall and remotely told my <kbd>Proxmox</kbd> host to also shut down.
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -15,7 +15,6 @@ This is how I used Network UPS Tools (NUT) for pfSense through USB and safely sh
 {:toc}
 ---
 ## Getting started
-Install the Suricata package by navigating to System > Package Manager > Available Packages.
 
 ## Prerequisites
 * pfSense 2.4.5-RELEASE-p3 (amd64)
@@ -31,9 +30,9 @@ pfSense 7,5W
 
 
 ## Install NUT
-Navigate to System > Packages and select Available Packages, scroll down to the NUT package and click Install.
+Navigate to <kbd>System</kbd> `>` <kbd>Packages</kbd> and select <kbd>Available Packages</kbd>, scroll down to the <kbd>NUT</kbd> package and click <kbd>Install</kbd>.
 
-In order to make it correctly pick up the usb connection, you will have to reboot the firewall. Go to Diagnostics and Reboot.
+In order to make it correctly pick up the usb connection, you will have to reboot the firewall. Go to <kbd>Diagnostics</kbd> and hit <kbd>Reboot</kbd>.
 
 
 ## Services / UPS / Settings
@@ -58,7 +57,7 @@ override.battery.charge.low = 85
 The extra parameters `override.battery.charge.warning = 90` and `override.battery.charge.low = 85` will give a warning when the charge of the battery is below 90%. If the charge drops below 85%, it will send out shutdown commands. 
 
 
-The NUT package will create two users for you, [admin] and [local-monitor]:
+The <kbd>NUT</kbd> package will create two users for you, [admin] and [local-monitor]:
 ```bash
 more /usr/local/etc/nut/upsd.users
 [admin]
@@ -70,8 +69,6 @@ instcmds=all
 password=238ruhfE2849dfasdfaad
 upsmon master
 ```
-
-
 
 ## Fault finding
 ### upscmd
@@ -87,10 +84,8 @@ upscmd -u admin -p 437219huadshfe04 PowerWalker_VI_850_LCD <command>
 ```
 
 
-
-
-
-
+## Authors
+Mr. Johnson
 
 ## Acknowledgments
 * [https://www.howtoforge.com/monitoring-ups-power-status-with-nut-on-opensuse10.3](https://www.howtoforge.com/monitoring-ups-power-status-with-nut-on-opensuse10.3)
