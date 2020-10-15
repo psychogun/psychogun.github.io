@@ -45,9 +45,8 @@ Hide Deprecated Rules Categories:
 #### Rules Update Settings
 * Update Interval: 12 HOURS
 * Update Start Time: 00:30
-
 * GeoLite2 DB Update:
-- [v] Enable downloading of free GeoLite2 Country IP Database updates. Default is Not Checked
+- [x] Enable downloading of free GeoLite2 Country IP Database updates. Default is Not Checked
 * GeoLite2 DB License Key: dOFdszB21sz44
 
 #### General Settings
