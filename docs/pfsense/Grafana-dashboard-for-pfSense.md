@@ -180,7 +180,7 @@ Copy over all the plugins from https://github.com/VictorRobellini/pfSense-Dashbo
 ```
 
 ### Configure Telegraf
-Go to Services > Telegraf.
+Go to Services `>` Telegraf.
 
 * Enable: v Enable Telegraf
 * Telegraf Output: InfluxDB
