@@ -129,12 +129,12 @@ torkel@gaard:~$
 torkel@gaard:~$ sudo apt-get install qemu-guest-agent
 ```
 
-Issue `sudo shutdown now` to power of the guest and go to the Proxmox web gui and enable QEMU Guest Agent under Options, then start it again.
+Issue `sudo shutdown now` to power of the guest and go to the Proxmox web gui and enable <kbd>QEMU Guest Agent</kbd> under Options, then start it again.
 
 ## Install Grafana
 [https://grafana.com/docs/grafana/latest/installation/debian/](https://grafana.com/docs/grafana/latest/installation/debian/)
 
-After the install, hop on in to `http://ip-adress:3000` and use `admin/admin` and then change the password. For now, do not do anything and proceed with installation of `InfluxDB`. 
+After the install, hop on in to `http://ip-adress:3000` and use <kbd>admin/admin</kbd> as login credentials. Then change the password for your user. For now, do not do anything in Grafana, but proceed with installation of `InfluxDB`. 
 
 ## Install InfluxDB
 [https://docs.influxdata.com/influxdb/v1.8/introduction/install/](https://docs.influxdata.com/influxdb/v1.8/introduction/install/)
