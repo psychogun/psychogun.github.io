@@ -221,23 +221,20 @@ In the little config window on the bottom, paste in these lines of code:
 #  server = "127.0.0.1:953"
 #  binary = "/usr/local/bin/telegraf_unbound.sh"
 ```
-Hit `Save`. 
+Hit <kbd>Save</kbd>. 
 
 ## Configure Grafana
-Configuraton > Data Sources 
+Configuraton `>` Data Sources 
 
-Add data source
+- Add data source
+- Select InfluxDB
+- Name: **pf_firewall**
+- URL: http://localhost:8086
 
-Select InfluxDB
-
-Name: pf_firewall
-
-URL: http://localhost:8086
-
-Database: pf_firewall
-User: pf_firewall_read
-Password: READ_PASSWORD
-HTTP Method: GET
+* Database: pf_firewall
+* User: pf_firewall_read
+* Password: READ_PASSWORD
+* HTTP Method: GET
 
 
 ### Grafana worldmap panel
