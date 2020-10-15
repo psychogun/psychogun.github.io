@@ -34,9 +34,8 @@ Install ETOpen Emerging Threats rules:
 
 Install Snort rules: 
 - [x] Snort free Registered User or paid Subscriber rules
-
-Snort Rules Filename: snortrules-snapshot-29151.tar.gz
-Snort Oinkmaster Code: d3fb58191766f206a2a444buid8fc289sd89uz6c
+** Snort Rules Filename: snortrules-snapshot-29151.tar.gz
+** Snort Oinkmaster Code: d3fb58191764f206a2a444buid8fd289sd891z6c
 
 Install Snort GPLv2 Community rules: 
 - [x] The Snort Community Ruleset is a GPLv2 Talos-certified ruleset that is distributed free of charge without any Snort Subscriber License restrictions.
@@ -44,20 +43,22 @@ Hide Deprecated Rules Categories:
 - [x] Hide deprecated rules categories in the GUI and remove them from the configuration. Default is Not Checked.
 
 #### Rules Update Settings
-Update Interval: 12 HOURS
-Update Start Time: 00:30
-GeoLite2 DB Update: [v] Enable downloading of free GeoLite2 Country IP Database updates. Default is Not Checked
-GeoLite2 DB License Key: dOFdszB21sdd4
+* Update Interval: 12 HOURS
+* Update Start Time: 00:30
+
+* GeoLite2 DB Update:
+- [v] Enable downloading of free GeoLite2 Country IP Database updates. Default is Not Checked
+* GeoLite2 DB License Key: dOFdszB21sz44
 
 #### General Settings
-Remove Blocked Hosts Interval: NEVER
-Log to System Log: [] Copy Suricata messages to the firewall system log.
-Keep Suricata Settings After Deinstall: [v] Settings will not be removed during package deinstallation.
+* Remove Blocked Hosts Interval: NEVER
+* Log to System Log: [] Copy Suricata messages to the firewall system log.
+* Keep Suricata Settings After Deinstall: [v] Settings will not be removed during package deinstallation.
 
-Click Save. 
+Click <kbd>Save</kbd>. 
 
 ### Updates
-No rule sets have been updated. Click Update. After you have configured the above settings in Global Settings, it should read "Results: success".
+No rule sets have been updated. Click <kbd>Update</kbd>. After you have configured the above settings in <kbd>Global Settings</kbd>, it should read <kbd>Results: success</kbd>.
 #### INSTALLED RULE SET MD5 SIGNATURES
 * Emerging Threats Open Rules
 * Snort Subscriber Rules
@@ -68,12 +69,15 @@ On the Interface Setting Overview, click + Add and all the way to the bottom, cl
 
 Go back to Interfaces and click the blue icon "Start suricata on this interface". Edit that WAN interface.
 #### Logging Settings
-Send Alerts to System Log: [v] Suricata will send Alerts from this interface to the firewall's system log.
-Log Facility: LOCAL1
-Log Priority: NOTICE
+Send Alerts to System Log: 
+- [x] Suricata will send Alerts from this interface to the firewall's system log.
+* Log Facility: LOCAL1
+* Log Priority: NOTICE
 
-Enable Tracked-Files Log: [v] Suricata will log tracked files in JavaScript Object Notation (JSON) format. Default is Not Checked.
-Append Tracked-Files Log: [v] Suricata will append-to instead of clearing Tracked Files log file when restarting. Default is Checked.
+Enable Tracked-Files Log:
+- [x] Suricata will log tracked files in JavaScript Object Notation (JSON) format. Default is Not Checked.
+Append Tracked-Files Log: 
+- [x] Suricata will append-to instead of clearing Tracked Files log file when restarting. Default is Checked.
 
 #### EVE Output Settings
 EVE JSON Log: [v] Suricata will output selected info in JSON format to a single file or to syslog. Default is Not Checked.
