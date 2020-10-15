@@ -230,7 +230,6 @@ Configuraton `>` Data Sources
 * Select _InfluxDB_
 * Name: **pf_firewall**
 * URL: http://localhost:8086
-
 * Database: pf_firewall
 * User: pf_firewall_read
 * Password: READ_PASSWORD
