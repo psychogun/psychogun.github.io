@@ -39,9 +39,7 @@ In order to make it correctly pick up the usb connection, you will have to reboo
 
 ### General Settings
 * UPS Type: Local USB
-
 * UPS Name: PowerWalker_VI_850_LCD
-
 * Notifications: [v] Enable E-Mail notifications
 
 ### Driver Settings
