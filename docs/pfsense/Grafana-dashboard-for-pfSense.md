@@ -182,7 +182,7 @@ Copy over all the plugins from https://github.com/VictorRobellini/pfSense-Dashbo
 ### Configure Telegraf
 Go to Services `>` Telegraf.
 
-* Enable: <input type="checkbox" disabled checked /> Enable Telegraf
+* [x] Enable: Enable Telegraf
 * Telegraf Output: InfluxDB
 * InfluxDB Server: http://ip-adress:8086
 * InfluxDB Database: pf_firewall
