@@ -386,7 +386,7 @@ admin@raspberrypi:~ $ gpsmon
 <kbd>PS:</kbd> Use CTRL + S to freeze the picture.
 
 The top line summarizes the best information collected from the GPS receiver, including the time (in UTC) and the current location, and the bottom portion of the screen shows the more or less raw data from the GPS unit.
-Of particular import are the lines ---- PPS offset --- because they indicate proper handling of the pulse-per-second input.
+Of particular import are the lines `---- PPS offset ---` because they indicate proper handling of the pulse-per-second input.
 
 If the top of the `gpsmon` display shows:
 ```bash
@@ -399,7 +399,7 @@ The lack of Lat/Lon indicates the GPS receiver has not obtained a satellite fix,
 
 Always check for the fix LED on the GPS hat itself, which should flash once every 15 seconds; if instead it's one second on/one second off, then it doesn't have a fix and there's not much that `gpsmon` can do for you.
 
-Do not proceed to the next section until you get valid PPS input and valid GPS data showing up via gpsmon.
+Do not proceed to the next section until you get valid PPS input and valid GPS data showing up via `gpsmon`.
 
 
 #### cgps -s
@@ -504,12 +504,12 @@ Set folder permissions (recursive):
 ```bash
 administrator@raspberrypi:~ $ sudo chown -R ntp:ntp /var/lib/ntp /var/log/ntpstats
 ```
-Enable the NTPsec service:
+Enable the <kbd>NTPsec</kbd> service:
 ```bash
 administrator@raspberrypi:~ $ sudo systemctl enable ntpd
 Created symlink /etc/systemd/system/multi-user.target.wants/ntpd.service → /lib/systemd/system/ntpd.service.
 ```
-Now NTPsec is executed automatically when rebooting the system. 
+Now <kbd>NTPsec</kbd> is executed automatically when rebooting the system. 
 
 At the moment the service is not running yet, because we have to configure it first.
 
@@ -517,6 +517,7 @@ At the moment the service is not running yet, because we have to configure it fi
 The final part of this project configures the NTP (Network Time Protocol) daemon to consume the GPS time, possibly correlate it with other sources, and make accurate time available to the local machine and the rest of the network.
 
 How does NTP get the precise time from `gpsd`? The answer is via shared memory. NTPD supports multiple kinds of time drivers, and one of them is a set of shared memory segments that feeds accurate time to all callers.
+
 Note that `gpsd` also provides a TCP-based network service for all of the data it collects (certainly location data), but the network service is not useful for accurate time; the shared memory segment is far more precise for process-to-process communications.
 The configuration is a little tricky and is not at all intuititive, so we'll do checking in steps.
 First is the tool `ntpshmmon`, which monitors shared memory as if it were a client, and reports the counters found:
@@ -656,7 +657,7 @@ restrict source notrap nomodify noquery
 admin@raspberrypi:~/ntpsec $ 
 ```
 
-In the first example (Example 1) the Raspberry Pi synchronizes its clock with a public NTPsec time server using a classical unsecured NTP connection. Which is the same as (Example #0).
+In the first example <kbd>Example 1</kbd> the Raspberry Pi synchronizes its clock with a public NTPsec time server using a classical unsecured NTP connection. Which is the same as <kbd>Example #0</kbd>.
 
 In the second example, the client communicates with the same time server via an NTS-secured NTP connection. The initial channel to the NTS-KE server uses the default port 123 TCP (currently implementation-specific). Since the NTPsec time server uses certificates issued by Let’s Encrypt, we do not need to set any additional parameters. To check the certificates, the client uses the local root CA pool (`/etc/ssl/certs/ca-certificates.crt`), which also allows the verification of certificates issued by Let’s Encrypt.
 
@@ -665,11 +666,11 @@ In the third example, we connect to the time server of the Ostfalia University, 
 sudo wget http://nts3-e.ostfalia.de/homePi/CLIENT/rootCaBundle.pem -P /var/lib/ntp/certs/
 ```
 
-Caution: The time server of the Ostfalia University also publishes its private key, as it is a public test server. This time server should not be used for clock synchronization of productive systems.
+<kbd>Caution</kbd>: The time server of the Ostfalia University also publishes its private key, as it is a public test server. This time server should not be used for clock synchronization of productive systems.
 
 The fourth example differs from the third one only from the deactivated domain validation. This can be useful when we running a local NTS server with certificates without a registered domain.
 
-The fift example is using the pool from cloudflare to sync time. CloudFlare supports only TLS 1.3. To use TLS 1.3, you must have OpenSSL 1.1.1 or higher installed.
+The fift example is using the pool from [https://time.cloudflare.com](cloudflare) to sync time. CloudFlare supports only TLS 1.3. To use TLS 1.3, you must have OpenSSL 1.1.1 or higher installed.
 * Check with `openssl version`.
 
 The other entries in the configuration file are optional and are used to record statistics and log files. The descriptions as well as the complete parameter list (incl. NTS) can be found in `ntp_conf.adoc`. Here only very briefly described:
@@ -730,7 +731,9 @@ It probably requires reboot for this to take effect. At this point, you will be 
 admin@raspberrypi:~ $ sudo reboot
 ```
 ### Status of ntp
-After the reboot and 15 minutes or so, you should see `SHM(2)`, the `PPS` signal, selected, which will be indicated by an asterisk in front of that line. Check the `ntp` status with `ntpq -p`:
+After the reboot and 15 minutes or so (gps lock), you should see `SHM(2)`, the `PPS` signal, selected, which will be indicated by an asterisk in front of that line. 
+
+Check the `ntp` status with `ntpq -p`:
 ```bash
 admin@raspberrypi:~ $ ntpq -p
      remote                                   refid      st t when poll reach   delay   offset   jitter
@@ -744,7 +747,7 @@ xSHM(0)                                  .NMEA.           0 l   26   64  377   0
 * `*` means that this is the preferred time server
 * `x` in front of the `NMEA` means that `ntpd` detect `NMEA` as falseticked.
 
-* You could also use `watch ntpq -p`
+You could also use `watch ntpq -p` to make it autorefresh every other 2 seconds. 
 
 A more thorough explanation of the output of `ntpq` can be found here [https://detailed.wordpress.com/2017/10/22/understanding-ntpq-output/](https://detailed.wordpress.com/2017/10/22/understanding-ntpq-output/), and here [https://www.thegeekdiary.com/what-is-the-refid-in-ntpq-p-output/](https://www.thegeekdiary.com/what-is-the-refid-in-ntpq-p-output/).
 
@@ -768,14 +771,18 @@ synchronised to UHF radio at stratum 1
 admin@raspberrypi:~ $ 
 ```
 
+:smiley:
+
 ## Share our time
-Now that this raspberry is syncing with a UFH radio at stratum 1, we want to make our raspberry available as a NTP server. This is already configured in our `ntp.conf` file, the section with access control configuration. You can check if our Raspberry is allowing NTP traffic with `netstat`:
+Now that this raspberry is syncing with a UFH radio at stratum 1, we want to make our raspberry available as a NTP server. This is already configured in our `ntp.conf` file, the section with access control configuration. 
+
+You can check if our Raspberry is allowing NTP traffic with `netstat`:
 
 ```bash
 administrator@raspberrypi:~ $ netstat -a | grep ntp                      
 udp        0      0 localhost:ntp           0.0.0.0:*                          
 udp        0      0 0.0.0.0:ntp             0.0.0.0:*                          
-udp6       0      0 fe80::f347:77da:42d:ntp [::]:*                             
+udp6       0      0 fe80::f347:77da:42c:ntp [::]:*                             
 udp6       0      0 localhost:ntp           [::]:*                             
 udp6       0      0 [::]:ntp                [::]:*    
 ```
@@ -790,7 +797,7 @@ Interfaces > Assignments > VLANs > Click Add.
 * Description: NTP server
 Click Save
 
-Go Interfaces > Assignments > and select Interface Assignments.
+Go <kbd>Interfaces</kbd>, <kbd>Assignments</kbd> and select <kbd>Interface Assignments</kbd>.
 
 Under Available network ports: select  `VLAN 28 on em0 - lan (NTP Server)` and click Add. 
 
@@ -804,26 +811,33 @@ Click on the newly added interface.
 
 Save and Apply Changes
 
-Go to Services > DHCP Server and select your interface VLAN28_NTP.
+Go to <kbd>Services</kbd>, <kbd>DHCP Server</kbd> and select your interface <kbd>VLAN28_NTP</kbd>.
 
 * Enable DHCP server on VLAN28_NTP interface
 * Range: From 192.168.28.2 To: 192.168.28.2
 
-Go to Services > NTP and Add our NTP server with an address of 192.168.28.2 and select Prefer. 
+Attach the Raspberry Pi to the assigned interface through an ethernet cable. 
 
-You should now see under Status > NTP that our NTP server at `192.168.28.2` is our active Peer. 
+Go to <kbd>Services</kbd>, <kbd>NTP</kbd> and Add our NTP server with an address of 192.168.28.2 and select <kbd>Prefer</kbd>. 
 
-In NTP, there exist two states for an NTP server. A "truechimer", which is providing accurate time, and a "false ticker", which is providing inaccurate time. NTP has a selection process for which it works to eliminate "false tickers" by checking the time offsets received from a number of sources. It works to enter into an agreement over which system likely has the most accurate time. Therefore, you should not delete the default pool of NTP servers in the PfSense configuration. Better yet, is to add some geographical Stratum 1 servers to your list: [http://support.ntp.org/bin/view/Servers/StratumOneTimeServers](http://support.ntp.org/bin/view/Servers/StratumOneTimeServers).
+You should now see under <kbd>Status</kbd>, NTP that our NTP server at `192.168.28.2` is our active Peer. 
 
-You should configure your non-GPS time source systems to use 5 NTP upstream servers. If you sync to a single upstream time source, NTP will trust this time source's clock. It could be 10 seconds off, 10 minutes off, 10 days off, or 10 years off. NTP can trust it and sync to it. 
+In NTP, there exist two states for an NTP server. A "truechimer", which is providing accurate time, and a "false ticker", which is providing inaccurate time. NTP has a selection process for which it works to eliminate "false tickers" by checking the time offsets received from a number of sources. It works to enter into an agreement over which system likely has the most accurate time. Therefore, you should not delete the default pool of NTP servers in the PfSense configuration. 
+
+Better yet, is to add some geographical Stratum 1 servers to your list: [http://support.ntp.org/bin/view/Servers/StratumOneTimeServers](http://support.ntp.org/bin/view/Servers/StratumOneTimeServers).
+
+You should configure your non-GPS time source systems to use atleast 5 NTP upstream servers. 
+
+<kbd>NB:</kbd> If you sync to a **single** upstream time source, NTP will trust this time source's clock. It could be 10 seconds off, 10 minutes off, 10 days off, or 10 years off. NTP can trust it and sync to it. 
 
 
 ## Standalone connection
 Comment out all the _external_ `pool`/`server` lines in `/etc/ntp.conf`, because we are not using internet for time sync anymore.
 
-It is written in the documentation, that the PPS is taken in account only in cases when a "normal" time source is reached - because a PPS itself serves only a signal, not a date & time. __PPS believed only if prefer peer correct and within 128 ms.__ Our other time source would then be the NMEA. Also, from the documentation [http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html](http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html) __Note: you must add a preferred server or PPS doesn’t work.__
+It is written in the documentation, that the PPS is taken in account only in cases when a "normal" time source is reached - because a PPS itself serves only a signal, not a date & time. __PPS believed only if prefer peer correct and within 128 ms.__ Our other time source would then be the NMEA. Also, from the documentation [http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html](http://www.satsignal.eu/ntp/Raspberry-Pi-quickstart.html) 
+<kbd>Note:</kbd> you must add a preferred server or PPS doesn’t work.__
 
-The NMEA gps data are not very accurate in sync by nature of gps NMEA string handling (the strings arrives not very syncroniusly via serial port and there are many additional gps data where its amount depends on how many satelites are in view and the baud rate of serial connection). So its jitter can be up to 500ms, in average it is something around 300 ms. That is good enough, to set the local date time to a correct value, but is far away to be very accurate as it should for a stratum1 ntp server.
+The NMEA gps data are not very accurate in sync by nature of gps NMEA string handling (the strings arrives not very syncroniusly via serial port and there are many additional gps data where its amount depends on how many satelites are in view and the baud rate of serial connection). So its jitter can be up to 500ms. In average it is something around 300 ms. That is good enough, to set the local date time to a correct value, but is far away to be very accurate as it should for a stratum 1 ntp server.
 
 The `ntp` keeps to stay at the NMEA source and will therefore never switck to the very precise PPS clock source, because of it's time is out of bounds. 
 
@@ -841,7 +855,7 @@ fudge  127.127.28.0 refid NMEA
 
 It takes the NMEA data to initially sync date & time, and few seconds later the `PPS` will be activated and `ntpd` takes PPS into account.
 
-The `ntpd` driver 28 for the virtual ip 127.127.28.0 starts to work only when a `gpsd` client connects to `gpsd` once. 
+The `ntpd` driver 28 for the virtual ip <kbd>127.127.28.0</kbd> starts to work only when a `gpsd` client connects to `gpsd` once. 
 
 To auto start the `gpsd`, add an additional entry `gpspipe -r -n 1 &` in the `/etc/rc.local` file, just before the `exit 0`:
 ```bash
@@ -856,7 +870,7 @@ On a reboot/startup, this will connect a gps client for exactly one NMEA output 
 Once that is done the time via NMEA (the gps data strings) acts as time source for ntp.
 
 And also the ntp driver 22 for PPS virtual ip 127.127.28.0 starts to get being active from the view of ntp
-(the `/dev/pps0` is served by the kernel and is actively working all the time, only `ntp` takes notice of `PPS` after a gps client was connected to gpsd first).
+(the `/dev/pps0` is served by the kernel and is actively working all the time, only `ntp` takes notice of `PPS` after a gps client is connected to gpsd first).
 
 ## Fault finding
 ### /var/log/ntp.log
@@ -876,9 +890,10 @@ admin@raspberrypi:~ $ tail -f /var/log/ntp.log
 2020-07-23T17:36:00 ntpd[1622]: DNS: dns_check: processing time.cloudflare.com:1234, 1, 21921
 2020-07-23T17:36:00 ntpd[1622]: DNS: dns_take_status: time.cloudflare.com:1234=>error, 12
 ```
-Check your firewall settings. 
+Check your firewall logs and change settings correctly!
 
 ### 123?
+```bash
 admin@raspberrypi:~ :~ $ sudo netstat -nlap | grep 'ntpd'
 [sudo] password for administrator: 
 udp        0      0 192.168.28.2:123        0.0.0.0:*                           446/ntpd            
@@ -888,8 +903,9 @@ udp6       0      0 fe80::f337:776a:44d:123 :::*                                
 udp6       0      0 ::1:123                 :::*                                446/ntpd            
 udp6       0      0 :::123                  :::*                                446/ntpd            
 unix  2      [ ]         DGRAM                    12991    446/ntpd             
-
+```
 ### ntp?
+```bash
 admin@raspberrypi:~ :~ $ systemctl list-unit-files | grep 'ntp'
 ntp-wait.service                       disabled       
 ntpd.service                           enabled        
@@ -899,7 +915,7 @@ ntpviz-weekly.service                  static
 ntplogtemp.timer                       disabled       
 ntpviz-daily.timer                     disabled       
 ntpviz-weekly.timer                    disabled   
-
+```bash
 ### Start ntpd with debug mode
 ```bash
 admin@raspberrypi:~ :~ $ sudo ntpd -nD 4
@@ -985,15 +1001,15 @@ ity":"N","stopbits":1,"cycle":1.00}]}
 │ 0   1 185 37 00ad 18.9     │└─────── Packet Type 6 (0x06) ───────────────────┘
 │ 1   7  54 18 00ad 22.8     │┌ CPU Throughput ────────────────────────────────┐
 │ 2  29  78 44 00ac  3.9     ││Max: 0.000  Lat: 0.000  Time: 0.000   MS:  0    │
-│ 3   2 209 18 00bf 28.3 T   │└─────── Packet type 9 (0x09) ───────────────────┘
-│ 4  20 362 72 00ad  9.1     │┌ Clock Status ──────────────────────────────────┐
+│ 3   2  09 18 00bf 28.3 T   │└─────── Packet type 9 (0x09) ───────────────────┘
+│ 4  20  62 72 00ad  9.1     │┌ Clock Status ──────────────────────────────────┐
 │ 5  11  24 14 00ad 15.4     ││SVs:    Drift:        Bias:                     │
-│ 6  19  95 43 00bf 27.8 T   ││GPS Time:             PPS:                      │
+│ 6  19  92 43 00bf 27.8 T   ││GPS Time:             PPS:                      │
 │ 7  11  54 39 008c  8.3     │└─────── Packet type 7 (0x07) ───────────────────┘
 │ 8  23  81 19 00ad 21.6     │┌ Visible List ──────────────────────────────────┐
-│ 9  21 212 53 0000  0.0     ││                                                │
+│ 9  21 249 53 0000  0.0     ││                                                │
 │10  20 140 12 0000  0.0     │└─────── Packet type 13 (0x0D) ──────────────────┘
-│11  80 308 18 0000  0.0     │┌ DGPS Status ───────────────────────────────────┐
+│11  80 108 18 0000  0.0     │┌ DGPS Status ───────────────────────────────────┐
 └─── Packet Type 4 (0x04) ───┘│                                                │
                               └─────── Packet type 27 (0x1B) ──────────────────┘
 
@@ -1059,18 +1075,18 @@ time_pps_fetch() error -1 (Connection timed out)
 ## Client settings
 ### Linux
 ```bash
-admin@raspberrypi:~$ timedatectl status
+user@box:~$ timedatectl status
                       Local time: Fri 2020-07-24 23:54:55 CEST
                   Universal time: Fri 2020-07-24 21:54:55 UTC
                         RTC time: Fri 2020-07-24 21:54:56
-                       Time zone: Europe/Oslo (CEST, +0200)
+                       Time zone: Europe/Paris (CEST, +0200)
        System clock synchronized: yes
 systemd-timesyncd.service active: yes
                  RTC in local TZ: no
 ```
 
 ```bash
-admin@raspberrypi:~$ sudo nano /etc/systemd/timesyncd.conf 
+user@box:~$ sudo nano /etc/systemd/timesyncd.conf 
 #  This file is part of systemd.
 #
 #  systemd is free software; you can redistribute it and/or modify it
@@ -1085,7 +1101,7 @@ admin@raspberrypi:~$ sudo nano /etc/systemd/timesyncd.conf
 # See timesyncd.conf(5) for details.
 
 [Time]
-NTP=192.168.53.234
+NTP=192.168.28.2
 #FallbackNTP=ntp.ubuntu.com
 #RootDistanceMaxSec=5
 #PollIntervalMinSec=32
@@ -1093,14 +1109,14 @@ NTP=192.168.53.234
 ```
 
 ```bash
-admin@raspberrypi:~$ date
+user@box:~$ date
 Sat Jul 25 00:07:02 CEST 2020
-admin@raspberrypi:~$ 
+user@box:~$ 
 ```
 
-To see exact upstream IP address of ntp server run
+To see exact upstream IP address of ntp server run:
 ```bash
-admin@raspberrypi:~$ systemctl status systemd-timesyncd
+user@box:~$ systemctl status systemd-timesyncd
 ● systemd-timesyncd.service - Network Time Synchronization
    Loaded: loaded (/lib/systemd/system/systemd-timesyncd.service; enabled; vendor preset: enabled)
    Active: active (running) since Fri 2020-07-10 21:53:07 CEST; 2 weeks 0 days ago
@@ -1122,6 +1138,7 @@ Jul 24 22:50:52 raspberrypi systemd-timesyncd[616]: Synchronized to time server 
 Jul 24 23:50:51 raspberrypi systemd-timesyncd[616]: Network configuration changed, trying to establish connection.
 Jul 24 23:50:51 raspberrypi systemd-timesyncd[616]: Synchronized to time server 91.189.89.198:123 (ntp.ubuntu.com).
 ```
+Restart `timesyncd` for your new address to be in effect:
 ```bash
 admin@raspberrypi:~$ sudo systemctl restart systemd-timesyncd
 ```
@@ -1143,7 +1160,7 @@ Poll Interval: 10 (1024s)
 
 C:\Users\Don Pablo>
 ```
-Start > Control Panel > Clock, Language, and Region.
+<kbd>Start</kbd>, <kbd>Control Panel</kbd>, <kbd>Clock</kbd>, <kbd>Language</kbd>, and <kbd>Region</kbd>.
 Click the icon Date and Time. There, switch to the tab named Internet Time. To adjust available settings, you need to click the button "Change settings..." and add the ip to your Raspberry Pi for testing:
 
 ```
@@ -1164,9 +1181,9 @@ C:\Users\Don Pablo>
 
 ### Mac OS / iOS 
 
-The easiest way with Apple devices is to use your DNS Resolver and add host overrides and point them to an address which serves NTP. 
+The easiest way with Apple devices is to use your <kbd>DNS Resolver</kbd> and add host overrides and point them to an address which serves NTP. 
 
-On PfSense, add these under Services > DNS Resolver:
+On your pfSense firewall, add these under <kbd>Services</kbd>, <kbd>DNS Resolver</kbd>:
 
 Host | Parent domain of host | IP to return for host | Description
 ------------ | ------------- | ------------ | -------------
