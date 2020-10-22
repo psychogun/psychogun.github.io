@@ -536,9 +536,7 @@ MQTT
 * Broker: localhost 
 
 ## Z-Wave
-
-sensor.door_window_sensor_6_basic
-## configuration.yaml
+### configuration.yaml
 Here are som code snippets that I have used directly in the `configuration.yaml` file. 
 ### ID-Lock 150
 
