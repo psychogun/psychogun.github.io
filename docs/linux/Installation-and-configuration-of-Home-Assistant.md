@@ -151,7 +151,7 @@ This is only necessary if you are using <kbd>Proxmox</kbd> or another linux KVM:
 ```bash
 assistant@linuxbabe:~$ sudo apt-get install qemu-guest-agent
 ```
-Issue `sudo shutdown now` to power of the guest and go to the <kbd>Proxmox</kbd> web gui and enable QEMU Guest Agent under Options, then start it again.
+Issue `sudo shutdown now` to power of the guest and go to the <kbd>Proxmox</kbd> web gui and enable <kbd>QEMU Guest Agent</kbd> under <kbd>Options</kbd>, then start it again.
 
 
 ### python3 version
@@ -358,7 +358,7 @@ assistant@linuxbabe:~$ lsusb
 Bus 001 Device 002: ID 0627:0001 Adomax Technology Co., Ltd 
 Bus 001 Device 001: ID 1d6b:0001 Linux Foundation 1.1 root hub
 ```
-Select the Home Assistant Virtual Machine in Proxmox and go to <kbd>Hardware</kbd>. <kbd>Add</kbd>, <kbd>USB Device</kbd>. Select `* Use USB Vendor/Device ID` and the device with the above ID (`Unknown (0658:0200)`).
+Select the Home Assistant Virtual Machine in Proxmox and go to <kbd>Hardware</kbd>. <kbd>Add</kbd>, <kbd>USB Device</kbd>. Select <kbd>Use USB Vendor/Device ID</kbd> and the device with the above ID (`Unknown (0658:0200)`).
 
 Reboot/start the Virtual Machine. 
 
@@ -371,7 +371,7 @@ Bus 002 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
 Bus 001 Device 002: ID 0627:0001 Adomax Technology Co., Ltd 
 Bus 001 Device 001: ID 1d6b:0001 Linux Foundation 1.1 root hub
 ```
-To check where this USB device is mounted, use:
+To check where this USB device is mounted (<kbd>/dev/ttyACM0</kbd>) use:
 ```bash
 assistant@linuxbabe:~$ ls -l /dev/serial/by-id/usb-
 usb-0658_0200-if00                                                     usb-dresden_elektronik_ingenieurtechnik_GmbH_ConBee_II_DE2228251-if00  
@@ -391,7 +391,7 @@ assistant@linuxbabe:/sys/class/tty$ readlink ttyACM0
 After we have passed the USB device to our installation, we will further pass the USB device- to a docker running `ozwdaemon` which we will use to pair Z-Wave devices to our dongle with. 
 
 
-## Migrate to OpenZWave (beta)
+## OpenZWave
 <kbd>Promox</kbd>, <kbd>ubuntu-server</kbd>, <kbd>docker</kbd>, <kbd>ozwdaemon</kbd> - USB Z-Wave dongle. This is the setup which will allow messages from our Z-Wave enabled entities communicate with <kbd>Home Assistant</kbd> through a <kbd>mqtt</kbd> broker server installed directly on the <kbd>ubuntu-server</kbd>.
 
 Let's do this.
@@ -443,8 +443,9 @@ Connect ***locally***.
 * [https://community.home-assistant.io/t/get-openzwave-beta-working/200121](https://community.home-assistant.io/t/get-openzwave-beta-working/200121)
 
 #### Portainer: Upgrade Portainer
-I did this to upgrade the <kbd>Portainer</kbd> docker:
-List our containers:
+After a while, I wanted to update my <kbd>Portainer</kbd> docker.
+
+First, list our containers:
 ```
 assistant@linuxbabe:/$ sudo docker container ls
 [sudo] password for assistant: 
@@ -452,7 +453,7 @@ CONTAINER ID        IMAGE                                 COMMAND             CR
 f6f62aef31b1        openzwave/ozwdaemon:allinone-latest   "/init"             10 minutes ago      Up 10 minutes       0.0.0.0:1983->1983/tcp, 0.0.0.0:5901->5901/tcp, 0.0.0.0:7800->7800/tcp   ozwdaemon
 855186d94b34        portainer/portainer                   "/portainer"        2 months ago        Up 4 weeks          0.0.0.0:9000->9000/tcp                                                   mystifying_rubin
 ```
-Stop  our portainer container:
+Stop our <kbd>Portainer</kbd> container:
 ```bash
 assistant@linuxbabe:/$ sudo docker stop 855186d94b34
 ```
@@ -478,7 +479,7 @@ assistant@linuxbabe:/$ sudo docker run -d -p 9000:9000 -v /var/run/docker.sock:/
 423debb02a73ef7275e4e221e3e2fb276387b0ca00e12c271254ce4c4e03d424
 ```
 
-#### ozwdaemon: Prerequisites
+### ozwdaemon: Prerequisites
 ```bash
 assistant@linuxbabe:/$ cd /opt/
 assistant@linuxbabe:/opt$ sudo mkdir ozw
@@ -486,7 +487,7 @@ assistant@linuxbabe:/opt$ cd ozw/
 assistant@linuxbabe:/opt/ozw$ sudo mkdir config
 ```
 
-### ozwdaemon: Configuration
+#### ozwdaemon: Configuration
 I configure my <kbd>ozwdaemon</kbd> Docker container through <kbd>Portainer</kbd>:
 
 **Add Container:**
@@ -538,19 +539,20 @@ MQTT
 
 sensor.door_window_sensor_6_basic
 ## configuration.yaml
-
+Here are som code snippets that I have used directly in the `configuration.yaml` file. 
 ### ID-Lock 150
+
+#### ID Lock 150 configuration
+Go to Configuration > Z-Wave > Select Node `ID Lock AS 150 (Node 7: Complete)
+* Node Config Options: 3: Door Hinge Position
+* Config Value: Left Handle
+Click `SET CONFIG PARAMETER`.
+
+* Node Config Options: 4: Door Audio Volume Level
+* Config Value: No Sound
+Click `SET CONFIG PARAMETER`.
+
 Which user opened the Door?
-```bash
-# Boss used the door
-binary_sensor:
-  - platform: template
-    sensors:
-      boss_is_home:
-       friendly_name: "Boss is home"
-       value_template: >-
-         {{ is_state('sensor.id_150_z_wave_module_user_code', '63') }}
-```
 
 ```bash
 # Which user opened the door
@@ -559,7 +561,7 @@ binary_sensor:
     sensors:
 # John
       id_150_user_code_john:
-       friendly_name: "John opened the door"
+       friendly_name: "Johnson opened the door"
        value_template: >-
          {{ is_state('sensor.id_150_z_wave_module_user_code', '63') }}
 # Sarah      
@@ -575,6 +577,7 @@ binary_sensor:
 ```
 
 ### Ping
+Ping these devices. 
 ```bash
 ## Presence detector
 device_tracker:
@@ -629,64 +632,7 @@ sensor:
         value_template: '{{ ((states.sensor.general_thermostat_v2_electric_kwh.state)) | multiply(0.728) | round(2) }}'
 ```
 
-## Controlling Home Assistant from Apple Home
-### Apple Home dependencies
-Install the necessary dependencies to be able to forward entities from Home Assistant to Apple HomeKit, so they can be controlled from Apple’s Home app and Siri.
-```bash
-assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo apt-get install libavahi-compat-libdnssd-dev
-```
-
-Add `homekit:` in `configuration.yaml`:
-```bash
-assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo nano configuration.yaml 
-# Enable Apple Home
-homekit:
-  auto_start: false
-```
-Depending on your setup, it might be necessary to disable Auto Start for all accessories to be available for HomeKit. Only those entities that are fully set up when the HomeKit integration is started, can be added. To start HomeKit when `auto_start: false`, you can call the service `homekit.start`.
-
-If you have Z-Wave entities you want to be exposed to HomeKit, then you’ll need to disable auto start and then start it after the Z-Wave mesh is ready. This is because the Z-Wave entities won’t be fully set up until then. This can be automated using an automation. Let us edit `automations.yaml` and make Home Assistant wait 9 minutes before starting `homekit`:
-
-```bash
-assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo nano automations.yaml 
-- alias: 'Start HomeKit'
-  trigger:
-  - platform: homeassistant
-    event: start
-  action:
-  - delay: 00:09
-  - service: homekit.start
-```
-
-Restart Home Assistant and you should be able to add it as a accessory in Apple Home on your iOS device. 
-PS: Remember to properly configure your Apple TV as a hub, first. 
-
-### Restrict number of devices
-Perhaps you would not like to send everything from Home Assistant to your iOS device. Edit `configuration.yaml` and use a `filter`:
-```bash
-
-homekit:
-  auto_start: False
-  filter:
-    include_entities:
-      - binary_sensor.aeon_labs_zw100_multisensor_6_sensor
-      - sensor.aeon_labs_zw100_multisensor_6_battery_level
-      - sensor.aeon_labs_zw100_multisensor_6_relative_humidity
-      - sensor.aeon_labs_zw100_multisensor_6_temperature
-      - sensor.aeon_labs_zw100_multisensor_6_burglar
-      - sensor.fibaro_system_fgbs001_universal_binary_sensor_temperature
-      - sensor.fibaro_system_fgbs001_universal_binary_sensor_temperature_2
-      - switch.fibaro_system_fgwpe_f_wall_plug_gen5_switch
-      - lock.id_lock_as_150_locked
-      - binary_sensor.burglar_up
-
-```
-## Advanced Mode
-In the Home Assistant GUI, go to your profile by clicking your name down to the left. Enable `Advanced Mode`. 
-
-With Advanced Mode turned on, you can go to `Developer Tools` and check your 
-
-## System Health
+### System Health
 Enable System Health by adding `system_health:` in `configuration.yaml`, add it to the very top:
 
 ```bash
@@ -695,11 +641,10 @@ assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo nano configuration.
 system_health:
 ```
 
-## binary_sensor.routing_binary_sensor_instance_1_sensor
+## Integrations: Z-Wave
+Different entities from my Z-Wave network. 
 
-
-
-## Adding a tampering sensor
+### Adding a tampering sensor
 In the Home Assistant GUI, go to Configuration and select Entities. There you'll see that you have a sensor which is called `AEON Labs ZW100 MultiSensor 6 Burglar`. This is the motion sensor on the AEON Lab ZW100 device. Click on it, and you'll see what the entity is named: `sensor.aeon_labs_zw100_multisensor_6_burglar`. This gives us a value `3` for tampering with the device, `8` for motion and `254` for sleep. We're going to add a binary sensor to be able to get notifications in Apple Home for tampering.
 
 ```bash
@@ -719,32 +664,24 @@ Wake up the Multisensor 6, as stated in the documentation found here [https://ae
 * Release Multisensor 6 Action Button
 * The LED on Multisensor 6 will now rapidly blink its Yellow/Orange LED while it is in its awake state. You may send in any configurations or commands from your current gateway to configure your Multisensor 6.
 
-Then go to Configuration > Z-Wave Node Management 
-Select
+Then go to <kbd>Configuration</kbd>, <kbd>Z-Wave Node Management</kbd>. Select
 
-Nodes: AEON Labs ZW100 Multisensor 6
-
+* Nodes: AEON Labs ZW100 Multisensor 6
 Entities of this node:
-binary_sensor.aeon_labs_zw100_multisensor_6_sensor
+* binary_sensor.aeon_labs_zw100_multisensor_6_sensor
+* Node Values: Burglag (Instance; 1, Index; 10)
+* Node group associations: 
+* Node Config Options: **3600**
+* Config Parameter: 5; Command Options
+* Config Value: ** Binary Sensor Report **
 
-Node Values: Burglag (Instance; 1, Index; 10)
-
-Node group associations: 
-
-Node Config Options: 
-3600
-
-Config Parameter: 5; Command Options
-
-Config Value: ** Binary Sensor Report **
-
-Click `SET CONFIG PARAMETER`.
+Click <kbd>SET CONFIG PARAMETER</kbd>.
 
 * Tap the Action Button on Multisensor 6 to put Multisensor 6 back to sleep, or wait 10 minutes. (recommended to manually put it back to sleep to conserve battery life).
 
-* Make sure that also the entity `binary_sensor.aeon_labs_zw100_multisensor_6_sensor` also uses `Binary Sensor Report`, as stated as best practise here: [https://www.home-assistant.io/docs/z-wave/entities/](https://www.home-assistant.io/docs/z-wave/entities/).
+<kbd>PS:</kbd> Make sure that also the entity `binary_sensor.aeon_labs_zw100_multisensor_6_sensor` also uses `Binary Sensor Report`, as stated as best practise here: [https://www.home-assistant.io/docs/z-wave/entities/](https://www.home-assistant.io/docs/z-wave/entities/).
 
-## Fantem (Oomi) Unknown: type=0002, id=0070
+### Fantem (Oomi) Unknown: type=0002, id=0070
 I have a door / window sensor from Fantem, which is not yet listed with configuration files on the OpenZwave project page. 
 
 Anywhow, this is the same device as the Aeotec Zw112. So you could just link this configuration file to that device;
@@ -765,35 +702,21 @@ sudo mv zwcfg_0xac103ded.xml zwcfg_0xac103ded.backup
 sudo systemctl start home-assistant@homeassistant
 ```
 
-Go to Configuration > Devices and delete all the unknown entities. Restart `sudo systemctl restart home-assistant@homeassistant`. 
+Go to <kbd>Configuration</kbd>, <kbd>Devices</kbd> and delete all the unknown entities. Restart `sudo systemctl restart home-assistant@homeassistant`. 
 
-Go to Configuration > Z-Wave and `ADD NODE SECURE` and follow the inclusion settings for the device from the manual. Now it should show up as the ZW112 device. 
+Go to <kbd>Configuration</kbd>, <kbd>Z-Wave</kbd> and <kbd>ADD NODE SECURE</kbd> and follow the inclusion settings for the device from the manual. Now it should show up as the ZW112 device. 
 
 Anyhow, I ended up following this article upgrading the firmware of the Fantem (Oomi) sensor, as it's the same device: [https://aeotec.freshdesk.com/support/solutions/articles/6000228743-how-to-update-door-window-sensor-6-z-wave-firmware-](https://aeotec.freshdesk.com/support/solutions/articles/6000228743-how-to-update-door-window-sensor-6-z-wave-firmware-). It now shows up as AEON Labs ZW112 Door Window Sensor 6.
 
-Go to Configuration, Z-Wave, selec AEON Labs ZW112 Door Window Sensor 6 (Node:2 Complete) and scroll down to Node Configuration Options. Set 121: Report Type to Send configuration parameter to Sensor Binary Report. 
+Go to <kbd>Configuration</kbd>, <kbd>Z-Wave</kbd>, selec <kbd>AEON Labs ZW112 Door Window Sensor 6 (Node:2 Complete)</kbd> and scroll down to <kbd>Node Configuration Options</kbd>. Set <kbd>121: Report Type</kbd> to <kbd>Send configuration parameter</kbd> to <kbd>Sensor Binary Report</kbd>. 
 
 ## Enable Multi-factor Authentication Modules
 Go to your profile by clicking your name down to the left.
 
 Under `Multi-factor Authentication Modules`, click ENABLE on `totp`. Download Google Authenticator from your App Store and scan the code. For more information, go to [https://www.home-assistant.io/docs/authentication/multi-factor-auth/](https://www.home-assistant.io/docs/authentication/multi-factor-auth/).
 
-### Home Assistant Companion
+## Home Assistant Companion
 Install Home Assistant Companion from your App Store, but only do it after you have enabled Multi-factor. Do not log in and use it before enabling multi-factor authentication, because you will be unable to log on in without destroying your entities (because you are unable to connect, because you have not used Google Authenticator under that process).
-
-## Remote access with TLS/SSL via Let's Encrypt
-Follow this excellent guide over here [https://www.home-assistant.io/docs/ecosystem/certificates/lets_encrypt/](https://www.home-assistant.io/docs/ecosystem/certificates/lets_encrypt/)
-
-You have to add the user `homeassistant` to the `etc/sudoers` file, so it can run the `certbot-auto` with nopassword.
-
-Adding the following line to the `etc/sudoers` at the bottom with `sudo visudo`:
-```bash
-assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo visudo
-(...)
-homeassistant ALL=(ALL) NOPASSWD:SETENV: /home/homeassistant/certbot/certbot-auto
-```
-In this way you, only allow the user/systemuser that is running the homeassistant process (`hass`) only to run the cerbot for generating and renewing the certificate. This should be more secure in case of a security breach within the process `hass`.
-
 
 ## Change icons
 Change your icons by using `mdi:icon` - look at this list for reference: [https://cdn.materialdesignicons.com/3.2.89/](https://cdn.materialdesignicons.com/3.2.89/)
@@ -864,6 +787,8 @@ homeassistant@linuxcbabe:/home/assistant$ source /srv/homeassistant/bin/activate
 ```
 
 ## Camera
+I have a Unifi NVR on my network. This i s how  I integrated it.
+
 Stop Home Assistant:
 
 ```bash
@@ -873,9 +798,15 @@ assistant@linuxbabe:/srv/homeassistant$ sudo -u homeassistant -H -s
 [sudo] password for assistant: 
 homeassistant@linuxbabe:/srv/homeassistant$ source bin/activate
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ 
+```
+Is  it running?
+```bash
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl | grep home
   home-assistant@homeassistant.service                                                               loaded active running   Home Assistant                                                               
-  system-home\x2dassistant.slice                                                                     loaded active active    system-home\x2dassistant.slice                       
+  system-home\x2dassistant.slice                                                                     loaded active active    system-home\x2dassistant.slice  
+```
+Stop it:
+```bash                     
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl status home-assistant@homeassistant
 ● home-assistant@homeassistant.service - Home Assistant
    Loaded: loaded (/etc/systemd/system/home-assistant@homeassistant.service; enabled; vendor preset: enabled)
@@ -892,8 +823,15 @@ Password:
 ==== AUTHENTICATION COMPLETE ===
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$
 ```
+* Follow this guide [https://www.home-assistant.io/integrations/uvc/](https://www.home-assistant.io/integrations/uvc/)
 
-Follow this guide [https://www.home-assistant.io/integrations/uvc/](https://www.home-assistant.io/integrations/uvc/);
+Install `ffmpeg`:
+```bash
+(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ exit
+assistant@linuxbabe:/srv/homeassistant$  sudo apt-get install ffmpeg
+```
+
+This is what I ended up with in my `configuration.yaml` file:
 ```bash
 
 # UniFi Network Video Recorder
@@ -905,12 +843,6 @@ camera:
     password: !secret password_to_camera
 ```
 
-
-Install `ffmpeg`:
-```bash
-(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ exit
-assistant@linuxbabe:/srv/homeassistant$  sudo apt-get install ffmpeg
-```
 Start Home Assistant:
 ```bash
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ sudo -u homeassistant -H -s
@@ -924,132 +856,54 @@ assistant@linuxbabe:/srv/homeassistant$ sudo journalctl -f -u home-assistant@hom
 ```
 
 ## Person tracker
-
 Configuration > Customization
 
  entity_picture: URL
 
-## Fault finding
-### ModuleNotFoundError: No module named 'apt_pkg'
-```bash
-assistant@linuxbabe:~$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-Traceback (most recent call last):
-  File "/usr/bin/add-apt-repository", line 11, in <module>
-    from softwareproperties.SoftwareProperties import SoftwareProperties, shortcut_handler
-  File "/usr/lib/python3/dist-packages/softwareproperties/SoftwareProperties.py", line 28, in <module>
-    import apt_pkg
-ModuleNotFoundError: No module named 'apt_pkg'
-```
-```bash
-assistant@linuxbabe:~$ ls -l /usr/lib/python3/dist-packages/apt_pkg*
--rw-r--r-- 1 root root 346784 Jan 24  2020 /usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so
--rw-r--r-- 1 root root   8900 Jan 24  2020 /usr/lib/python3/dist-packages/apt_pkg.pyi
-```
-
-
-```bash
-assistant@linuxbabe:~$ sudo update-alternatives --config python3
-There are 2 choices for the alternative python3 (providing /usr/bin/python3).
-
-  Selection    Path                Priority   Status
-------------------------------------------------------------
-  0            /usr/bin/python3.7   2         auto mode
-  1            /usr/bin/python3.6   1         manual mode
-* 2            /usr/bin/python3.7   2         manual mode
-
-Press <enter> to keep the current choice[*], or type selection number:  <enter> 
-update-alternatives: warning: forcing reinstallation of alternative /usr/bin/python3.7 because link group python3 is broken
-```
-```bash
-assistant@linuxbabe:~$ sudo apt remove python3.6*
-```
-sudo apt install python3-apt
-sudo apt install software-properties-common
-```bash
-assistant@linuxbabe:~$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-Hit:1 http://no.archive.ubuntu.com/ubuntu bionic InRelease
-Hit:2 http://no.archive.ubuntu.com/ubuntu bionic-updates InRelease
-Hit:3 http://no.archive.ubuntu.com/ubuntu bionic-backports InRelease                  
-Hit:4 http://no.archive.ubuntu.com/ubuntu bionic-security InRelease                   
-Get:5 https://download.docker.com/linux/ubuntu bionic InRelease [64.4 kB]             
-Get:6 https://download.docker.com/linux/ubuntu bionic/stable amd64 Packages [12.5 kB]
-Fetched 76.9 kB in 1s (147 kB/s)      
-Reading package lists... Done
-```
+## Zigbee
 
 ### Conbee-II 
 Upgrade Conbee II:
-
 * [https://github.com/dresden-elektronik/deconz-rest-plugin/wiki/Update-deCONZ-manually#update-in-ubuntu](https://github.com/dresden-elektronik/deconz-rest-plugin/wiki/Update-deCONZ-manually#update-in-ubuntu)
 
 Download firmware:
 * [http://deconz.dresden-elektronik.de/deconz-firmware/?C=M;O=D](http://deconz.dresden-elektronik.de/deconz-firmware/?C=M;O=D)
 
-### HAP-python not found
-```bash
-assistant@linuxbabe:/home/homeassistant/.homeassistant$ tail -f home-assistant.log 
-2020-01-26 14:22:43 ERROR (SyncWorker_2) [homeassistant.util.package] Unable to install package homeassistant-pyozw==0.1.7: Command "/srv/homeassistant/bin/python3 -u -c "import setuptools, tokenize;__file__='/tmp/pip-build-v_f92wss/homeassistant-pyozw/setup.py';f=getattr(tokenize, 'open', open)(__file__);code=f.read().replace('\r\n', '\n');f.close();exec(compile(code, __file__, 'exec'))" install --record /tmp/pip-pq6berwr-record/install-record.txt --single-version-externally-managed --compile --install-headers /srv/homeassistant/include/site/python3.7/homeassistant-pyozw" failed with error code 1 in /tmp/pip-build-v_f92wss/homeassistant-pyozw/
-2020-01-26 14:22:47 ERROR (SyncWorker_1) [homeassistant.util.package] Unable to install package HAP-python==2.6.0: Command "/srv/homeassistant/bin/python3 -u -c "import setuptools, tokenize;__file__='/tmp/pip-build-3ljvhzbx/ed25519/setup.py';f=getattr(tokenize, 'open', open)(__file__);code=f.read().replace('\r\n', '\n');f.close();exec(compile(code, __file__, 'exec'))" install --record /tmp/pip-s_mwhh88-record/install-record.txt --single-version-externally-managed --compile --install-headers /srv/homeassistant/include/site/python3.7/ed25519" failed with error code 1 in /tmp/pip-build-3ljvhzbx/ed25519/
-2020-01-26 14:22:47 ERROR (MainThread) [homeassistant.components.homeassistant] Component error: zwave - Requirements for zwave not found: ['homeassistant-pyozw==0.1.7'].
-Component error: default_config - Requirements for homekit not found: ['HAP-python==2.6.0'].
-2020-01-26 14:27:14 ERROR (SyncWorker_2) [homeassistant.util.package] Unable to install package homeassistant-pyozw==0.1.7: Command "/srv/homeassistant/bin/python3 -u -c "import setuptools, tokenize;__file__='/tmp/pip-build-6yvub58z/homeassistant-pyozw/setup.py';f=getattr(tokenize, 'open', open)(__file__);code=f.read().replace('\r\n', '\n');f.close();exec(compile(code, __file__, 'exec'))" install --record /tmp/pip-ll4z1ocf-record/install-record.txt --single-version-externally-managed --compile --install-headers /srv/homeassistant/include/site/python3.7/homeassistant-pyozw" failed with error code 1 in /tmp/pip-build-6yvub58z/homeassistant-pyozw/
-2020-01-26 14:27:19 ERROR (MainThread) [homeassistant.components.homeassistant] Component error: zwave - Requirements for zwave not found: ['homeassistant-pyozw==0.1.7'].
-```
+
+deCONZ by dresden elektronik is a software that communicates with ConBee/RaspBee Zigbee gateways and exposes Zigbee devices that are connected to the gateway.
+
+### ZHA 
+There are different ways to connect your Zigbee devices to Home Assistant (Zigbee2mqtt, deCONZ, ZHA). I opted for using Zigbee Home Automation (the integrated one). 
+
+Shut the proxmox guest from proxmox. Attach the USB physically, add it to the guest and start home assistant again. My device showed up as `FT230X Basic UART (0403:6015)` in proxmox. 
 
 ```bash
-assistant@linuxbabe:/home/homeassistant/.homeassistant$ pip3 install HAP-python
-assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo apt-get install libudev-dev
+assistant@linuxbabe:~$ lsusb 
+Bus 002 Device 003: ID 0403:6015 Future Technology Devices International, Ltd Bridge(I2C/SPI/UART/FIFO)
+assistant@linuxbabe:~$ ls -alh /dev/ttyUSB0 
+crw-rw---- 1 root dialout 188, 0 Feb  4 22:39 /dev/ttyUSB0
 ```
+Following this guide [https://www.home-assistant.io/integrations/zha/](https://www.home-assistant.io/integrations/zha/)
 
-### ID Lock 150
-Nothing happens when I press UNLOCK/LOCK on my ID Lock 150. I was sure to be on the latest firmware. My ID Lock 150 is running the latest firmware version 1.5.0 ([https://idlock.no/kundesenter/idl150updater-version/](https://idlock.no/kundesenter/idl150updater-version/)).
-
-I checked the logs and I saw this;
 ```bash
-assistant@linuxbabe:/home/homeassistant/.homeassistant$ tail -f OZW_Log.txt 
-2020-01-28 22:56:35.465 Error, Node008, ERROR: Dropping command, expected response not received after 1 attempt(s)
+ZHA
+USB Device Path: /dev/ttyUSB0
+Radio Type: deconz
 ```
 
-So I am going to try to do a Z-Wave local reset, as instructed in the manual for ID Lock 150, [https://idlock.no/wp-content/uploads/2019/08/IDLock150_ZWave_UserManual_v3.02.pdf](https://idlock.no/wp-content/uploads/2019/08/IDLock150_ZWave_UserManual_v3.02.pdf) and on the home-assistant site [https://www.home-assistant.io/docs/z-wave/adding/](https://www.home-assistant.io/docs/z-wave/adding/).
+### IKEA Tradfri
+#### IKEA of Sweden TRADFRI on/off switch
+Unscrew the lock. Go to Configuration > Integrations >  and click `CONFIGURE` on your ZHA integration and then the yellow `+` sign down on the right. Click 4 times (within 5 seconds (?)) on the reset button on the on/off switch. After 15 seconds or more it will show up as a new entity.
 
-To remove ID Lock 150 from Home Assistant:
-* Go to the Z-Wave control panel in the Home Assistant frontend
-* Click the Remove Node button in the Z-Wave Network Management card - this will place the controller in exclusion mode
-* Open the door, press and hold the key-button three seconds. Use the mastercode followed by an `*`. 
-* Press `2` followed by a `*` for all settings.
-* Then press `0` to reset all settings on the Z-Wave module
-* Wait for a sound and blue led for confirmation of the setting. 
-* Run a Heal Network so all the other nodes learn about its removal
-* The device will now be removed, but that won’t show until you restart Home Assistant
-* Restart Home Assistant and wait for it to be fired all the way up
-* Do a Heal Network again, just for kicsk
-* Remove the id_lock150 entities from Entities
-* Restart Home Assistant, ID Lock 150 should be all gone.
+If you have more switches, I recommend marking them and changing the name of the switch / adding e.g. "_1" or sonething and mark the switch with a pen, so you know which ones is which.
 
-Somehow, this did a full reset on my ID Lock. I had to configure all the keys and stuffs, hinge and whatnot before I did the following:
+#### IKEA TRADFRI Remote
+This is the round one, with 5 buttons.
 
-To add ID Lock 150 to Home Assistant:
-* Go to the Z-Wave control panel in the Home Assistant frontend
-* Click the Add Node Secure button in the Z-Wave Network Management card - this will place the controller in inclusion mode
-* Open the door, press and hold the key-button three seconds. Use the mastercode followed by an `*`. 
-* Press `2` followed by a `*` for all settings.
-* Then press `5` to set the lock in inclusion mode
-* Wait for a sound and blue led for confirmation of the setting. 
-* With the device in its final location, run a Heal Network
+Open up the lid. Go to <kbd>Configuration</kbd>, <kbd>Integrations</kbd> and click ´CONDFIGURE` on your ZHA integration and then the yello `+`sign down on the right. Click 4 times within 5 seconds on the reset button on the on/off switch. After 15 seconds or more it will show up as a new entity. 
 
-And now I had two instances of the ID Lock 150 in Home Assistant. I had to follow the guide "Removing Devices" with `is_failed: true` setting: [https://www.home-assistant.io/docs/z-wave/adding/](https://www.home-assistant.io/docs/z-wave/adding/).
-
-#### ID Lock 150 configuration
-Go to Configuration > Z-Wave > Select Node `ID Lock AS 150 (Node 7: Complete)
-* Node Config Options: 3: Door Hinge Position
-* Config Value: Left Handle
-Click `SET CONFIG PARAMETER`.
-
-* Node Config Options: 4: Door Audio Volume Level
-* Config Value: No Sound
-Click `SET CONFIG PARAMETER`.
-
-
+#### IKEA bulb
+* [https://phoscon.de/en/support#faq-ikea1](https://phoscon.de/en/support#faq-ikea1)
 
 
 ## Samba share
@@ -1121,48 +975,184 @@ On MacOS, open Finder and press `command + K`. Connect to server `smb://172.16.3
 
 Now you can directly edit the `configuration.yaml` file from MacOS!
 
-## Zigbee
-
-There are different ways to connect your Zigbee devices to Home Assistant (Zigbee2mqtt, deCONZ, ZHA). I opted for using Zigbee Home Automation (the integrated one). 
-
-Shut the proxmox guest from proxmox. Attach the USB physically, add it to the guest and start home assistant again. My device showed up as `FT230X Basic UART (0403:6015)` in proxmox. 
-
+## Fault finding
+### ModuleNotFoundError: No module named 'apt_pkg'
 ```bash
-assistant@linuxbabe:~$ lsusb 
-Bus 002 Device 003: ID 0403:6015 Future Technology Devices International, Ltd Bridge(I2C/SPI/UART/FIFO)
-assistant@linuxbabe:~$ ls -alh /dev/ttyUSB0 
-crw-rw---- 1 root dialout 188, 0 Feb  4 22:39 /dev/ttyUSB0
+assistant@linuxbabe:~$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+Traceback (most recent call last):
+  File "/usr/bin/add-apt-repository", line 11, in <module>
+    from softwareproperties.SoftwareProperties import SoftwareProperties, shortcut_handler
+  File "/usr/lib/python3/dist-packages/softwareproperties/SoftwareProperties.py", line 28, in <module>
+    import apt_pkg
+ModuleNotFoundError: No module named 'apt_pkg'
 ```
-Following this guide [https://www.home-assistant.io/integrations/zha/](https://www.home-assistant.io/integrations/zha/)
-
 ```bash
-ZHA
-USB Device Path: /dev/ttyUSB0
-Radio Type: deconz
+assistant@linuxbabe:~$ ls -l /usr/lib/python3/dist-packages/apt_pkg*
+-rw-r--r-- 1 root root 346784 Jan 24  2020 /usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so
+-rw-r--r-- 1 root root   8900 Jan 24  2020 /usr/lib/python3/dist-packages/apt_pkg.pyi
 ```
 
-deCONZ by dresden elektronik is a software that communicates with ConBee/RaspBee Zigbee gateways and exposes Zigbee devices that are connected to the gateway.
 
-### IKEA Tradfri
-#### IKEA of Sweden TRADFRI on/off switch
-Unscrew the lock. Go to Configuration > Integrations >  and click `CONFIGURE` on your ZHA integration and then the yellow `+` sign down on the right. Click 4 times (within 5 seconds (?)) on the reset button on the on/off switch. After 15 seconds or more it will show up as a new entity.
+```bash
+assistant@linuxbabe:~$ sudo update-alternatives --config python3
+There are 2 choices for the alternative python3 (providing /usr/bin/python3).
 
-If you have more switches, I recommend marking them and changing the name of the switch / adding e.g. "_1" or sonething and mark the switch with a pen, so you know which ones is which.
+  Selection    Path                Priority   Status
+------------------------------------------------------------
+  0            /usr/bin/python3.7   2         auto mode
+  1            /usr/bin/python3.6   1         manual mode
+* 2            /usr/bin/python3.7   2         manual mode
 
-#### IKEA TRADFRI Remote
-This is the round one, with 5 buttons.
+Press <enter> to keep the current choice[*], or type selection number:  <enter> 
+update-alternatives: warning: forcing reinstallation of alternative /usr/bin/python3.7 because link group python3 is broken
+```
+```bash
+assistant@linuxbabe:~$ sudo apt remove python3.6*
+```
 
-Open up the lid. Go to <kbd>Configuration</kbd>, <kbd>Integrations</kbd> and click ´CONDFIGURE` on your ZHA integration and then the yello `+`sign down on the right. Click 4 times within 5 seconds on the reset button on the on/off switch. After 15 seconds or more it will show up as a new entity. 
+```bash
+sudo apt install python3-apt
+sudo apt install software-properties-common
+```
 
-#### IKEA bulb
-https://phoscon.de/en/support#faq-ikea1
+```bash
+assistant@linuxbabe:~$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+Hit:1 http://no.archive.ubuntu.com/ubuntu bionic InRelease
+Hit:2 http://no.archive.ubuntu.com/ubuntu bionic-updates InRelease
+Hit:3 http://no.archive.ubuntu.com/ubuntu bionic-backports InRelease                  
+Hit:4 http://no.archive.ubuntu.com/ubuntu bionic-security InRelease                   
+Get:5 https://download.docker.com/linux/ubuntu bionic InRelease [64.4 kB]             
+Get:6 https://download.docker.com/linux/ubuntu bionic/stable amd64 Packages [12.5 kB]
+Fetched 76.9 kB in 1s (147 kB/s)      
+Reading package lists... Done
+```
+Not quite sure if I remember what I did to fix this. I think I just started from scratch. 
 
 
-## Unknown Node 3
-How to remove unknown node
+### HAP-python not found
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ tail -f home-assistant.log 
+2020-01-26 14:22:43 ERROR (SyncWorker_2) [homeassistant.util.package] Unable to install package homeassistant-pyozw==0.1.7: Command "/srv/homeassistant/bin/python3 -u -c "import setuptools, tokenize;__file__='/tmp/pip-build-v_f92wss/homeassistant-pyozw/setup.py';f=getattr(tokenize, 'open', open)(__file__);code=f.read().replace('\r\n', '\n');f.close();exec(compile(code, __file__, 'exec'))" install --record /tmp/pip-pq6berwr-record/install-record.txt --single-version-externally-managed --compile --install-headers /srv/homeassistant/include/site/python3.7/homeassistant-pyozw" failed with error code 1 in /tmp/pip-build-v_f92wss/homeassistant-pyozw/
+2020-01-26 14:22:47 ERROR (SyncWorker_1) [homeassistant.util.package] Unable to install package HAP-python==2.6.0: Command "/srv/homeassistant/bin/python3 -u -c "import setuptools, tokenize;__file__='/tmp/pip-build-3ljvhzbx/ed25519/setup.py';f=getattr(tokenize, 'open', open)(__file__);code=f.read().replace('\r\n', '\n');f.close();exec(compile(code, __file__, 'exec'))" install --record /tmp/pip-s_mwhh88-record/install-record.txt --single-version-externally-managed --compile --install-headers /srv/homeassistant/include/site/python3.7/ed25519" failed with error code 1 in /tmp/pip-build-3ljvhzbx/ed25519/
+2020-01-26 14:22:47 ERROR (MainThread) [homeassistant.components.homeassistant] Component error: zwave - Requirements for zwave not found: ['homeassistant-pyozw==0.1.7'].
+Component error: default_config - Requirements for homekit not found: ['HAP-python==2.6.0'].
+2020-01-26 14:27:14 ERROR (SyncWorker_2) [homeassistant.util.package] Unable to install package homeassistant-pyozw==0.1.7: Command "/srv/homeassistant/bin/python3 -u -c "import setuptools, tokenize;__file__='/tmp/pip-build-6yvub58z/homeassistant-pyozw/setup.py';f=getattr(tokenize, 'open', open)(__file__);code=f.read().replace('\r\n', '\n');f.close();exec(compile(code, __file__, 'exec'))" install --record /tmp/pip-ll4z1ocf-record/install-record.txt --single-version-externally-managed --compile --install-headers /srv/homeassistant/include/site/python3.7/homeassistant-pyozw" failed with error code 1 in /tmp/pip-build-6yvub58z/homeassistant-pyozw/
+2020-01-26 14:27:19 ERROR (MainThread) [homeassistant.components.homeassistant] Component error: zwave - Requirements for zwave not found: ['homeassistant-pyozw==0.1.7'].
+```
+
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ pip3 install HAP-python
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo apt-get install libudev-dev
+```
+
+### ID Lock 150
+Nothing happens when I press UNLOCK/LOCK on my ID Lock 150. I was sure to be on the latest firmware. My ID Lock 150 is running the latest firmware version 1.5.0 ([https://idlock.no/kundesenter/idl150updater-version/](https://idlock.no/kundesenter/idl150updater-version/)).
+
+I checked the logs and I saw this;
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ tail -f OZW_Log.txt 
+2020-01-28 22:56:35.465 Error, Node008, ERROR: Dropping command, expected response not received after 1 attempt(s)
+```
+
+So I am going to try to do a Z-Wave local reset, as instructed in the manual for ID Lock 150, [https://idlock.no/wp-content/uploads/2019/08/IDLock150_ZWave_UserManual_v3.02.pdf](https://idlock.no/wp-content/uploads/2019/08/IDLock150_ZWave_UserManual_v3.02.pdf) and on the home-assistant site [https://www.home-assistant.io/docs/z-wave/adding/](https://www.home-assistant.io/docs/z-wave/adding/).
+
+To remove ID Lock 150 from Home Assistant:
+* Go to the Z-Wave control panel in the Home Assistant frontend
+* Click the Remove Node button in the Z-Wave Network Management card - this will place the controller in exclusion mode
+* Open the door, press and hold the key-button three seconds. Use the mastercode followed by an `*`. 
+* Press `2` followed by a `*` for all settings.
+* Then press `0` to reset all settings on the Z-Wave module
+* Wait for a sound and blue led for confirmation of the setting. 
+* Run a Heal Network so all the other nodes learn about its removal
+* The device will now be removed, but that won’t show until you restart Home Assistant
+* Restart Home Assistant and wait for it to be fired all the way up
+* Do a Heal Network again, just for kicsk
+* Remove the id_lock150 entities from Entities
+* Restart Home Assistant, ID Lock 150 should be all gone.
+
+Somehow, this did a full reset on my ID Lock. I had to configure all the keys and stuffs, hinge and whatnot before I did the following:
+
+To add ID Lock 150 to Home Assistant:
+* Go to the Z-Wave control panel in the Home Assistant frontend
+* Click the Add Node Secure button in the Z-Wave Network Management card - this will place the controller in inclusion mode
+* Open the door, press and hold the key-button three seconds. Use the mastercode followed by an `*`. 
+* Press `2` followed by a `*` for all settings.
+* Then press `5` to set the lock in inclusion mode
+* Wait for a sound and blue led for confirmation of the setting. 
+* With the device in its final location, run a Heal Network
+
+And now I had two instances of the ID Lock 150 in Home Assistant. I had to follow the guide "Removing Devices" with `is_failed: true` setting: [https://www.home-assistant.io/docs/z-wave/adding/](https://www.home-assistant.io/docs/z-wave/adding/).
+
 
 ## Legacy
 Older notes which I have kept. 
+
+### Remote access with TLS/SSL via Let's Encrypt
+I am not using this anymore. I am using nginx reverse proxy. 
+Follow this excellent guide over here [https://www.home-assistant.io/docs/ecosystem/certificates/lets_encrypt/](https://www.home-assistant.io/docs/ecosystem/certificates/lets_encrypt/)
+
+You have to add the user `homeassistant` to the `etc/sudoers` file, so it can run the `certbot-auto` with nopassword.
+
+Adding the following line to the `etc/sudoers` at the bottom with `sudo visudo`:
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo visudo
+(...)
+homeassistant ALL=(ALL) NOPASSWD:SETENV: /home/homeassistant/certbot/certbot-auto
+```
+In this way you, only allow the user/systemuser that is running the homeassistant process (`hass`) only to run the cerbot for generating and renewing the certificate. This should be more secure in case of a security breach within the process `hass`.
+
+### Apple Home dependencies
+Controlling Home Assistant entities from Apple Home app on your iOs. 
+Install the necessary dependencies to be able to forward entities from Home Assistant to Apple HomeKit, so they can be controlled from Apple’s Home app and Siri.
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo apt-get install libavahi-compat-libdnssd-dev
+```
+
+Add `homekit:` in `configuration.yaml`:
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo nano configuration.yaml 
+# Enable Apple Home
+homekit:
+  auto_start: false
+```
+Depending on your setup, it might be necessary to disable Auto Start for all accessories to be available for HomeKit. Only those entities that are fully set up when the HomeKit integration is started, can be added. To start HomeKit when `auto_start: false`, you can call the service `homekit.start`.
+
+If you have Z-Wave entities you want to be exposed to HomeKit, then you’ll need to disable auto start and then start it after the Z-Wave mesh is ready. This is because the Z-Wave entities won’t be fully set up until then. This can be automated using an automation. Let us edit `automations.yaml` and make Home Assistant wait 9 minutes before starting `homekit`:
+
+```bash
+assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo nano automations.yaml 
+- alias: 'Start HomeKit'
+  trigger:
+  - platform: homeassistant
+    event: start
+  action:
+  - delay: 00:09
+  - service: homekit.start
+```
+
+Restart Home Assistant and you should be able to add it as a accessory in Apple Home on your iOS device. 
+PS: Remember to properly configure your Apple TV as a hub, first. 
+
+### Restrict number of devices
+Perhaps you would not like to send everything from Home Assistant to your iOS device. Edit `configuration.yaml` and use a `filter`:
+```bash
+
+homekit:
+  auto_start: False
+  filter:
+    include_entities:
+      - binary_sensor.aeon_labs_zw100_multisensor_6_sensor
+      - sensor.aeon_labs_zw100_multisensor_6_battery_level
+      - sensor.aeon_labs_zw100_multisensor_6_relative_humidity
+      - sensor.aeon_labs_zw100_multisensor_6_temperature
+      - sensor.aeon_labs_zw100_multisensor_6_burglar
+      - sensor.fibaro_system_fgbs001_universal_binary_sensor_temperature
+      - sensor.fibaro_system_fgbs001_universal_binary_sensor_temperature_2
+      - switch.fibaro_system_fgwpe_f_wall_plug_gen5_switch
+      - lock.id_lock_as_150_locked
+      - binary_sensor.burglar_up
+
+```
 
 ### Upgrade python3.6 to python3.7
 If you are upgrading Python from another version, you'll have to re-build your virtual environment.
