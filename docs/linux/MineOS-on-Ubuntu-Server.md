@@ -226,3 +226,4 @@ Mr. Johnson
 * [https://minecraft.gamepedia.com/Server.properties](https://minecraft.gamepedia.com/Server.properties)
 * [http://minecraft.codeemo.com/mineoswiki/index.php?title=MineOS-node_(apt-get)](http://minecraft.codeemo.com/mineoswiki/index.php?title=MineOS-node_(apt-get))
 * [https://discourse.codeemo.com/t/permissions-ownership/3402/5](https://discourse.codeemo.com/t/permissions-ownership/3402/5)
+* [https://www.server-world.info/en/note?os=Ubuntu_20.04&p=dhcp&f=2](https://www.server-world.info/en/note?os=Ubuntu_20.04&p=dhcp&f=2)
