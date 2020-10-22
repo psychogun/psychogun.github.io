@@ -300,5 +300,5 @@ Mr. Johnson
 * [https://forums.freebsd.org/threads/command-for-starting-dhcp.48216/](https://forums.freebsd.org/threads/command-for-starting-dhcp.48216/)
 * [https://forums.freebsd.org/threads/cant-assign-ip-addresses-to-vlan-interfaces-in-rc-conf.66454/](https://forums.freebsd.org/threads/cant-assign-ip-addresses-to-vlan-interfaces-in-rc-conf.66454/)
 * [https://forums.freebsd.org/threads/solved-how-to-skip-wifi-bring-up-during-boot.44956/#post-250815](https://forums.freebsd.org/threads/solved-how-to-skip-wifi-bring-up-during-boot.44956/#post-250815)
-* [https://discourse.codeemo.com/t/how-to-white-list-people-for-minecraft/2754](https://discourse.codeemo.com/t/how-to-white-list-people-for-minecraft/2754
+* [https://discourse.codeemo.com/t/how-to-white-list-people-for-minecraft/2754](https://discourse.codeemo.com/t/how-to-white-list-people-for-minecraft/2754)
 * [https://minecraft.gamepedia.com/Commands/whitelist](https://minecraft.gamepedia.com/Commands/whitelist)
