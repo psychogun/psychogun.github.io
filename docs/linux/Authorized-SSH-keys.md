@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Authorized SSH Keys
-parent: linux
+parent: Linux
 nav_order: 2
 ---
 # Authorized SSH Keys
