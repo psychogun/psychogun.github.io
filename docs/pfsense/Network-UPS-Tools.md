@@ -2,7 +2,7 @@
 layout: default
 title: Network UPS Tools
 parent: pfSense
-nav_order: 2
+nav_order: 3
 ---
 # Network UPS Tools (NUT)
 {: .no_toc }
