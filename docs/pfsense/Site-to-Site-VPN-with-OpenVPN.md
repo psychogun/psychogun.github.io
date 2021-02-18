@@ -2,7 +2,7 @@
 layout: default
 title: Site-to-Site VPN with OpenVPN
 parent: pfSense
-nav_order: 3
+nav_order: 5
 ---
 # Suricata installation and configuration
 {: .no_toc }
