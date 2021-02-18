@@ -340,6 +340,39 @@ root@Mylar3:/usr/local/etc/rc.d #
 ```
 
 # Fault finding
+
+## git --unfuk
+Stop the `mylar3` service first:
+```bash
+root@Mylar3:~ # service mylar3 stop
+Stopping mylar3.
+Waiting for PIDS: 64557.
+```
+`git fetch`:
+```bash
+root@Mylar3:~ # cd /usr/local/mylar3/
+root@Mylar3:/usr/local/mylar3 # git fetch 
+From https://github.com/mylar3/mylar3
+   9a04132..91fad59  master     -> origin/master
+ * [new tag]         v0.3.4     -> v0.3.4
+ * [new tag]         v0.3.5     -> v0.3.5
+ * [new tag]         v0.3.6     -> v0.3.6
+ * [new tag]         v0.4.0     -> v0.4.0
+ * [new tag]         v0.4.1     -> v0.4.1
+ * [new tag]         v0.4.2     -> v0.4.2
+ * [new tag]         v0.4.3     -> v0.4.3
+ * [new tag]         v0.4.4     -> v0.4.4
+ * [new tag]         v0.4.5     -> v0.4.5
+ * [new tag]         v0.4.6     -> v0.4.6
+ * [new tag]         v0.4.7     -> v0.4.7
+```
+
+`git reset`:
+```bash
+root@Mylar3:/usr/local/mylar3 # git reset --hard origin/python3-dev
+HEAD is now at d1a6e42 FIX:(#505) Fixes webviewer throwing a large X on new image load (just the cover)
+```
+
 ## pip freeze
 On the jail:
 ```bash
@@ -465,7 +498,7 @@ command_args="${mylar3_dir}/Mylar.py --daemon --nolaunch --pidfile $pidfile --co
 (...)
 ```
 
-## Migrate 
+## Migrate / backup
 ### /cache
 ```bash
 root@Freenas:~ # cp -rp /mnt/TankJr/iocage/jails/oldMylar3/root/usr/local/mylar3/cache/* /mnt/TankJr/iocage/jails/newMylar3/root/usr/local/mylar3/cache/
