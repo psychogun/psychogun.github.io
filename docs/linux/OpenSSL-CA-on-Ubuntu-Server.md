@@ -2,7 +2,7 @@
 layout: default
 title: OpenSSL Certificate Authority on Ubuntu Server
 parent: Linux
-nav_order: 14
+nav_order: 16
 ---
 # OpenSSL Certificate Authority on Ubuntu Server
 {: .no_toc }
