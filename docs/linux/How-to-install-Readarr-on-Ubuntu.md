@@ -2,7 +2,7 @@
 layout: default
 title: How to install Readarr on Ubuntu
 parent: Linux
-nav_order: 12
+nav_order: 9
 ---
 # How to install Readarr on Ubuntu 
 {: .no_toc }
