@@ -2,7 +2,7 @@
 layout: default
 title: Retropie on a Raspberry Pi 3 Model B
 parent: Linux
-nav_order: 15
+nav_order: 17
 ---
 # Retropie on a Raspberry Pi 3 Model B
 {: .no_toc }
