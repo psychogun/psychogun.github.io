@@ -321,11 +321,31 @@ Add Let's Encrypt Certificate - use freedns network name
 
 
 
-
-
 igor@nginx:~$ sudo ifconfig ens19 up
 igor@nginx:~$ sudo dhclient ens19
 cmp: EOF on /tmp/tmp.30tz3S1FTt which is empty
+
+
+## Auto update container
+```bash
+igor@nginx:~$ sudo docker pull containrrr/watchtower
+Using default tag: latest
+latest: Pulling from containrrr/watchtower
+3ed6cec7d4d1: Pull complete 
+c0706b5a6b44: Pull complete 
+6eae408ad811: Pull complete 
+Digest: sha256:ff3ba4f421801c07754150aee4c03fdde26a0a9783d36021e81c7097d6842f25
+Status: Downloaded newer image for containrrr/watchtower:latest
+docker.io/containrrr/watchtower:latest
+igor@nginx:~$ 
+```
+
+Update all containers:
+```bash
+igor@nginx:~$ sudo docker run -d --restart=always --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower --stop-timeout 300s
+74d839c3459e3b2153500b2f2dcc3084caa67106a521501c600846b422b8587f
+```
+
 
 ## Fault finding
 ### Packets out of order
@@ -333,16 +353,26 @@ cmp: EOF on /tmp/tmp.30tz3S1FTt which is empty
 [8/18/2020] [9:17:51 PM] [Global   ] › ✖  error     Packets out of order. Got: 1 Expected: 0
 ```
 
-Check the IP adress of the NGINX docker you have created, and alter the following:
+Check the IP adress of the NGINX docker you have created- perhaps it has changed? GRANT ALL PRIVILEGES on the database from the new IP address:
 ```bash
+igor@nginx:/usr/local/etc/npm$ sudo mariadb 
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 529
+Server version: 10.5.6-MariaDB-1:10.5.6+maria~focal mariadb.org binary distribution
+
+Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+
 MariaDB [(none)]> GRANT ALL PRIVILEGES ON npm.* TO 'npm'@'172.17.0.3' IDENTIFIED BY 'password';
 Query OK, 0 rows affected (0.000 sec)
 ```
 
 
-Set the clock?
+### Set the clock?
 
-https://support.rackspace.com/how-to/mysql-connect-to-your-database-remotely/
+[https://support.rackspace.com/how-to/mysql-connect-to-your-database-remotely/](https://support.rackspace.com/how-to/mysql-connect-to-your-database-remotely/)
 
 
 ## Authors
@@ -365,4 +395,5 @@ Mr. Johnson
 * [https://superuser.com/questions/331720/how-do-i-set-the-priority-of-network-connections-in-ubuntu](https://superuser.com/questions/331720/how-do-i-set-the-priority-of-network-connections-in-ubuntu)
 * [https://netplan.io/examples](https://netplan.io/examples)
 * [https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04](https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04)
-* [https://www.cyberciti.biz/faq/how-to-delete-remove-user-account-in-mysql-mariadb/](https://www.cyberciti.biz/faq/how-to-delete-remove-user-account-in-mysql-mariadb/))
+* [https://www.cyberciti.biz/faq/how-to-delete-remove-user-account-in-mysql-mariadb/](https://www.cyberciti.biz/faq/how-to-delete-remove-user-account-in-mysql-mariadb/)
+* [https://containrrr.dev/watchtower/arguments/](https://containrrr.dev/watchtower/arguments/)
