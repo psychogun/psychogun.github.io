@@ -2,7 +2,7 @@
 layout: default
 title: Installation and configuration of Home Assistant
 parent: Linux
-nav_order: 8
+nav_order: 10
 ---
 
 # Installation and configuration of Home Assistant
