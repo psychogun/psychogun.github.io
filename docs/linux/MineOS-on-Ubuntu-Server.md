@@ -2,7 +2,7 @@
 layout: default
 title: How to install MineOS on Ubuntu Server
 parent: Linux
-nav_order: 12
+nav_order: 14
 ---
 # How to install MineOS  on Ubuntu Server
 {: .no_toc }
