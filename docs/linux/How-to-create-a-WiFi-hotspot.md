@@ -2,7 +2,7 @@
 layout: default
 title: How to create a WiFi hotspot
 parent: Linux
-nav_order: 6
+nav_order: 7
 ---
 
 # How to create a WiFi hotspot
