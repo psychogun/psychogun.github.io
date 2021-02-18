@@ -2,7 +2,7 @@
 layout: default
 title: Installing Kali on a Raspberry Pi 3 Model B
 parent: Linux
-nav_order: 10
+nav_order: 12
 ---
 *WORK IN PROGRESS as of 2019-09-15*
 # How to install Kali Linux on a Raspberry Pi 3 Model B
