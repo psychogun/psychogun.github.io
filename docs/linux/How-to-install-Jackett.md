@@ -2,7 +2,7 @@
 layout: default
 title: How to install Jackett
 parent: Linux
-nav_order: 7
+nav_order: 8
 ---
 # Key Management Service on Ubuntu
 {: .no_toc }
