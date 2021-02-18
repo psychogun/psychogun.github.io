@@ -2,7 +2,7 @@
 layout: default
 title: Enable monitor mode on wlan interface
 parent: Linux
-nav_order: 4
+nav_order: 5
 ---
 # How to enable monitor mode on wlan interface
 {: .no_toc }
