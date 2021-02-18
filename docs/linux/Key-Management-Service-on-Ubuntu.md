@@ -2,7 +2,7 @@
 layout: default
 title: Key Management Service on Ubuntu
 parent: Linux
-nav_order: 11
+nav_order: 13
 ---
 # Key Management Service on Ubuntu
 {: .no_toc }
