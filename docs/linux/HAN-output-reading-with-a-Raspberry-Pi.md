@@ -2,7 +2,7 @@
 layout: default
 title: HAN output reading with a Raspberry Pi
 parent: Linux
-nav_order: 5
+nav_order: 5 
 ---
 
 # How to use a Raspberry Pi to read the HAN output from your smart meter
