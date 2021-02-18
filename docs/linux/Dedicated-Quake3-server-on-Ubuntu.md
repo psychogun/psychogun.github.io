@@ -2,7 +2,7 @@
 layout: default
 title: Dedicated Quake3 servers on Ubuntu
 parent: Linux
-nav_order: 2
+nav_order: 3
 ---
 *WORK IN PROGRESS as of 2019-08-01*
 # How to set up dedicated Quake 3 Arena server(s) with different mods on Ubuntu Server 16.04
