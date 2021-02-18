@@ -66,7 +66,14 @@ The key's randomart image is:
 +----[SHA256]-----+
 ┌─[jd@asdf]─[~]
 ```
-Remember the passphrase.
+Remember the passphrase, and I suggest renaming the key pair to something which you can remember which server this pair is used for. 
+
+To generate the pair of keys using 4096 bits of encryption, do this: 
+
+```bash
+┌─[jd@asdf]─[~]
+└──╼ $ssh-keygen -b 4096
+```
 
 ## Public Key
 Navigate to System > User Management and edit the user you want to log in to pfSense with. 
@@ -84,6 +91,13 @@ Copy the output from `id_rsa.pub` under <kbd>Keys</kbd> for the user in question
 Enter passphrase for key '/home/jd/.ssh/id_rsa':
 ```
 
+Use specific private key:
+```bash
+┌─[jd@asdf]─[~]
+└──╼ $ssh -l -i /home/jd/.ssh/server-1-admin admin 192.168.234.33
+Enter passphrase for key '/home/jd/.ssh/server-1-admin:
+```
+
 ## Authors
 Mr. Johnson
 
@@ -92,3 +106,5 @@ Mr. Johnson
 * [https://askubuntu.com/questions/53553/how-do-i-retrieve-the-public-key-from-a-ssh-private-key](https://askubuntu.com/questions/53553/how-do-i-retrieve-the-public-key-from-a-ssh-private-key)
 * [https://www.howtogeek.com/424510/how-to-create-and-install-ssh-keys-from-the-linux-shell/](https://www.howtogeek.com/424510/how-to-create-and-install-ssh-keys-from-the-linux-shell/)
 * [https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-ubuntu-1604](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-ubuntu-1604)
+* [https://www.freecodecamp.org/news/the-ultimate-guide-to-ssh-setting-up-ssh-keys/](https://www.freecodecamp.org/news/the-ultimate-guide-to-ssh-setting-up-ssh-keys/)
+* [https://www.digitalocean.com/community/tutorials/ssh-essentials-working-with-ssh-servers-clients-and-keys](https://www.digitalocean.com/community/tutorials/ssh-essentials-working-with-ssh-servers-clients-and-keys)
