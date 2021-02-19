@@ -8,21 +8,28 @@ nav_order: 11
 {: .no_toc }
 This is how I installed a new instance of Zabbix on a Proxmox guest, moving from an ESXi host and along transfer the new database to the newly created guest.
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 
 
-## Prerequisites
+### Prerequisites
 * Ubuntu 18.04
 * MySQL
 * NGINX
 
-## Install qemu-guest-agent
+### Install qemu-guest-agent
 The qemu-guest-agent is a helper daemon, which is installed in the guest. It is used to exchange information between the host and guest, and to execute command in the guest.
 
 In Proxmox VE, the qemu-guest-agent is used for mainly two things:
@@ -36,14 +43,14 @@ administrator@zabbix:~$ sudo shutdown now
 ```
 In Proxmox, go to Options and Enable by selecting `Use QEMU Guest Agent`. Start your VM again. 
 
-## tzdata
+### tzdata
 Ensure that your timezone is correct.
 ```bash
 merovingian@zabbix:~$ sudo dpkg-reconfigure tzdata
 ```
 
 
-## Perform backup
+### Perform backup
 Outline;
 Server upgrade process
 
@@ -288,6 +295,8 @@ MariaDB [(none)]> SELECT table_schema "databases name", sum(data_length + index_
 MariaDB [(none)]> 
 ```
 
+---
+
 ## FreeNAS 
 ### Dependencies
 merovingian@zabbix:/usr/bin$ sudo apt-get install snmp snmp-mibs-downloader
@@ -325,7 +334,7 @@ Restart the Zabbix server.
 
 snmpwalk -v3 -l authPriv -u rtyuih675 -a SHA -A "askdjhfz67z6asd7fgoya" -x DES -X "oisduhx7986x8ygai" 192.168.5.13:161
 
-
+---
 
 ## Fault finding
 
@@ -444,8 +453,12 @@ Aborted
 
 bzip2 -d dbdump.bz2 
 
+---
+
 ## Authors
 Mrs. Johnson
+
+---
 
 ## Acknowledgments
 * [https://www.zabbix.com/documentation/current/manual/config/items/itemupdate](https://www.zabbix.com/documentation/current/manual/config/items/itemupdate)
