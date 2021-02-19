@@ -9,10 +9,17 @@ nav_order: 19
 {: .no_toc }
 This are useful commands I have found managing FreeNAS.
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 
 ## Find
@@ -22,18 +29,26 @@ This are useful commands I have found managing FreeNAS.
 | `find /mnt/directory1/ | grep Pool | xargs -I@ mv @ mnt/directory1/moved/`  | Find files located in `/mnt/directory1` named `"Pool"` and move those files to `/mnt/directory1/moved`  |
 | `find . -type f -size -3M -delete` | Find and delete files located in current directory that is under 3MB in size |
 
+---
+
 ## Replacement
 Replace volume name, v, with a 0.
 ```bash
 #!/bin/sh
 for f in *v*; do mv -v "$f" "$(echo "$f" | tr 'v' '0')"; done
 ```
+
+---
+
 ## 2000AD Prog replacement
 Replace `2000AD Prog` with `2000 AD`.
 ```bash
 #!/bin/sh
 for f in *AD\ Prog*; do mv -v -- "$f" "${f%%AD Prog*} AD ${f#*AD Prog }"; done
 ```
+
+---
+
 ## Move file into folder
 Create a folder for each file based on the first part of the filename of a .pdf before the hyphen, and move the file in to the respective named folder.
 ```bash
@@ -47,6 +62,8 @@ Execute by placing the `script.sh` file inside unsorted magazine folder, then do
 
 Then move these folders into your Magazine folder, and hit Library Scan.
 
+---
+
 ## Is it a real hyphen?
 Check if the - (above) is really a real hyphen.
 ```bash
@@ -55,8 +72,11 @@ root@LazyLibrarian:/mnt/LazyLibrarian # printf '–' | od -tx1 -An
 ```
 [http://www.ltg.ed.ac.uk/~richard/utf-8.cgi?input=–&mode=char](http://www.ltg.ed.ac.uk/~richard/utf-8.cgi?input=–&mode=char)
 
+---
+
 ## Move a folder
 
+---
 
 ## Authors
 Mr. Johnson
