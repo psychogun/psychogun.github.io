@@ -4,17 +4,24 @@ title: Installing Kali on a Raspberry Pi 3 Model B
 parent: Linux
 nav_order: 12
 ---
-*WORK IN PROGRESS as of 2019-09-15*
+
 # How to install Kali Linux on a Raspberry Pi 3 Model B
 {: .no_toc }
 This is how I installed Kali Linux on an ARM device, namely the Raspberry Pi 3 Model B. 
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 Download Kali Linux for ARM architecture:
 [https://www.offensive-security.com/kali-linux-arm-images/](https://www.offensive-security.com/kali-linux-arm-images/)
@@ -33,6 +40,8 @@ Insert your SD card into your Raspberry Pi and hook it up to a monitor + keyboar
 
 ### Prerequsites
 * Raspberry Pi 3 Model B
+
+---
 
 ## Emergency mode
 If you happen to enter emergency mode when booting, you should modify `fstab`, after you enter the default root password `toor`.
@@ -65,6 +74,8 @@ If /etc/fstab doesn't get changed back to normal, then the system will always mo
 
 Reboot.
 
+---
+
 ## Change SSH host keys
 ```bash
 root@kali:~ rm /etc/ssh/ssh_host_*
@@ -72,10 +83,14 @@ root@kali:~ dpkg-reconfigure openssh-server
 root@kali:~ service ssh restart
 ```
 
+---
+
 ## Change root password
 ```bash
 root@kali:~ passwd root
 ```
+
+---
 
 ## Expand installation 
 All the available space on your SD card is not in use- view the disk space by issuing `df -h`:
@@ -123,6 +138,9 @@ tmpfs           464M     0  464M   0% /sys/fs/cgroup
 tmpfs            93M  4.0K   93M   1% /run/user/113
 tmpfs            93M     0   93M   0% /run/user/0
 ```
+
+---
+
 ## Update and upgrade
 Update:
 ```bash
@@ -137,6 +155,8 @@ Do a dist-upgrade:
 root@kali:~# apt-get dist-upgrade
 ```
 And use `apt autoremove` to remove packages that are no longer required.
+
+---
 
 ## WiFi
 Use `iwlist` to scan for wireless networks:
@@ -176,6 +196,8 @@ wlan0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 ```
 
+---
+
 ## Errors
 ### E: Sub-process /usr/bin/dpkg returned an error code (1)
 Try to reconfigure the package database. Probably the database got corrupted while installing a package. Reconfiguring often fixes the problem:
@@ -188,6 +210,13 @@ root@kali:~# apt clean
 root@kali:~# apt --fix-broken install
 root@kali:~# apt-get upgrade
 ```
+
+---
+
+## Authors
+Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://raspberrypi.stackexchange.com/questions/64095/unable-to-run-fsck-on-dev-mmcblk0p2/64097#64097](https://raspberrypi.stackexchange.com/questions/64095/unable-to-run-fsck-on-dev-mmcblk0p2/64097#64097)
