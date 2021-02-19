@@ -8,16 +8,23 @@ nav_order: 9
 {: .no_toc }
 Readarrrrrrrrrrrrr. 
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 
 
-## Prerequisites
+### Prerequisites
 * Proxmox 6.1
 * Ubuntu 20.04
 * [https://hub.docker.com/r/hotio/readarr](https://hub.docker.com/r/hotio/readarr)
@@ -82,6 +89,8 @@ read@arr:~$ sudo apt install qemu-guest-agent
 ```
 Shut down the VM. Enable Qemu Guest Agent in Proxmox and start the VM. 
 
+---
+
 ## Portainer
 ### Prerequisites
 We install the necessary packages to be able to install Docker:
@@ -141,6 +150,7 @@ docker.io/containrrr/watchtower:latest
 read@arr:~$ sudo docker run -d --restart=always --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower readarr watchtower --stop-timeout 300s
 ```
 
+---
 
 ## SMB Shares
 ### Create mount point
@@ -249,6 +259,8 @@ sudo mkdir Torrents
 sudo mount -t cifs -o username=rradaer,uid=1000,gid=1000 //192.168.5.13/Torrents /mnt/SMB/Torrents
 Password for rradaer@//192.168.5.13/Torrents: 
 
+---
+
 ## Deluge
 ### Custom SSL 
 View your custom certificate authority with `more`.
@@ -274,12 +286,12 @@ Local Path
 /mnt/Torrents/Finished/
 /mnt/SMB/Torrents/Finished/
 
-
-
+---
 
 ## Authors
 Mr. Johnson
 
+---
 
 ## Acknowledgments 
 * [https://github.com/Readarr/Readarr/wiki/Docker](https://github.com/Readarr/Readarr/wiki/Docker)
