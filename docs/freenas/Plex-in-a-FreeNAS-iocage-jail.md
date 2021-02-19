@@ -9,20 +9,27 @@ nav_order: 12
 {: .no_toc }
 This is how i installed a client-server media player system and software suite on FreeNAS in a standalone iocage jail. 
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 
 ## Getting started
 I wrote this down because I moved from a warden jail on FreeNAS to an iocage jail due to an update broke my Plex on warden. Some of these settings might not apply for your installation. 
 
-## Prerequisites
+### Prerequisites
 * FreeNAS 11.2
 * Knowledge of SSH and stuff
 
-## Create a jail
+### Create a jail
 Go to your FreeNAS. Select Jails. Click ADD.
 
 Jail Name: Plex
@@ -43,17 +50,18 @@ Confirm these settings.
 
 Click SUBMIT.
 
-## Configure correct interface 
+
+### Configure correct interface 
 Go to your FreeNAS. Select Jails. Select 'Plex', click the three dots, and then click Edit.
 Go to Network properties.
 On Interfaces, type vnet0:bridge1. 
 
 Click Save. 
 
-## Start the jail
+### Start the jail
 Go to your FreeNAS. Select Jails. Select 'Plex', click the three dots, and then click Start. 
 
-## Log in to your jail
+### Log in to your jail
 ```bash
 hubbard:~ jordan$ ssh -l grimes 192.168.200.177
 grimes@freenas:~ # jls
@@ -62,7 +70,7 @@ grimes@freenas:~ # jls
 grimes@freenas:~ # iocage console Plex
 ```
 
-## Update & upgrade your jail
+### Update & upgrade your jail
 ```bash
 root@Plex:~ # env ASSUME_ALWAYS_YES=YES pkg bootstrap
 Bootstrapping pkg from pkg+http://pkg.FreeBSD.org/FreeBSD:11:amd64/quarterly, please wait...
@@ -88,6 +96,8 @@ Processing candidates (1 candidates): 100%
 Checking integrity... done (0 conflicting)
 Your packages are up to date.
 ```
+
+---
 
 ## Install plexmediaserver-plexpass (+ nano)
 ```bash
@@ -189,6 +199,8 @@ new features may not function without an active PlexPass account.
 root@Plex:~ # exit
 ```
 
+---
+
 ## Mount drives
 Go to your FreeNAS. Select Jails. Select 'Plex', click the three dots, and then click Stop.
 Select the three dots again and click Mount points.
@@ -211,6 +223,8 @@ v Read only
 Click Save
 
 Go to your FreeNAS. Select Jails. Select 'Plex', click the three dots, and then click Start.
+
+---
 
 ## Groups and rights
 Go to your FreeNAS. Select Accounts > Groups. Click Add. I want to segregate permissions, so I am creating read only groups for the shares. 
@@ -259,21 +273,15 @@ plex audio_ro tv_shows_ro movies_ro
 ```
 Now, our user `plex` belongs to groups that has read-only access on the different datasets, through Windows ACL. 
 
+---
+
 ## Backup your Preferences.xml file
 ```bash
 root@Plex:~# cd /usr/local/plexdata-plexpass/Plex\ Media\ Server/
 root@Plex:/usr/local/plexdata-plexpass/Plex Media Server # mv Preferences.xml Preferences.xml.bak
 ```
-## Copy Preferences.xml from the warden jail
-```bash
-root@Plex:~# exit
-grimes@freenas:/ # cp /mnt/williams/jails/Plex/usr/local/plexdata-plexpass/Plex\ Media\ Server/Preferences.xml /mnt/williams/iocage/jails/Plex/root/usr/local/plexdata-plexpass/Plex\ Media\ Server/Preferences.xml
-grimes@freenas:~ # iocage console Plex
-root@Plex:/ # cd /usr/local/plexdata-plexpass/Plex\ Media\ Server/
-root@Plex:/usr/local/plexdata-plexpass/Plex Media Server # chown plex Preferences.xml
-```
-(I did not bother copying over old cache and stuff).
 
+---
 
 ## Start plexmediaserver_plexpass on boot
 ```bash
@@ -281,11 +289,15 @@ root@Plex:~ # sysrc plexmediaserver_plexpass_enable=YES
 plexmediaserver_plexpass_enable:  -> YES
 ```
 
+---
+
 ## Manual start of plexmediaserver_plexpass
 ```bash
 root@Plex:/ # service plexmediaserver_plexpass start
 Starting plexmediaserver_plexpass.
 ```
+
+---
 
 ## Configure plex
 ```bash
@@ -311,9 +323,11 @@ root@Plex:~ #
 Use a webbrowser and go to https://192.168.200.180:32400. There I only had to point the different libraries to my three folders in `/media`. 
 PS: Remember to update your DHCP settings / and NAT settings for the new jail - or just shut down the warden jail and configure the iocage jail to be the same IP.  
 
+---
+
 ## Automatic update 
 
-If you dont want to have to bother executing the upgrades, you can add a crontab entry in the jail to do it for you:
+If you dont want to have to bother executing the upgrades manually, you can add a crontab entry in the jail to do it for you:
 ```bash
 0 4 * * * env ASSUME_ALWAYS_YES=YES pkg upgrade plexmediaserver >> ~/plexupgrade.log
 ```
@@ -322,6 +336,8 @@ If you dont want to have to bother executing the upgrades, you can add a crontab
 0 4 * * * env ASSUME_ALWAYS_YES=YES pkg upgrade plexmediaserver-plexpass >> ~/plexupgrade.log
 ```
 
+---
+
 ## Manual update
 ```bash
 root@Plex:/ # service plexmediaserver_plexpass stop
@@ -329,6 +345,8 @@ root@Plex:/ # pkg update && pkg upgrade
 root@Plex:/ # pkg upgrade multimedia/plexmediaserver-plexpass
 root@Plex:/ # service plexmediaserver_plexpass start
 ```
+
+---
 
 ## Troubleshooting
 ### Is it running?
@@ -415,8 +433,25 @@ root@Plex:/usr/local/plexdata-plexpass/Plex Media Server/Logs # more /usr/local/
 ```bash
 root@Plex:/usr/local/plexdata-plexpass/Plex Media Server/Logs # sh -x /usr/local/etc/rc.d/plexmediaserver_plexpass start
 ```
+
+## Fault finding
+
+### Copy Preferences.xml from the warden jail
+```bash
+root@Plex:~# exit
+grimes@freenas:/ # cp /mnt/williams/jails/Plex/usr/local/plexdata-plexpass/Plex\ Media\ Server/Preferences.xml /mnt/williams/iocage/jails/Plex/root/usr/local/plexdata-plexpass/Plex\ Media\ Server/Preferences.xml
+grimes@freenas:~ # iocage console Plex
+root@Plex:/ # cd /usr/local/plexdata-plexpass/Plex\ Media\ Server/
+root@Plex:/usr/local/plexdata-plexpass/Plex Media Server # chown plex Preferences.xml
+```
+(I did not bother copying over old cache and stuff).
+
+---
+
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://www.ixsystems.com/community/threads/how-to-update-freenas-11-2-plex-server-from-1-13-2-5154-to-1-13-5-5291.69059/page-2](https://www.ixsystems.com/community/threads/how-to-update-freenas-11-2-plex-server-from-1-13-2-5154-to-1-13-5-5291.69059/page-2)
