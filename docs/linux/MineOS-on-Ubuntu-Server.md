@@ -10,16 +10,23 @@ This is how I created a MineOS server for multiplaying on my network. Mostly bas
 
 * Your webui for managing your servers will ultimately be on https://xxx.yyy.zzz.aaa:8443
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 
 
-## Prerequisites
+### Prerequisites
 * Proxmox 6.1
 * Ubuntu 20.04
 * Mojang 16.1.3
@@ -83,6 +90,8 @@ per@sson:~$ sudo apt upgrade
 per@sson:~$ sudo apt install qemu-guest-agent
 ```
 Shut down the VM. Enable Qemu Guest Agent in Proxmox and start the VM. 
+
+---
 
 ## Installation of MineOS
 Does the installation come with `java`?
@@ -164,6 +173,7 @@ When creating minecraft servers, it is required to use an unprivileged user to c
 
 In your browser, visit the location: https://xxx.yyy.zzz.aaa:8443
 
+---
 
 ## Creating servers
 Servers may only be created by unprivileged users, or in other words: not root. Be sure to log in as any unprivileged user to create any servers you wish and leverage group membership to share control of servers with others!
@@ -207,6 +217,7 @@ Go to Dashboard, select your newly created server.
 
 Accept EULA, click Start.
 
+---
 
 ## Server settings
 ### Server.properties
@@ -218,9 +229,12 @@ Go to LOGGING > logs/latest.log and select your server.
 
 Add users by typing next to the `>`: whitelist add [username]
 
+---
 
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://minecraft.gamepedia.com/Server.properties](https://minecraft.gamepedia.com/Server.properties)
