@@ -8,15 +8,20 @@ nav_order: 3
 {: .no_toc }
 This is how I used Network UPS Tools (NUT) for pfSense through USB and safely shut down my firewall and remotely told my <kbd>Proxmox</kbd> host to also shut down.
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
----
+</details>
+
+{: .no_toc .text-delta }
+
 ## Getting started
 
-## Prerequisites
+### Prerequisites
 * pfSense 2.4.5-RELEASE-p3 (amd64)
 * nut 2.7.4_7
 * Proxmox 6.7
@@ -27,13 +32,14 @@ Using a powermeter I found out that the PowerWalker VI 850 LCD power consumption
 
 pfSense 7,5W
 
-
+---
 
 ## Install NUT
 Navigate to <kbd>System</kbd> `>` <kbd>Packages</kbd> and select <kbd>Available Packages</kbd>, scroll down to the <kbd>NUT</kbd> package and click <kbd>Install</kbd>.
 
 In order to make it correctly pick up the usb connection, you will have to reboot the firewall. Go to <kbd>Diagnostics</kbd> and hit <kbd>Reboot</kbd>.
 
+---
 
 ## Services / UPS / Settings
 
@@ -68,6 +74,8 @@ password=238ruhfE2849dfasdfaad
 upsmon master
 ```
 
+---
+
 ## Fault finding
 ### upscmd
 SSH in to your pfsense firewall, open up Shell (8):
@@ -81,9 +89,12 @@ Use a user which has sufficient permissions, `instcmds=all`, to send a command t
 upscmd -u admin -p 437219huadshfe04 PowerWalker_VI_850_LCD <command>
 ```
 
+---
 
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://www.howtoforge.com/monitoring-ups-power-status-with-nut-on-opensuse10.3](https://www.howtoforge.com/monitoring-ups-power-status-with-nut-on-opensuse10.3)
