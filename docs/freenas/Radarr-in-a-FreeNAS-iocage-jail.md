@@ -9,10 +9,17 @@ nav_order: 13
 {: .no_toc }
 This is how i installed a Radarr, an independent fork of Sonarr reworked for automatically downloading movies via Usenet and BitTorrent, on FreeNAS in a iocage jail.
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 
 ## Getting started
@@ -22,7 +29,7 @@ These instructions will tell you how to add storage to an iocage jail, install a
 * Knowledge of SSH and how to navigate to your jail in FreeNAS
 * FreeNAS 11.2 and knowledge of how to create a jail with shares and knowledge of UNIX folder and files permissions
 
-## Udate and upgrade
+### Udate and upgrade
 Update and upgrade your iocage jail first:
 ```tcsh
 root@Radarr:/ # pkg upgrade && pkg update
@@ -32,6 +39,8 @@ Update and upgrade your iocage jail first:
 ```tcsh
 root@Radarr:/ # pkg upgrade && pkg update
 ```
+
+---
 
 ## Install radarr
 ```bash
@@ -143,6 +152,8 @@ Set `radarr_enable="YES"` in `/etc/rc.conf`, then start the Radarr service by ex
 root@Radarr:/usr/local/etc/rc.d # service radarr start
 ```
 
+---
+
 ## Configuring folders
 Stop the Radarr jail. 
 
@@ -182,6 +193,7 @@ root@Radarr:/mnt # groups radarr
 radarr movies deluge
 ```
 
+---
 
 ## User configuration
 ```bash
@@ -207,8 +219,12 @@ root@Radarr:~ # find / -user 352 -exec chown -h radarr {} \;
 root@Radarr:~ # find / -group 352 -exec chgrp -h radarr {} \;
 ```
 
+---
+
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://github.com/Radarr/Radarr/wiki/Installation#freebsd-jail](https://github.com/Radarr/Radarr/wiki/Installation#freebsd-jail).
