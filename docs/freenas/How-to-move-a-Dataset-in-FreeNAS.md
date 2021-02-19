@@ -11,10 +11,17 @@ I started to get those pesky e-mails, saying that 'Space usage for pool "Detaine
 
 So I wanted to move a Dataset, "Audio", to another Pool to free up some space. This is how I did it. 
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 ## Getting started
 A pool containing the original dataset Audio named Detainer and a new pool named Destroyer.
@@ -24,6 +31,7 @@ A pool containing the original dataset Audio named Detainer and a new pool named
 * 2 pools 
 * Understanding replication/snapshot tasks
 
+---
 
 ## Periodic Snapshot Tasks
 FreeNAS gui > Periodic Snapshot Tasks > ADD.
@@ -37,6 +45,8 @@ Day of week: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
 v Enabled
 
 Press SAVE.
+
+---
 
 ## Create a Dataset
 FreeNAS gui > Storage > Pools > Destroyer and on the three little dots to the far right, click Add Dataset:
@@ -55,6 +65,8 @@ Group: audio
 Apply Permissions recursively is not neseccary, as we do not have anything there yet. 
 
 Press SAVE.
+
+---
 
 ## Replication
 FreeNAS gui > Replication Tasks > ADD.
@@ -94,8 +106,12 @@ FreeNAS gui > Jails > select Lidarr and press STOP.
 #### Plex
 FreeNAS gui > Jails > select Plex and press STOP. 
 
+---
+
 ## Stop replication
 FreeNAS gui > Tasks > Replication Tasks > click the three little dots on the right of our task, select Edit and disable it by removing the checkmark to the left of 'Enabled'.
+
+---
 
 ## Remount
 FreeNAS gui > Jails > Lidarr > click the three little dots on the right of Lidarr, select Mount Points. Delete the mount point by clicking the three dots and select Delete. Check 'Confirm' and press 'DELETE MOUNT POINT'.
@@ -105,6 +121,8 @@ Source : /mnt/Destroyer/Audio
 Destination : /mnt/Audio
 
 Do the same for any other jails using the original Mount Point.
+
+---
 
 ## Start all services
 #### Plex
@@ -116,6 +134,8 @@ FreeNAS gui > Jails > select Lidarr and press START.
 Select the three little dots on the far right of your original Dataset (Detainer/Audio) and click 'Edit permissions'. Take a note of what type of ACL it is using, who is the owner of the folder and which group is the owner of the folder.
 
 And with a Windows computer, mount the share (if the dataset is used by SMB) and take a note of all the permissions under the Security tab under mount Properties.
+
+---
 
 ## Sharing and Services
 FreeNAS gui > Services > select the slider to the right of 'SMB' and stop the service. 
@@ -131,9 +151,13 @@ Click SAVE.
 
 FreeNAS gui > Services > select the slider to the right of 'SMB' and start the service. 
 
+---
+
 ## Delete Dataset
 To finally free up space, delete the dataset. 
 FreeNAS gui > Storage > Pools > select Detainer/Audio and click the three little dots to the right and press 'Delete Dataset'.
+
+---
 
 ## Periodic Snapshot Tasks
 Now we want to be sure to enable a periodic snapshot task to our new Audio dataset on the pool 'Destroyer'.
@@ -150,10 +174,12 @@ v Enabled
 
 Press SAVE.
 
+---
+
 ## Replication Tasks
 Edit our original replication task.
 
-
+---
 
 ## Periodic Snapshot Tasks
 After you have shut down all the services that might write to the original Dataset, go in FreeNAS gui > Tasks > Periodic Snapshot Tasks. 
@@ -165,10 +191,12 @@ You should now see under Replications Tasks that the task is changed from 'Up to
 Refresh that page until the Status has changed to 'Up to date'. 
 Confirm by checking that the Used space is the same. 
 
+---
+
 ## Authors
 Mr. Johnson
 
-## Acknowledgments
+
 
 
 
