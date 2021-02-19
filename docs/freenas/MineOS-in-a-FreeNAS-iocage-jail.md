@@ -9,12 +9,18 @@ nav_order: 9
 {: .no_toc }
 From 
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
----
+</details>
 
+{: .no_toc .text-delta }
+
+---
 ## Getting started
 Go to your FreeNAS. Select Jails > and click Add.
 Jail Name: Lidarr
@@ -158,6 +164,8 @@ Accept the Minecraft end user license agreement (EULA).
 Start the server.
 To download the Minecraft server binaries:
 
+---
+
 ## Configure
 ### Spigot
 Press "Download latest BuildTools.jar"
@@ -232,6 +240,8 @@ Issue command for starting DHCP on the VLAN 120 interface:
 root@MineOS:~ # dhclient epair0b.120
 ```
 
+---
+
 ## Create VLAN
 ### ADD VLAN
 FreeNAS gui > Network > VLANs. 
@@ -277,6 +287,7 @@ vnet0:bridge120
 root@freenas:~ # iocage set defaultrouter=192.168.120.1 MineOS
 ```
 
+---
 
 ## Fault finding
 ### Update / reset MineOS webgui
@@ -289,9 +300,12 @@ root@MineOS:/usr/local/games/minecraft # rm -rf node_modules
 root@MineOS:/usr/local/games/minecraft # echo "CXX=c++ npm install" | sh
 ```
 
+---
+
 ## Authors
 Mr. Johnson
 
+---
 
 ## Acknowledgements
 * [https://devpro.media/minecraft-server-freenas/#preparing-the-jail](https://devpro.media/minecraft-server-freenas/#preparing-the-jail)
