@@ -8,17 +8,20 @@ nav_order: 1
 {: .no_toc }
 This is how I generated a private/public key pair for securing the SSH logins for the user `admin` on my pfSense.
 
-## Table of contents
 <details open markdown="block">
   <summary>
   Table of contents
   </summary>
-  {: .no_toc .text-delta }
+  {: .text-delta }
 1. TOC
 {:toc}
 </details>
 
+{: .no_toc .text-delta }
 
+1. TOC
+{:toc}
+---
 ## Getting started
 Secure shell (SSH) is the encrypted protocol used to log in to user accounts on remote Linux or Unix-like computers. Typically such user accounts are secured using passwords. When you log in to a remote computer, you must provide the user name and password for the account you are logging in to.
 
