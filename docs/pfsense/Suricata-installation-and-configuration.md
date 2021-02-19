@@ -8,21 +8,30 @@ nav_order: 6
 {: .no_toc }
 What is the only reason for not running Snort? If you are using **Suricata** instead. 
 
-This is how I installed <kbd>Suricata</kbd> and used it as a IDS/IPS on my pfSense firewall and logged events to my Elastic Stack.
+This is how I installed `Suricata` and used it as a IDS/IPS on my pfSense firewall and logged events to my Elastic Stack.
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 Install the Suricata package by navigating to <kbd>System</kbd>, <kbd>Package Manager</kbd> and select <kbd>Available Packages</kbd>.
 
-## Prerequisites
+### Prerequisites
 * pfSense 2.4.4-RELEASE-p3 (amd64)
 * suricata 4.1.6_2
 * elastic stack 5.6.8
+
+---
 
 ## Configuration
 Navigate to Suricata by clicking <kbd>Services</kbd>, <kbd>Suricata</kbd>.
@@ -85,6 +94,8 @@ Append Tracked-Files Log:
 
 Let the rest be default, click <kbd>Save</kbd>. 
 
+---
+
 ## 10-suricata.conf
 ```bash
 root@ELK:/usr/local/etc/logstash/conf.d # nano 12-suricata.conf
@@ -126,10 +137,12 @@ filter {
   }
 }
 ```
-
+---
 
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [http://pfelksuricata.3ilson.com](http://pfelksuricata.3ilson.com)
