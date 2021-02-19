@@ -11,10 +11,17 @@ From the very beginning I started to rip my CDs to be able to play them through 
 
 Thiis is how i installed a Radarr, a music collection manager for Usenet and BitTorrent users, on FreeNAS in a iocage jail.
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 
 ## Getting started
@@ -37,6 +44,8 @@ Network properties > Interfaces: vnet0:bridge1.
 Click SAVE.
 
 Select and START Lidarr.
+
+---
 
 ## Install Lidarr
 ### Log in to your FreeNAS via SSH
@@ -131,6 +140,8 @@ Enter the object names to select: FREENAS\lidarr and click OK.
 
 Make sure that the newly added group in your Security tab of the audio share has "Modify" and "Write" permissions a (check both "Modify" and "Write" under Allow). Click OK.
 
+---
+
 ## Mount points
 Stop your newly created Lidarr jail from the FreeNAS gui; FreeNAS > Jails > select Lidarr and click STOP.
 Click the three dots on the right and select Mount Points, ACTIONS > + Add Mount Point.
@@ -144,12 +155,17 @@ Log on to your jail again via SSH:
 ```bash
 homem-christo@freenas:~ # iocage console Lidarr
 ```
+---
+
 ## Create a lidarr user within the jail
 Be consistent with the UID (926) of the former created user in FreeNAS gui.
 ```bash
 homem-christo@Lidarr:/usr/local # pw useradd -n lidarr -u 926 -d /nonexistent -s /usr/sbin/nologin
 homem-christo@Lidarr:/usr/local # pw useradd -n lidarr -u 926 -m -s /usr/sbin/nologin
 ```
+
+---
+
 ## Create the daemon
 Create the daemon so Lidarr will be able to start as a service.
 ```bash
@@ -212,6 +228,8 @@ Start the service
 homem-christo@Lidarr:/etc/rc.d # service lidarr start
 ```
 Navigate to your new Lidarr service in your browser to get started with configuration of Lidarr, e.g. http://ip_addr:8686
+
+---
 
 ## Configuration of Lidarr
 
@@ -358,6 +376,8 @@ API Key:
 Categories: 100025 ,100023
 Minimum Seeders: 5
 
+---
+
 ## Fault finding
 System > Status
 
@@ -481,8 +501,13 @@ root@Lidarr:/usr/ports/lang/mono/work/pkg #
 This file you can now copy to your other jails.
 Then to install it, just do `pkg add -f /tmp/mono.mono-5.20.1.34_2.txz` in your other iocage jail. 
 
+---
+
 ## Authors
 Mr. Johnson
+
+---
+
 ## Acknowledgments
 * [https://github.com/Lidarr/Lidarr/wiki/Installation#linux](https://github.com/Lidarr/Lidarr/wiki/Installation#linux)
 * [https://www.ixsystems.com/community/threads/how-to-giving-plugins-write-permissions-to-your-data.27273/](https://www.ixsystems.com/community/threads/how-to-giving-plugins-write-permissions-to-your-data.27273/)
