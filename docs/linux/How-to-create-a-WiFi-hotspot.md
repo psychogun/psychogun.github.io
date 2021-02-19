@@ -9,11 +9,17 @@ nav_order: 7
 {: .no_toc }
 I wanted to use a Raspberry Pi 3 Model B to create a WiFi hotspot. 
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 
 ## Getting started
@@ -22,6 +28,8 @@ This is how I created a WiFi hotspot on my `wlan0` interface with a DHCP server 
 ### Prerequisites
 * Kali Linux 4.19.66-Re4son-v7+
 * Raspberry Pi 3 Model B
+
+---
 
 ## Installation
 Install hostapd (hotspot server) and dnsmasq (dns and dhcp server):
@@ -35,6 +43,7 @@ root@kali:~# service dnsmasq stop
 root@kali:~# sudo update-rc.d hostapd disable
 root@kali:~# sudo update-rc.d dnsmasq disable
 ```
+---
 
 ## dnsmasq.conf
 Secure a copy of the original `dnsmasq.conf` file:
@@ -63,6 +72,8 @@ dhcp-range=192.168.150.10,192.168.150.30,255.255.255.0,12h
 interface=wlan0
 ```
 
+---
+
 ## hostapd.conf
 Create and setup the configuration file of `hostapd`:
 ```bash
@@ -79,6 +90,8 @@ ieee80211n=1
 # Select WiFi channel
 channel=6
 ```
+
+---
 
 ## hotspot.sh
 Create `hotspot.sh`:
@@ -106,6 +119,13 @@ Execute the script `hotspot.sh` and go on your other WiFi device to see if it is
 ```bash
 root@kali:~# ./hotspot-wlan0.sh
 ```
+
+---
+
+## Authors
+Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://techstarspace.wordpress.com/2018/01/04/create-open-hotspot-on-kali-linux/](https://techstarspace.wordpress.com/2018/01/04/create-open-hotspot-on-kali-linux/)
