@@ -8,16 +8,23 @@ nav_order: 16
 {: .no_toc }
 This is how I configured a CA server on Ubuntu. My main source of information is copied from [Digital Ocean](https://www.digitalocean.com/community/tutorials/how-to-set-up-and-configure-a-certificate-authority-ca-on-ubuntu-20-04). Check them out.
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 
 
-## Prerequisites
+### Prerequisites
 * Proxmox 6.1
 * Ubuntu 20.04
 * TLSv1.2
@@ -79,6 +86,8 @@ rivest@shamir-adleman:~$ sudo apt update
 rivest@shamir-adleman:~$ sudo apt install qemu-guest-agent
 ```
 Shut down the VM. Enable Qemu Guest Agent in Proxmox and start.
+
+---
 
 ## Installing Easy-RSA
 ```bash
@@ -324,6 +333,8 @@ You now have two important files — `~/easy-rsa/pki/ca.crt` and `~/easy-rsa/pki
 
 With that, your CA is in place and it is ready to be used to sign certificate requests, and to revoke certificates.
 
+---
+
 ## Distributing your Certificate Authority’s Public Certificate
 
 Now your CA is configured and ready to act as a root of trust for any systems that you want to configure to use it. You can add the CA’s certificate to your OpenVPN servers, web servers, mail servers, and so on. Any user or server that needs to verify the identity of another user or server in your network should have a copy of the `ca.crt` file imported into their operating system’s certificate store.
@@ -395,6 +406,7 @@ If you are using your CA with web servers and use Firefox as a browser you will 
 ### Windows
 If you are using your CA to integrate with a Windows environment or desktop computers, please see the documentation on how to use `certutil.exe` to install a CA certificate.
 
+---
 
 ## Creating and Signing a Certificate Request
 Now that you have a Certificate Authority ready to use, you can practice generating a private key and certificate request to get familiar with the signing and distribution process.
@@ -464,6 +476,8 @@ root@Deluge:/home/deluge/.config/ssl # scp Deluge.req rivest@shamir-adleman:/tmp
 
 In this step you generated a Certificate Signing Request for a fictional server called `Deluge`. In a real-world scenario, the request could be from something like a staging or development web server that needs a TLS certificate for testing; or it could come from an OpenVPN server that is requesting a certificate so that users can connect to a VPN. In the next step, we’ll proceed to signing the certificate signing request using the CA Server’s private key.
 
+---
+
 ## Signing a CSR
 In the previous step, you created a practice certificate request and key for a fictional server. You copied it to the `/tmp` directory on your CA server (`shamir-adleman`), emulating the process that you would use if you had real clients or servers sending you CSR requests that need to be signed.
 
@@ -519,6 +533,7 @@ Edit Deluge's preferences and make it use those keys under HTTPS option (Interfa
 
 Stop the jail and start the jail again.
 
+---
 
 ## Mylar
 Here is another service I opted to encrypt using my newly created CA.
@@ -579,6 +594,7 @@ rivest@shamir-adleman:~/easy-rsa$ openssl x509 -req -in /tmp/Mylar.req -CA pki/c
 
 Copy contents of `config/Mylar.crt` to `/usr/local/mylar3/ssl/Mylar.crt`.
 
+---
 
 ## DNS / hostname resolution
 Pfsense > Services > DNS Forwarder > add host 
@@ -591,7 +607,7 @@ Mylar
 localdomain
 192.168.4.45
 
-
+---
 
 ## Fault finding
 ### Hash
@@ -618,8 +634,12 @@ Example:
 [root@Chandan test]#
 ```
 
+---
+
 ## Author
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://www.openssl.org/docs/man1.0.2/man1/x509.html](https://www.openssl.org/docs/man1.0.2/man1/x509.html)
