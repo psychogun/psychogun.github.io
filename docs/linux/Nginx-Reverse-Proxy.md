@@ -8,15 +8,22 @@ nav_order: 15
 {: .no_toc }
 This is how I used Nginx Reverse Proxy for accessing my internal services on the web. 
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 
-## Prerequisites
+### Prerequisites
 * Proxmox 6.1
 * Ubuntu 18.04
 * MariaDB 10.3.23
@@ -124,7 +131,7 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 igor@nginx:~$ 
 ```
 
-
+---
 
 ## Portainer prerequisites
 We install the necessary packages to be able to install Docker:
@@ -145,6 +152,8 @@ We install the latest Docker version:
 igor@nginx:~$ sudo apt install docker-ce
 ```
 
+---
+
 ## Portainer installation
 As we mentioned at the beginning of this article, installing Portainer is very simple since it works in a Docker container, for this we will execute:
 ```bash
@@ -159,6 +168,7 @@ Create an admin user through interface http://ip-adress:90000, after which you h
 Go to Containers, select the portainer container and under `Container details`, select `Restart policies` and use `Always` and press `Update`. 
 Connect locally. 
 
+---
 
 ## Nginx Proxy Manager prerequisites
 ### MariaDB
@@ -325,6 +335,7 @@ igor@nginx:~$ sudo ifconfig ens19 up
 igor@nginx:~$ sudo dhclient ens19
 cmp: EOF on /tmp/tmp.30tz3S1FTt which is empty
 
+---
 
 ## Auto update container
 ```bash
@@ -346,6 +357,7 @@ igor@nginx:~$ sudo docker run -d --restart=always --name watchtower -v /var/run/
 74d839c3459e3b2153500b2f2dcc3084caa67106a521501c600846b422b8587f
 ```
 
+---
 
 ## Fault finding
 ### Packets out of order
@@ -372,13 +384,14 @@ Query OK, 0 rows affected (0.000 sec)
 
 ### Set the clock?
 
-[https://support.rackspace.com/how-to/mysql-connect-to-your-database-remotely/](https://support.rackspace.com/how-to/mysql-connect-to-your-database-remotely/)
+*[https://support.rackspace.com/how-to/mysql-connect-to-your-database-remotely/](https://support.rackspace.com/how-to/mysql-connect-to-your-database-remotely/)
 
+---
 
 ## Authors
 Mr. Johnson
 
-
+----
 
 ## Acknowledgments
 * [https://hub.docker.com/r/jc21/nginx-proxy-manager/tags](https://hub.docker.com/r/jc21/nginx-proxy-manager/tags)
