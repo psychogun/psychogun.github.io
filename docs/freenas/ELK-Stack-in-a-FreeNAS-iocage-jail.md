@@ -14,12 +14,18 @@ If you are new to Elastic Stack, I suggest reading [https://psychogun.github.io/
 
 This is how I installed the Elastic Stack in a FreeNAS iocage jail with syslog, netflow and suricata. 
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
----
+</details>
 
+{: .no_toc .text-delta }
+
+---
 ## Getting started
 These instructions will install and configure the Elastic stack in an iocage jail on FreeNAS for use with pfSense. A lot of this is copy and paste from the excellent tutorial by [http://blog.dushin.net/2019/08/installing-elk-on-freenas-jail/](http://blog.dushin.net/2019/08/installing-elk-on-freenas-jail/) and [http://pfelksuricata.3ilson.com](http://pfelksuricata.3ilson.com).
 
@@ -30,6 +36,7 @@ These instructions will install and configure the Elastic stack in an iocage jai
 * kibana6: 6.8.5
 * suricata 4.1.6_2
 
+---
 
 ## Create Jail
 Go to FreeNAS gui and select Jails and click ADD.
@@ -142,6 +149,7 @@ Checking integrity... done (0 conflicting)
 
 root@ELK:~ # 
 ```
+---
 
 ## Install and Start Elasticsearch
 Elasticsearch is the (Java) service that hosts all of the Lucene injestion, indexing, and search capability.
@@ -493,6 +501,8 @@ root@ELK:~ #
 
 Okay, that is Elasticsearch. For the most part this is just a “back end” service, and nothing needs to be done to it, yet. Let’s move on.
 
+---
+
 ## Install and run Logstash
 Logstash is the ingestion engine for Elasticsearch. It will be the thing to which we will send logs, which in turn will get indexed and made searchable.
 
@@ -602,6 +612,8 @@ total 9
 root@ELK:~ # 
 ```
 
+---
+
 ## Install and run Kibana
 Kibana is the Web GUI in front of Elasticsearch.
 
@@ -702,6 +714,7 @@ Nothing shows.
 
 Well, I'll try a browser. Hm, there it was an error, white font and red background. Do not remember what it said.. But it worked when I restarted (STOP/START) the whole jail. 
 
+---
 
 ## Configuration
 ### Logstash
@@ -1055,6 +1068,7 @@ root@ELK:/usr/local/etc/logstash/conf.d # tail -f /var/log/logstash/logstash-pla
 
 ```
 
+---
 
 ## pfSense 1
 ### Syslog
@@ -1067,6 +1081,8 @@ Enable Remote Logging and point one of the ‘Remote log servers’ to ‘ip:por
 PS: Be sure to remember to enable logging in your firewall rules, ‘Log packets that are handled by this rule’. For instance, all the rulesets on my WAN interface has logging enabled.
 
 ### Suricata
+
+---
 
 ## Kibana configuration
 Kibana is where you can graphically present the logs.
@@ -1116,6 +1132,8 @@ Hopefully you have 3 dashboards now. One which is showing blocked traffic, one w
 
 As of 2019-12-31, when logstash has been run for 1 hour -- size of iocage jail is 2.07 GiB. 
 
+---
+
 ## pfSense 2
 ### softflowd
 Log on to your PFSense and go to System > Package Manager > Available Packages and install `softflowd`. Edit `softflowd` by navigating to Services > `softflowd`. A basic configuration looks like this:
@@ -1129,6 +1147,7 @@ Log on to your PFSense and go to System > Package Manager > Available Packages a
 
 PS: Communication between softflowd and Logstash for Netflow is not encrypted. Make sure you are creating a good network design by using VLAN or something else to ensure the metadata of the communication on your monitored interfaces is not intentionally going where it should not go.
 
+---
 
 ## Logstash and Netflow
 Stop logstash.service:
@@ -1395,10 +1414,13 @@ root@ELK:~ # tail -f /var/log/logstash/logstash-plain.log
 [2020-01-01T16:38:24,887][INFO ][logstash.agent           ] Successfully started Logstash API endpoint {:port=>9600}
 ```
 
+---
+
 ## Managing the index lifecycle
 For me, my `netflow` elasticsearch indices generates at a size of approx 500mb a day.
 The same as my `logstash` indice.  If you have an unlimited storage space, this might not be a problem for you - but for me, to keep things in the clear- I would only want to keep my indices for 30 days. That way, the storage space needed would never go above 30 x (500mb + 500mb) = 30GB.
 
+---
 
 ## Fault finding
 
@@ -1531,9 +1553,12 @@ kibana is running as pid 81243.
 root@ELK:~ # 
 ```
 
+---
+
 ## Authors
 Mr. Johnson
 
+---
 
 ## Acknowledgments
 * [https://github.com/robcowart/synesis_lite_suricata](https://github.com/robcowart/synesis_lite_suricata)
