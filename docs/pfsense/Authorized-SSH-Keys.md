@@ -11,12 +11,13 @@ This is how I generated a private/public key pair for securing the SSH logins fo
 ## Table of contents
 <details open markdown="block">
   <summary>
-
+  Table of contents
   </summary>
-  {: .text-delta }
+  {: .no_toc .text-delta }
 1. TOC
 {:toc}
 </details>
+
 
 ## Getting started
 Secure shell (SSH) is the encrypted protocol used to log in to user accounts on remote Linux or Unix-like computers. Typically such user accounts are secured using passwords. When you log in to a remote computer, you must provide the user name and password for the account you are logging in to.
