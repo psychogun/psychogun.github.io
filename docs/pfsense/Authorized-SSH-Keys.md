@@ -4,13 +4,14 @@ title: Authorized SSH Keys
 parent: pfSense
 nav_order: 1
 ---
+
 # Authorized SSH Keys
 {: .no_toc }
 This is how I generated a private/public key pair for securing the SSH logins for the user `admin` on my pfSense.
 
 <details open markdown="block">
   <summary>
-  Table of contents
+   Table of contents
   </summary>
   {: .text-delta }
 1. TOC
@@ -21,7 +22,9 @@ This is how I generated a private/public key pair for securing the SSH logins fo
 
 1. TOC
 {:toc}
+
 ---
+
 ## Getting started
 Secure shell (SSH) is the encrypted protocol used to log in to user accounts on remote Linux or Unix-like computers. Typically such user accounts are secured using passwords. When you log in to a remote computer, you must provide the user name and password for the account you are logging in to.
 
@@ -47,6 +50,8 @@ The remote computer now knows that you must be who you say you are because only 
 ## Prerequisites
 * pfSense 2.4.5-RELEASE-p3 (amd64)
 * linux client
+
+---
 
 ## ssh-keygen
 ```bash
@@ -83,6 +88,8 @@ To generate the pair of keys using 4096 bits of encryption, do this:
 └──╼ $ssh-keygen -b 4096
 ```
 
+---
+
 ## Public Key
 Navigate to System > User Management and edit the user you want to log in to pfSense with. 
 
@@ -91,6 +98,8 @@ Copy the output from `id_rsa.pub` under <kbd>Keys</kbd> for the user in question
 ┌─[jd@asdf]─[~]
 └──╼ $cat /home/jd/.ssh/id_rsa.pub 
 ```
+
+---
 
 ## Try it
 ```bash
@@ -106,9 +115,12 @@ Use specific private key:
 Enter passphrase for key '/home/jd/.ssh/server-1-admin:
 ```
 
+---
+
 ## Authors
 Mr. Johnson
 
+---
 
 ## Acknowledgments
 * [https://askubuntu.com/questions/53553/how-do-i-retrieve-the-public-key-from-a-ssh-private-key](https://askubuntu.com/questions/53553/how-do-i-retrieve-the-public-key-from-a-ssh-private-key)
