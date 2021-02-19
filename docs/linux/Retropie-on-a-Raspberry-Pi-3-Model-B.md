@@ -8,12 +8,19 @@ nav_order: 17
 {: .no_toc }
 This is how I installed Retropie on Raspberry Pi. 
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 
 ### Download premade image.
@@ -40,11 +47,14 @@ network={
 }
 ```
 
+---
+
 ## Authors
 Mr. Johnson
 
-## Acknowledgments
+---
 
+## Acknowledgments
 * [https://retropie.org.uk/forum/topic/19769/xsession-unable-to-start-x-session/4](https://retropie.org.uk/forum/topic/19769/xsession-unable-to-start-x-session/4)
 * [https://cordcutting.com/how-to/how-to-install-kodi-on-retropie/](https://cordcutting.com/how-to/how-to-install-kodi-on-retropie/)
 * [https://retropie.org.uk/docs/SSH/](https://retropie.org.uk/docs/SSH/)
