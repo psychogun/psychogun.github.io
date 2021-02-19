@@ -19,6 +19,8 @@ This is how I used Network UPS Tools (NUT) for pfSense through USB and safely sh
 
 {: .no_toc .text-delta }
 
+---
+
 ## Getting started
 
 ### Prerequisites
