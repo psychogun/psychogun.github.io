@@ -9,10 +9,17 @@ nav_order: 15
 {: .no_toc }
 I wanted a secure way to share my datasets on FreeNAS. 
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 ## Getting started
 ### Prerequisites
@@ -20,15 +27,15 @@ I wanted a secure way to share my datasets on FreeNAS.
 * SMB Shares
 * Different users & groups
 
-## Create a new jail
+### Create a new jail
 Open up your FreeNAS gui > Jails > ADD.
 
 Select an appropriate jail name.
 
-## Mount points
+### Mount points
 Add your different mount points and make sure to make them read only. 
 
-## Configure of the jail
+### Configure of the jail
 Log in to your FreeNAS through SSH, e.g. 
 ```bash
 poco:~ loco$ ssh -l root 172.16.58.71
@@ -117,8 +124,11 @@ adduser: INFO: Successfully added (sftpuser1) to the user database.
 Add another user? (yes/no): no
 Goodbye!
 ```
-## Add mount points
+
+### Add mount points
 Back in FreeNAS gui, select your jail and add a mount point as read-only (if you do not want users to be able to write to the dataset, then). Or just have confidence in your permissions management :) Read on.. .
+
+---
 
 ## Configure ssh
 Find out what your ip address of the jail is.
@@ -155,6 +165,8 @@ This service allows sftp connections only.
 ### Try FileZilla
 Check if you can log in with an SFTP application, I tried FileZilla.
 There you'll see that you are able to log in, but you are unable to navigate in the file hierarchy. That is because the created user does not have any permissions to read folders which is mounted. Neither does the group of which the user belongs to (sftponly).
+
+---
 
 ## getfacl
 Navigate to `/mnt` and do an `ls -alh` to see the UID:GID.
@@ -217,6 +229,8 @@ Back in FileZilla, disconnect and reconnect- you'll se that the folders now are 
 
 Now you just have to repeat for whatever folders you would like the users to connect to.
 
+---
+
 ## Reading getfacl from Windows
 As the owner of the mount point, which should be the same owner as listed in SMB services, map a network drive.
 
@@ -235,8 +249,12 @@ Let the be a checkmark next to 'Read & execute', 'List folder contents' and 'Rea
 
 Then you'll have the group 'Filesgroup_ro' with sufficient permissions for our user `sftpuser` to download files via a secure SFTP connection. 
 
+---
+
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [http://bin63.com/how-to-set-up-an-sftp-user-on-freebsd](http://bin63.com/how-to-set-up-an-sftp-user-on-freebsd)
