@@ -348,14 +348,14 @@ root@Plex:/ # service plexmediaserver_plexpass start
 
 ---
 
-## Troubleshooting
-### Is it running?
+## Fault finding
+### service status
 ```bash
 root@Plex:/ # service plexmediaserver_plexpass status
 plexmediaserver_plexpass is not running.
 ```
 
-### What is the install status?
+### install status
 ```bash
 root@Plex:/ # pkg info plexmediaserver-plexpass
 plexmediaserver-plexpass-1.17.0.1841
@@ -411,7 +411,8 @@ drwxr-xr-x   2 plex  plex    81B Oct  8 18:05 PMS Plugin Logs
 root@Plex:/usr/local/plexdata-plexpass/Plex Media Server/Logs # tail -f Plex\ Media\ Server.log 
 ```
 
-### Check if our rc.d is installed:
+### rc.d
+Check if our rc.d is installed:
 ```bash
 root@Plex:/usr/local/plexdata-plexpass/Plex Media Server/Logs # service -e
 /etc/rc.d/cleanvar
@@ -424,7 +425,6 @@ root@Plex:/usr/local/plexdata-plexpass/Plex Media Server/Logs # service -e
 /etc/rc.d/cron
 ```
 
-### Check rc.d
 ```bash
 root@Plex:/usr/local/plexdata-plexpass/Plex Media Server/Logs # more /usr/local/etc/rc.d/plexmediaserver_plexpass
 ```
@@ -433,8 +433,6 @@ root@Plex:/usr/local/plexdata-plexpass/Plex Media Server/Logs # more /usr/local/
 ```bash
 root@Plex:/usr/local/plexdata-plexpass/Plex Media Server/Logs # sh -x /usr/local/etc/rc.d/plexmediaserver_plexpass start
 ```
-
-## Fault finding
 
 ### Copy Preferences.xml from the warden jail
 ```bash
