@@ -9,11 +9,17 @@ nav_order: 2
 {: .no_toc }
 This is how I used Grafana to display dashboard for vitals from my PfSense firewall. I was able to do this because of this VictorRobellini's work: [https://github.com/VictorRobellini/pfSense-Dashboard](https://github.com/VictorRobellini/pfSense-Dashboard)
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 
 ## Getting started
@@ -26,6 +32,7 @@ I am using an Ubuntu 20.04 installation on a virtual machine deployed from Proxm
 * InfluxDB 1.8.2
 * Telegraf 0.9_4
 
+---
 
 ## Allocating a VM in Proxmox
 Log in to your Proxmox in a web-browser and create a new virtal machine. 2GiB RAM and 32GiB harddrive is enough.
@@ -34,6 +41,8 @@ Power on the Virtual machine and follow this guide for an excellent guide to ins
 (even though the link is for 1604, almost the same applies for 20.04).
 
 Remember to select to install `OpenSSH server` under the installation of Ubuntu.
+
+---
 
 ## Some things first ..
 ### update && upgrade
@@ -131,10 +140,14 @@ torkel@gaard:~$ sudo apt-get install qemu-guest-agent
 
 Issue `sudo shutdown now` to power of the guest and go to the Proxmox web gui and enable <kbd>QEMU Guest Agent</kbd> under Options, then start it again.
 
+---
+
 ## Install Grafana
 [https://grafana.com/docs/grafana/latest/installation/debian/](https://grafana.com/docs/grafana/latest/installation/debian/)
 
 After the install, hop on in to `http://ip-adress:3000` and use <kbd>admin/admin</kbd> as login credentials. Then change the password for your user. For now, do not do anything in Grafana, but proceed with installation of `InfluxDB`. 
+
+---
 
 ## Install InfluxDB
 [https://docs.influxdata.com/influxdb/v1.8/introduction/install/](https://docs.influxdata.com/influxdb/v1.8/introduction/install/)
@@ -202,6 +215,8 @@ autogen  0s       168h0m0s           1        true
 4weeks   336h0m0s 24h0m0s            1        false
 ```
 
+---
+
 ## PfSense
 ### Install Telegraf
 System `>` Package Manager `>` Available Packages, install `Telegraf`. 
@@ -266,6 +281,8 @@ In the little config window on the bottom, paste in these lines of code:
 ```
 Hit <kbd>Save</kbd>. 
 
+---
+
 ## Configure Grafana
 Configuraton `>` Data Sources 
 
@@ -294,6 +311,8 @@ torkel@gaard:~$ sudo grafana-cli plugins install grafana-piechart-panel
 
 
 Now you should be all done. Restart the `Telegraf` service on your pfSense firewall and the data should begin populating!
+
+---
 
 ## TLS on Grafana
 Do this if you run your own Certificate Authority and want to secure your dashboard. 
@@ -368,9 +387,12 @@ torkel@gaard:/usr/local/etc/ssl$ du -sh /var/lib/influxdb/data/<db name>
 ```
 Where `/var/lib/influxdb/data` is the data directory defined in `influxdb.conf`.
 
+---
 
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://stackoverflow.com/questions/44454836/influxdb-storage-size-on-disk](https://stackoverflow.com/questions/44454836/influxdb-storage-size-on-disk)
