@@ -4,21 +4,28 @@ title: Site-to-Site VPN with OpenVPN
 parent: pfSense
 nav_order: 5
 ---
-# Suricata installation and configuration
+
+# Site-to-Site VPN with OpenVPN
 {: .no_toc }
 Here is how I configured two pfSense firewalls with site-to-site VPN.
 
-
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 Install the Suricata package by navigating to System > Package Manager > Available Packages.
 
-## Prerequisites
+### Prerequisites
 * pfSense 2.4.4-RELEASE-p3 (amd64)
 
 ### Internet
@@ -36,6 +43,7 @@ Install the Suricata package by navigating to System > Package Manager > Availab
 ### Tunnel network
 * Tunnel network: 10.0.101.0/30
 
+---
 
 ## Local (Server) configuration
 ### Certificate Authority
@@ -69,10 +77,12 @@ img Site-to-Site-VPN-with-OpenVPN_07_Cryptographic-Settings-03.png
 ### Interfaces Assignment
 Add the OpenVPN connection to an interface. 
 
-
+---
 
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://docs.netgate.com/pfsense/en/latest/vpn/openvpn/configuring-a-site-to-site-pki-ssl-openvpn-instance.html](https://docs.netgate.com/pfsense/en/latest/vpn/openvpn/configuring-a-site-to-site-pki-ssl-openvpn-instance.html)
