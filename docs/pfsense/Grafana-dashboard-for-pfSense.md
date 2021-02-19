@@ -7,7 +7,7 @@ nav_order: 2
 
 # Grafana dashboard for pfSense
 {: .no_toc }
-This is how I used Grafana to display dashboard for vitals from my PfSense firewall. I was able to do this because of this VictorRobellini's work: [https://github.com/VictorRobellini/pfSense-Dashboard](https://github.com/VictorRobellini/pfSense-Dashboard)
+This is how I used Grafana to display dashboard for vitals from my pfSense firewall. I was able to do this because of this VictorRobellini's work: [https://github.com/VictorRobellini/pfSense-Dashboard](https://github.com/VictorRobellini/pfSense-Dashboard)
 
 <details open markdown="block">
   <summary>
@@ -28,7 +28,7 @@ I am using an Ubuntu 20.04 installation on a virtual machine deployed from Proxm
 ### Prerequsites
 * Proxmox Virtual Environment 6.1-5
 * Ubuntu 20.04 LTS
-* PfSense 2.4.5-RELEASE-p1 (amd64) 
+* pfSense 2.4.5-RELEASE-p1 (amd64) 
 * InfluxDB 1.8.2
 * Telegraf 0.9_4
 
@@ -217,7 +217,7 @@ autogen  0s       168h0m0s           1        true
 
 ---
 
-## PfSense
+## pfSense
 ### Install Telegraf
 System `>` Package Manager `>` Available Packages, install `Telegraf`. 
 
