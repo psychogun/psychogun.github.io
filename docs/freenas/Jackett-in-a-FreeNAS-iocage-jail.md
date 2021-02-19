@@ -9,10 +9,17 @@ nav_order: 6
 {: .no_toc }
 This is how i installed jackett, which works as a proxy server- it translates queries from apps (Sonarr, Radarr, SickRage, CouchPotato, Mylar, Lidarr, DuckieTV, qBittorrent, Nefarious etc.) into tracker-site-specific http queries, parses the html response, then sends results back to the requesting software. This allows for getting recent uploads (like RSS) and performing searches. Jackett is a single repository of maintained indexer scraping & translation logic - removing the burden from other apps.
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 
 ## Getting started
@@ -22,6 +29,8 @@ Show some love for Jackett over at [https://github.com/Jackett/Jackett](https://
 ### Prerequisites
 * FreeNAS Version: FreeNAS-11.3-RELEASE
 * Iocage jail version: 11.3-RELEASE
+
+---
 
 ## Installing
 
@@ -143,6 +152,8 @@ jackett_enable:  -> YES
 root@Jackett:~ # nano /etc/rc.conf
 ```
 
+---
+
 ## Update Jackett
 For some reason, the owner:group of the folder which `jackett` resides (`/usr/local/share/jackett`) was owned by a random UID:GID. If this is the case with you, you will be unable to update jackett automatically through the GUI. 
 
@@ -204,6 +215,12 @@ Then start jackett again
 service jackett start
 ```
 
+---
+
+## Authors
+Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://digimoot.wordpress.com/2019/10/13/freenas-jackett-manual-install/](https://digimoot.wordpress.com/2019/10/13/freenas-jackett-manual-install/)
