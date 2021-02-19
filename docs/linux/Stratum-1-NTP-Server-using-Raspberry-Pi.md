@@ -19,14 +19,20 @@ Please realize that connecting a consumer-grade (designed for location, not for 
 
 Proper GPS synchronization uses a PPS output (or similar) from the device, fed directly into an interrupt-generating line, for example a GPIO or parallel port. A GPSDO (GPS Disciplined Oscillator) is typically used which locks a temperature-compensated oscillator to the GPS time and provides a stable, reliable reference.
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
----
-## Getting started
+</details>
 
+{: .no_toc .text-delta }
+
+---
+
+## Getting started
 
 ## Prerequisites
 * Raspberry Pi Model 3
@@ -35,6 +41,8 @@ Proper GPS synchronization uses a PPS output (or similar) from the device, fed d
 * ntpd ntpsec-1.1.9+ 2020-07-20T23:57:14Z (git rev 6f72d3bfb)
 * OpenSSL 1.1.1d  10 Sep 2019
 * This was done from MacOS
+
+---
 
 ## Installation instructions
 I am using Raspbian Buster lite. 
@@ -146,6 +154,8 @@ admin@raspberrypi:~ $ date
 Sat 11 Jan 22:24:16 CET 2020
 ```
 
+---
+
 ## Serial port
 The Ultimate GPS hat delivers its data over a serial port at 9600 bps, which uses pins 14 and 15 on the GPIO header.
 On the Raspberry Pi 2, this went directly to the hardware UART and was available to Linux on `/dev/ttyAMA0`. Assuming there was no serial console using it, GPS works great here.
@@ -225,6 +235,8 @@ $GPRMC,052731.000,A,3343.3943,N,11749.3064,W,0.84,313.46,240117,,,D*74
 If you see the above, your serial port is configured correctly and it's seeing GPS data.
 Do not move to the next step until you can see serial data.
 
+---
+
 ## PPS (Pulse Per Second)
 Linux has special kernel support for Pulse Per Second input via a GPIO pin to help synchronize the time: it associates a hyper-precise kernel timestamp with the rising edge of the PPS signal and makes it available to the application; it can then get highly accurate timestamps.
 
@@ -271,6 +283,8 @@ source 0 - assert 1485236395.009456680, sequence: 152 - clear  0.000000000, sequ
 ```
 
 This should show one line every second; if it does, your Ultimate GPS hat is delivering PPS to the Linux kernel properly, and you have all the GPS inputs required: now we have to use them.
+
+---
 
 ## Install and configure gpsd
 NMEA is an acronym for the National Marine Electronics Association. NMEA existed well before GPS was invented. According to the NMEA website, the association was formed in 1957 by a group of electronic dealers to create better communications with manufacturers. Today in the world of GPS, NMEA is a standard data format supported by all GPS manufacturers, much like ASCII is the standard for digital computer characters in the computer world.
@@ -427,6 +441,8 @@ admin@raspberrypi:~ $ cgps -s
 │    Grid Square:     Q071pq                ││                                 │
 └───────────────────────────────────────────┘└─────────────────────────────────┘
 ```
+
+---
 
 ## Build and configure NTPsec
 The stock `ntpd` shipped with your distribution is intended to be used as a client instance, not a server. It doesn't do 1PPS, and thereforce can't be used for precision timekeeping. Thus, we're going to build a better version from source. That version is NTPsec, which runs lighter and more securely and can do more accurate time stepping.
@@ -773,6 +789,8 @@ admin@raspberrypi:~ $
 
 :smiley:
 
+---
+
 ## Share our time
 Now that this raspberry is syncing with a UFH radio at stratum 1, we want to make our raspberry available as a NTP server. This is already configured in our `ntp.conf` file, the section with access control configuration. 
 
@@ -830,6 +848,7 @@ You should configure your non-GPS time source systems to use atleast 5 NTP upstr
 
 <kbd>NB:</kbd> If you sync to a **single** upstream time source, NTP will trust this time source's clock. It could be 10 seconds off, 10 minutes off, 10 days off, or 10 years off. NTP can trust it and sync to it. 
 
+---
 
 ## Standalone connection
 Comment out all the _external_ `pool`/`server` lines in `/etc/ntp.conf`, because we are not using internet for time sync anymore.
@@ -871,6 +890,8 @@ Once that is done the time via NMEA (the gps data strings) acts as time source f
 
 And also the ntp driver 22 for PPS virtual ip 127.127.28.0 starts to get being active from the view of ntp
 (the `/dev/pps0` is served by the kernel and is actively working all the time, only `ntp` takes notice of `PPS` after a gps client is connected to gpsd first).
+
+---
 
 ## Fault finding
 ### /var/log/ntp.log
@@ -1071,6 +1092,7 @@ found PPS source "/dev/pps0"
 ok, found 1 source(s), now start fetching data...
 time_pps_fetch() error -1 (Connection timed out)
 ```
+---
 
 ## Client settings
 ### Linux
@@ -1193,8 +1215,12 @@ time |	asia.apple.com | 192.168.53.234	| time.asia.apple.com
 time |	apple.com |	192.168.53.234 | time.apple.com	 
 time-ios	| apple.com	| 192.168.53.234 | time-ios.apple.com
 
+---
+
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://kong.rellim.com](https://kong.rellim.com)
