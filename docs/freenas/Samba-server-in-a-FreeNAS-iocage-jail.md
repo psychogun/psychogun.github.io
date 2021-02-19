@@ -9,35 +9,43 @@ nav_order: 14
 {: .no_toc }
 I wanted to isolate a jail with VLAN from my network and use Samba to share some folders on this network. 
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
-## Getting started
-### Prerequisites
+
+## Prerequisites
 * FreeNAS 11.3
 * SMB Shares
 * Different users & groups
 
-## Create a new jail
+### Getting started
+### Create a new jail
 Open up your FreeNAS gui > Jails > ADD.
 
 Select an appropriate jail name (Samba)
 
-# Configuration of mount points
+### Configuration of mount points
 Back to our FreeNAS gui. 
 
-## Add group
+### Add group
 Add a group in FreeNAS web gui. Call it "Documents_ro" (a group which is read-only ). Take note of the `GID` (1050).
 
-## Edit ACL
+### Edit ACL
 Edit the dataset you want to share through samba, e.g. `/mnt/Tank/Documents` with mount point `/mnt/Documents` and add the `Documents_ro` group with read permission on the dataset.
 
-## Add Mount points
+### Add Mount points
 Stop the jail and add mount points through FreeNAS web gui. I have mounted `/mnt/Tank/Documents` to mount point `/mnt/Documents`. Make the mount point read-only. Now, lets start the jail. 
 
-## Configure of the jail
+### Configure of the jail
 Log in to your FreeNAS through SSH, e.g. 
 ```bash
 poco:~ loco$ ssh -l root 172.16.58.71
@@ -70,6 +78,8 @@ Your packages are up to date.
 root@Samba:~ # 
 ```
 
+---
+
 ## Branch: latest
 Let us update all our packages from `quarterly` to `latest`:
 ```bash
@@ -80,13 +90,13 @@ root@Samba:/etc/pkg # printf 'FreeBSD: { \n  url: "pkg+http://pkg.FreeBSD.org/${
 Then do another `pkg update && pkg upgrade`.
 
 
-# Create a group
+## Create a group
 Create a group in the jail with the same `GID` as the group from the FreeNAS gui above.
 ```bash
 root@Samba:/mnt # pw groupadd Documents_ro -g 1050
 ```
 
-## Add a service user
+### Add a service user
 Add a user which will act as a enabled user to log in to our Samba shares. This user is called `smbuser` with `uid=8675309`, has `/nonexistent` home directory and sets the user's login shell to `/usr/sbin/nologin` which denies this user interactive login- and a comment is also provided to this user, `-c`.
 ```bash
 root@Samba:/etc/pkg # pw adduser smbuser -u 8675309 -d /nonexistent -s /usr/sbin/nologin -c "Samba user"
@@ -119,7 +129,9 @@ If you are able to see `group:Documents_ro`, instead of `group:1050`, all is goo
 
 All good. 
 
-# VLAN
+---
+
+## VLAN
 To enable VLAN `20`on your iocage jail, add this to `rc.conf` (`epair0b` is the main interface, you can find out yours by using `ifconfig`):
 ```bash
 root@Samba:/mnt # pkg install nano
@@ -141,7 +153,9 @@ bound to 192.168.20.3 -- renewal in 3600 seconds.
 root@Samba:/mnt # 
 ```
 
-# Samba
+---
+
+## Samba
 ```bash
 root@Samba:/etc/pkg # pkg search samba
 p5-Samba-LDAP-0.05_2           Manage a Samba PDC with an LDAP Backend
@@ -166,6 +180,8 @@ How to start: http://wiki.samba.org/index.php/Samba4/HOWTO
 
 For additional documentation check: http://wiki.samba.org/index.php/Samba4
 ```
+
+---
 
 ## Configure Samba
 Create a `smb4.conf` file under `/usr/local/etc/`:
@@ -300,8 +316,10 @@ smb: \> ls
 smb: \> 
 ```
 
-# Fault finding
-## smbclient -L   
+---
+
+## Fault finding
+### smbclient -L   
 List shares that are available at ip:
 ```bash
 root@Samba:~ # smbclient -L 192.168.20.3
@@ -323,7 +341,7 @@ Anonymous login successful
 	MYGROUP              
 ```
 
-## smbstatus
+### smbstatus
 ```bash
 root@Samba:~ # smbstatus
 
@@ -336,9 +354,12 @@ Service      pid     Machine       Connected at                     Encryption  
 
 No locked files
 ```
+---
 
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://gist.github.com/sdebnath/086874c5df8b68e0df69](https://gist.github.com/sdebnath/086874c5df8b68e0df69)
