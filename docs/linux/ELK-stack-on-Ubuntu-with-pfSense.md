@@ -14,12 +14,19 @@ These instructions will tell you what I have learned and how I installed the Ela
 
 I have done this on a Proxmox host, so not all things may apply to your installation. 
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 The repository can be found here: [https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense](https://github.com/psychogun/ELK-Stack-on-Ubuntu-for-pfSense).
 
@@ -68,6 +75,7 @@ As with every how-to's, read through the entire thing before starting.
 
 I am running the Elastic Stack on a 4 x Intel(R) Xeon(R) CPU E3-1225 v3 @ 3.20GHz (1 Socket) machine, with 2 cores and 8GB of RAM allocated to the virtual guest. 
 
+---
 
 ## Installlation
 
@@ -516,6 +524,9 @@ Editing this parameter from a non-loopback address enables connections from remo
 If our Elasticsearch database is not on the same host as Kibana, you will have to tell where Elasticsearch is by specifying `elasticsearch.hosts`, e.g.: `elasticsearch.hosts http://ip-adress:9200` in `kibana.yml`
 
 `restart` or `start` your Kibana with `sudo systemctl start kibana` and go to http://ip-adress:5601 to check if it is up and running (choose No when asked if you want to import some data). Select 'Explore on your own', we'll get back to Kibana in a bit. Now we need some data to visualize, e.g. make pfSense send data to logstash.
+
+---
+
 ## Configuration
 ### pfSense and Syslog
 Log on to your pfSense and go to Status > System logs > Settings. 
@@ -610,8 +621,7 @@ Voilà. Netflow and syslogs in Kibana from pfSense. Another congratulations is i
 
 <img src="{{site.url}}/docs/linux/img/ELK-stack-on-Ubuntu-with-pfSense-2.png" style="display: block; margin: auto;" />
 
-
-
+---
 
 ## Securing our Elastic Stack
 ### Enable HTTPS on Kibana
@@ -985,6 +995,8 @@ stdout {
 }
 ```
 
+---
+
 ## Fault finding
 ### netflow.var.kibana.ssl.enabled=false
 ```bash
@@ -1130,10 +1142,12 @@ modules:
 ```
 Start with `sudo systemctl start logstash.service`
 
-
+---
 
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments 
 * [http://pfelk.3ilson.com](http://pfelk.3ilson.com)
