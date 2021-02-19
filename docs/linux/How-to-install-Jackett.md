@@ -4,31 +4,38 @@ title: How to install Jackett
 parent: Linux
 nav_order: 8
 ---
-# Key Management Service on Ubuntu
+# How to install Jackett on Ubuntu
 {: .no_toc }
-This is how I used `kms-server` on an Ubuntu 
+Jackettttttttt.
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
+* [https://github.com/Jackett/Jackett](https://github.com/Jackett/Jackett)
 
-
-## Prerequisites
+### Prerequisites
 * Proxmox Virtual Environment 6.1-5
 * Ubuntu 18.04.3 Server
 
 
-## Update
+### Update
 ```bash
 sudo apt-get update
 sudo apt-get upgrade
 ```
 
-## Install qemu-guest-agent
+### Install qemu-guest-agent
 The qemu-guest-agent is a helper daemon, which is installed in the guest. It is used to exchange information between the host and guest, and to execute command in the guest.
 
 In Proxmox VE, the qemu-guest-agent is used for mainly two things:
@@ -42,11 +49,15 @@ jack@ett::~$ sudo shutdown now
 ```
 In Proxmox, go to Options and Enable by selecting `Use QEMU Guest Agent`. Start your VM again. 
 
-## Prerequisites
+---
+
+## .NET
 https://github.com/dotnet/core/blob/master/Documentation/linux-prereqs.md
 ```bash
 sparrow@h37bjackett01:/tmp$ sudo apt-get install libcurl4-openssl-dev bzip2 mono-devel
 ```
+
+---
 
 ## Install Jackett
 Go to https://github.com/Jackett/Jackett/releases, download the latest `Jackett.Binaries.Mono.LinuxAMD64.tar.gz` (copy link):
@@ -76,3 +87,7 @@ jack@ett::/tmp$ cd /opt/jackett/
 jack@ett::/opt/jackett$ ./jackett
 ```
 
+---
+
+## Authors
+Mr. Johnson
