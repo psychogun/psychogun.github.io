@@ -16,7 +16,7 @@ Jokes aside, just trying to learn new things and I am using GitHub as a place fo
 
 
 
-I offer absolutely no warranty for any of the information provided on this site. 
+I offer absolutely no warranty for any of the information provided on this site, which in many cases is also incomplete.
 
 [https://github.com/psychogun/psychogun.github.io](https://github.com/psychogun/psychogun.github.io)
 
