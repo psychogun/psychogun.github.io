@@ -10,16 +10,25 @@ nav_order: 7
 Well, I wanted to organize all my magazines. 
 
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 ## Getting started
 
 
-## Requirements
+### Requirements
 * FreeNAS 11.2
+
+---
 
 ## Configuration of FreeNAS
 ### Group
@@ -112,8 +121,12 @@ Click SAVE.
 
 Now go to FreeNAS gui > Jails and start LazyLibrarian.
 
+---
+
 ## Create iocage jail
 Create a jail called LazyLibrarian from your FreeNAS gui.
+
+---
 
 ## Installation of LazyLibrarian
 Log in to your FreeNAS with SSH. 
@@ -244,6 +257,7 @@ Swap: 10G Total, 1130M Used, 9109M Free, 11% Inuse
 
 Log in to you LazyLibrian by going to http://ip-adress:5299.
 
+---
 
 ## Configuration of LazyLibrarian
 Create a folder named `Magazines` inside of `/mnt/LazyLibrarian`.
@@ -273,6 +287,8 @@ $b $Y
 
 $Y-$m-$d
 Magazine
+
+---
 
 ## Tips
 ### Move file into folder
@@ -306,7 +322,6 @@ and then go to options, and select Label lazylibrarian and click Save, Apply and
 Then open up a web browser to configure the deluge label.
 
 
-
 ### Is it a real hyphen?
 Check if the - (above) is really a real hyphen.
 ```bash
@@ -314,6 +329,8 @@ root@LazyLibrarian:/mnt/LazyLibrarian # printf '–' | od -tx1 -An
           e2  80  93               
 ```
 [http://www.ltg.ed.ac.uk/~richard/utf-8.cgi?input=–&mode=char](http://www.ltg.ed.ac.uk/~richard/utf-8.cgi?input=–&mode=char)
+
+---
 
 ## Fault finding
 ### Unable to process ascii
@@ -335,8 +352,12 @@ root@LazyLibrarian:/mnt/LazyLibrarian #
 
 For more information on how to proceed, go here [https://www.b1c1l1.com/blog/2011/05/09/using-utf-8-unicode-on-freebsd/](https://www.b1c1l1.com/blog/2011/05/09/using-utf-8-unicode-on-freebsd/)
 
+---
+
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 [https://serverfault.com/questions/348482/how-to-remove-invalid-characters-from-filenames](https://serverfault.com/questions/348482/how-to-remove-invalid-characters-from-filenames)
