@@ -9,12 +9,18 @@ nav_order: 16
 {: .no_toc }
 This is how i installed a Sonarr, an independent fork of Sonarr reworked for automatically downloading movies via Usenet and BitTorrent, on FreeNAS in a iocage jail.
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
----
+</details>
 
+{: .no_toc .text-delta }
+
+---
 ## Getting started
 These instructions will tell you how to add storage to an iocage jail, download, install and run Sonarr as a specific user, and integrate it with Deluge.
 
@@ -23,11 +29,13 @@ These instructions will tell you how to add storage to an iocage jail, download,
 * Knowledge of SSH and how to navigate to your jail in FreeNAS
 * FreeNAS 11.2 and knowledge of how to create a jail with shares and knowledge of UNIX folder and files permissions
 
-## Udate and upgrade
+### Udate and upgrade
 Update and upgrade your iocage jail first:
 ```tcsh
 root@Sonarr:/ # pkg upgrade && pkg update
 ```
+
+---
 
 ## Install Sonarr
 ```bash
@@ -101,6 +109,8 @@ Make the user `sonarr` the owner of Sonarr's startup directory. This will enable
 root@Sonarr:/usr/local/share # chown -R sonarr sonarr/
 ```
 
+---
+
 ## Configuring folders
 Stop the Sonarr jail. 
 
@@ -165,9 +175,12 @@ root@Sonarr:/mnt/Torrents # pw groupadd deluge -g 922
 root@Sonarr:/mnt/Torrents # pw usermod sonarr -G sonarr,warez,deluge
 ```
 
+---
+
 ## Authors
 Mr. Johnson
 
+---
 
 ## Acknowledgments
 * [https://www.cyberciti.biz/faq/linux-change-user-group-uid-gid-for-all-owned-files/](https://www.cyberciti.biz/faq/linux-change-user-group-uid-gid-for-all-owned-files/)
