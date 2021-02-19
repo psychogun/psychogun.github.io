@@ -10,16 +10,25 @@ nav_order: 2
 Wanted to document and gather all of my findings in a central place.
 
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 ## Getting started
 
 
-## Requirements
+### Requirements
 * FreeNAS 11.2
+
+---
 
 ## Install
 
@@ -83,6 +92,7 @@ su - bookstack
 ```
 NOTE: Replace bookstack with your username.
 
+---
 
 ## Install PHP
 
@@ -119,6 +129,8 @@ Performing sanity check on php-fpm configuration:
 
 Starting php_fpm.
 ```
+
+---
 
 ## Install MariaDB
 
@@ -236,6 +248,8 @@ Bye
 $ 
 ```
 
+---
+
 ## Install Nginx
 
 Install Nginx.
@@ -309,6 +323,8 @@ nginx: configuration file /usr/local/etc/nginx/nginx.conf test is successful
 $ 
 ```
 
+---
+
 ## Install Composer
 
 Install Composer globally by running the following script in your terminal.
@@ -328,6 +344,9 @@ $ composer --version
 Composer version 1.9.1 2019-11-01 17:20:17
 $ 
 ```
+
+---
+
 ## Install BookStack
 
 Create a document root folder.
@@ -456,6 +475,7 @@ $
 
 You can now login using the default admin details `admin@admin.com` with a password of `password`. It is recommended to change these details directly after your first login.
 
+---
 
 ## Fault finding
 ### List users in Mariadb
@@ -482,13 +502,19 @@ MariaDB [(none)]> SELECT User FROM mysql.user;
 4 rows in set (0.00 sec)
 ```
 
+---
+
 ### Change password MariaDB
 ```bash
 MariaDB [(none)]> SET PASSWORD FOR 'techonthenet'@'localhost' = PASSWORD('newpassword');
 ```
 
+---
+
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://www.vultr.com/docs/how-to-install-bookstack-on-freebsd-12](https://www.vultr.com/docs/how-to-install-bookstack-on-freebsd-12)
