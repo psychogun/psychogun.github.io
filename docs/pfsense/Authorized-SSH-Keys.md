@@ -20,9 +20,6 @@ This is how I generated a private/public key pair for securing the SSH logins fo
 
 {: .no_toc .text-delta }
 
-1. TOC
-{:toc}
-
 ---
 
 ## Getting started
@@ -47,7 +44,7 @@ Your computer accesses your private key and decrypts the message. It then sends 
 
 The remote computer now knows that you must be who you say you are because only your private key could extract the session Id from the message it sent to your computer.
 
-## Prerequisites
+### Prerequisites
 * pfSense 2.4.5-RELEASE-p3 (amd64)
 * linux client
 
