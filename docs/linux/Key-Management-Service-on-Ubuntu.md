@@ -8,27 +8,34 @@ nav_order: 13
 {: .no_toc }
 This is how I used `kms-server` on an Ubuntu 
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 
 
-## Prerequisites
+### Prerequisites
 * Proxmox Virtual Environment 6.1-5
 * Ubuntu 18.04.3 Server
 
 
-## Update
+### Update
 ```bash
 sudo apt-get update
 sudo apt-get upgrade
 ```
 
-## Install qemu-guest-agent
+### Install qemu-guest-agent
 The qemu-guest-agent is a helper daemon, which is installed in the guest. It is used to exchange information between the host and guest, and to execute command in the guest.
 
 In Proxmox VE, the qemu-guest-agent is used for mainly two things:
@@ -55,6 +62,8 @@ Universal Time is now:  Sat Jan 11 21:24:07 UTC 2020.
 administrator@kms:~$ date
 Sat 11 Jan 22:24:16 CET 2020
 ```
+
+---
 
 ## Installing the KMS server
 The KMS server is available as binaries or source code that needs to be compiled. Let us use the source code.
@@ -91,6 +100,9 @@ administrator@kms:~/vlmcsd/bin$ ./vlmcs
 Connecting to 127.0.0.1:1688 ... successful
 Sending activation request (KMS V6) 1 of 1  -> 1111-12201-369-033755-01-5079-11213.0010-0032021 (4A1DD49C13BB0079)
 ```
+
+---
+
 ## Configuring the KMS daemon to run at boot
 ```bash
 administrator@kms:~/vlmcsd/bin$ sudo nano /etc/systemd/system/kms@administrator.service
@@ -145,6 +157,8 @@ administrator@kms:/etc/systemd/system$ ps -ef | grep vlmcsd
 adminis+  6363  5391  0 14:29 pts/0    00:00:00 grep --color=auto vlmcsd
 ```
 
+---
+
 ## Windows configuration
 Open up `cmd.exe` as Administrator:
 ```cmd
@@ -165,10 +179,12 @@ cscript ospp.vbs /act
 cscript ospp.vbs /dstatusall
 
 
+---
 
 ## Authors
 Mr. Johnson
 
+---
 
 ## Acknowledgments
 * [https://github.com/kebe7jun/linux-kms-server](https://github.com/kebe7jun/linux-kms-server)
