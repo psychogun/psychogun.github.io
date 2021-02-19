@@ -14,12 +14,19 @@ I have some lights, a smartlock, some devices to measure temperatures with and, 
 
 I am basically following this guide for the starting installation: [https://www.home-assistant.io/docs/installation/raspberry-pi/](https://www.home-assistant.io/docs/installation/raspberry-pi/)
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 
 ## Getting started
 This is my guide. There are many like it, but this one is mine. My guide is my best friend. It is my life. 
@@ -52,7 +59,6 @@ Power on the Virtual machine and follow this guide for an excellent guide to ins
 
 Remember to select to install `OpenSSH server` under the installation of Ubuntu.
 
-## Some things first ..
 ### Update && upgrade
 Update and upgrade:
 ```bash
@@ -244,6 +250,8 @@ Successfully installed wheel-0.33.6
 
 Once you have installed the required `wheel` package it is now time to install Home Assistant in our virtual environment!
 
+---
+
 ## Install Home Assistant
 ```bash
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ pip3 install homeassistant
@@ -323,6 +331,8 @@ $ sudo systemctl restart home-assistant@YOUR_USER && sudo journalctl -f -u home-
 
 Do these things that are stated above/whatever you want, and shut down your VM guest through <kbd>Proxmox</kbd> web gui and/or issue `sudo shutdown now` inside the virtual machine.
 
+---
+
 ## Attaching Z-Wave controllers
 I am using a Aeotec ZW090 Z-Stick Gen5 EU for communication with my Z-Wave devices. We will have to pass USB device through the <kbd>Proxmox</kbd>host to the guest OS. 
 
@@ -390,6 +400,7 @@ assistant@linuxbabe:/sys/class/tty$ readlink ttyACM0
 
 After we have passed the USB device to our installation, we will further pass the USB device- to a docker running `ozwdaemon` which we will use to pair Z-Wave devices to our dongle with. 
 
+---
 
 ## OpenZWave
 <kbd>Promox</kbd>, <kbd>ubuntu-server</kbd>, <kbd>docker</kbd>, <kbd>ozwdaemon</kbd> - USB Z-Wave dongle. This is the setup which will allow messages from our Z-Wave enabled entities communicate with <kbd>Home Assistant</kbd> through a <kbd>mqtt</kbd> broker server installed directly on the <kbd>ubuntu-server</kbd>.
@@ -535,6 +546,8 @@ MQTT
 
 * Broker: localhost 
 
+----
+
 ## Z-Wave
 ### configuration.yaml
 Here are som code snippets that I have used directly in the `configuration.yaml` file. 
@@ -639,6 +652,8 @@ assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo nano configuration.
 system_health:
 ```
 
+---
+
 ## Integrations: Z-Wave
 Different entities from my Z-Wave network. 
 
@@ -708,20 +723,29 @@ Anyhow, I ended up following this article upgrading the firmware of the Fantem (
 
 Go to <kbd>Configuration</kbd>, <kbd>Z-Wave</kbd>, selec <kbd>AEON Labs ZW112 Door Window Sensor 6 (Node:2 Complete)</kbd> and scroll down to <kbd>Node Configuration Options</kbd>. Set <kbd>121: Report Type</kbd> to <kbd>Send configuration parameter</kbd> to <kbd>Sensor Binary Report</kbd>. 
 
+---
+
 ## Enable Multi-factor Authentication Modules
 Go to your profile by clicking your name down to the left.
 
 Under `Multi-factor Authentication Modules`, click ENABLE on `totp`. Download Google Authenticator from your App Store and scan the code. For more information, go to [https://www.home-assistant.io/docs/authentication/multi-factor-auth/](https://www.home-assistant.io/docs/authentication/multi-factor-auth/).
 
+---
+
 ## Home Assistant Companion
 Install Home Assistant Companion from your App Store, but only do it after you have enabled Multi-factor. Do not log in and use it before enabling multi-factor authentication, because you will be unable to log on in without destroying your entities (because you are unable to connect, because you have not used Google Authenticator under that process).
+
+---
 
 ## Change icons
 Change your icons by using `mdi:icon` - look at this list for reference: [https://cdn.materialdesignicons.com/3.2.89/](https://cdn.materialdesignicons.com/3.2.89/)
 
+---
 
 ## Backup Home Assistant
 More should come..
+
+---
 
 ## Upgrade Home Assistant
 ```bash
@@ -729,24 +753,9 @@ assistant@linuxbabe:/home/homeassistant/.homeassistant$ cd /srv/
 assistant@linuxbabe:/srv$ cd homeassistant
 assistant@linuxbabe:/srv/homeassistant$ sudo -u homeassistant -H -s
 [sudo] password for assistant: 
-homeassistant@linuxbabe:/srv/homeassistant$ source bin/activate
-(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ 
-(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl | grep home
-  home-assistant@homeassistant.service                                                               loaded active running   Home Assistant                                                               
-  system-home\x2dassistant.slice                                                                     loaded active active    system-home\x2dassistant.slice             
+homeassistant@linuxbabe:/srv/homeassistant$ source bin/activate         
 ```
 Remember to stop `homeassistant` if it is running:
-```bash
-(homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl status home-assistant@homeassistant
-● home-assistant@homeassistant.service - Home Assistant
-   Loaded: loaded (/etc/systemd/system/home-assistant@homeassistant.service; enabled; vendor preset: enabled)
-   Active: active (running) since Mon 2020-03-02 00:08:17 CET; 1 months 3 days ago
- Main PID: 994 (hass)
-    Tasks: 40 (limit: 3194)
-   CGroup: /system.slice/system-home\x2dassistant.slice/home-assistant@homeassistant.service
-           └─994 /srv/homeassistant/bin/python3 /srv/homeassistant/bin/hass -c /home/homeassistant/.homeassistant
-```
-Regardless of if Home Assistant was running or not, this is how I stopped it:
 ```bash
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl stop home-assistant@homeassistant
 ==== AUTHENTICATING FOR org.freedesktop.systemd1.manage-units ===
@@ -761,6 +770,8 @@ Upgrade `homeassistant`:
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ systemctl start home-assistant@homeassistant
 ```
 
+---
+
 ## Manual start of Home Assistant
 ```bash
 photon:~ keyne$ ssh -l assistant 192.168.112.10
@@ -773,6 +784,8 @@ homeassistant@linuxbabe:/home/assistant$ source /srv/homeassistant/bin/activate
 [Press Ctrl+a, then press d to detach from screen]
 ```
 
+---
+
 ## Upgrading pip
 ```bash
 photon:~ keyne$ ssh -l assistant 192.168.112.10
@@ -783,6 +796,8 @@ assistant@linuxbabe:~$ sudo -u homeassistant -H -s
 homeassistant@linuxcbabe:/home/assistant$ source /srv/homeassistant/bin/activate
 (homeassistant) homeassistant@linuxbabe:/home/carolee$ pip install --upgrade pip
 ```
+
+---
 
 ## Camera
 I have a Unifi NVR on my network. This i s how  I integrated it.
@@ -853,10 +868,14 @@ OK?
 assistant@linuxbabe:/srv/homeassistant$ sudo journalctl -f -u home-assistant@homeassistant
 ```
 
+---
+
 ## Person tracker
 Configuration > Customization
 
  entity_picture: URL
+
+---
 
 ## Zigbee
 
@@ -903,6 +922,7 @@ Open up the lid. Go to <kbd>Configuration</kbd>, <kbd>Integrations</kbd> and cli
 #### IKEA bulb
 * [https://phoscon.de/en/support#faq-ikea1](https://phoscon.de/en/support#faq-ikea1)
 
+---
 
 ## Samba share
 Install Samba:
@@ -972,6 +992,8 @@ Press enter to see a dump of your service definitions
 On MacOS, open Finder and press `command + K`. Connect to server `smb://172.16.32.17/homeassistant/.homeassistant` to see your configuration files. 
 
 Now you can directly edit the `configuration.yaml` file from MacOS!
+
+---
 
 ## Fault finding
 ### ModuleNotFoundError: No module named 'apt_pkg'
@@ -1081,9 +1103,10 @@ To add ID Lock 150 to Home Assistant:
 
 And now I had two instances of the ID Lock 150 in Home Assistant. I had to follow the guide "Removing Devices" with `is_failed: true` setting: [https://www.home-assistant.io/docs/z-wave/adding/](https://www.home-assistant.io/docs/z-wave/adding/).
 
+---
 
 ## Legacy
-Older notes which I have kept. 
+Older notes which I have decided to keep here for future references.
 
 ### Remote access with TLS/SSL via Let's Encrypt
 I am not using this anymore. I am using nginx reverse proxy. 
@@ -1250,9 +1273,12 @@ Restart Home Assistant again;
 assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo systemctl restart home-assistant@homeassistant
 ```
 
+---
+
 ## Authors
 Mr. Johnson
 
+---
 
 ## Acknowledgments
 * [https://community.letsencrypt.org/t/certbot-command-not-found/16547/13](https://community.letsencrypt.org/t/certbot-command-not-found/16547/13)
