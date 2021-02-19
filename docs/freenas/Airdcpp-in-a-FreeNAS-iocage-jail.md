@@ -9,10 +9,17 @@ nav_order: 1
 {: .no_toc }
 This is how i installed a communal peer-to-peer file sharing application for file servers/NAS devices called AirDC++ on FreeNAS in a standalone iocage jail.
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 
 ## Getting started
@@ -21,6 +28,8 @@ These instructions will download, compile, install and run AirDC++ in an iocage 
 ### Prerequisites
 * Knowledge of SSH and how to navigate to your jail in FreeNAS
 * FreeNAS 11.2 and knowledge of how to create a jail with shares and knowledge of UNIX folder and files permissions
+
+---
 
 ## Compiling
 Update and upgrade your iocage jail first:
@@ -50,6 +59,7 @@ Use `make` to compile AirDC++ with gcc (the number after -j indicates how many p
 ```bash
 root@Airdccp:/usr/local/airdcpp-webclient # make -j6
 ```
+---
 
 ## Add a user
 Add a user to run AirDC++, we do not want AirDC++ to run as root:
@@ -83,6 +93,7 @@ adduser: INFO: Successfully added (zanko) to the user database.
 adduser: INFO: Password for (zanko) is: 
 Add another user? (yes/no): no
 ```
+---
 
 ## Install
 ```bash
@@ -207,11 +218,13 @@ Start the `airdcppd` daemon:
 root@Airdcpp:/usr/local/etc/rc.d # service airdcppd start
 ```
 
+---
+
 ## Add share
 
+---
+
 ## getfacl
-
-
 Create a group called dump with GID = 1049 in the iocage jail.
 ```bash
 root@Airdcpp:~ # pw groupadd dump -g 1049
@@ -223,8 +236,12 @@ zanko dump
 root@Airdcpp:~ # 
 ```
 
+---
+
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://www.reddit.com/r/freenas/comments/9ijrsp/ive_read_dozens_of_guides_but_i_still_dont/](https://www.reddit.com/r/freenas/comments/9ijrsp/ive_read_dozens_of_guides_but_i_still_dont/)
