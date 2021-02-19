@@ -11,7 +11,7 @@ This is how I generated a private/public key pair for securing the SSH logins fo
 ## Table of contents
 <details open markdown="block">
   <summary>
-    Table of contents
+
   </summary>
   {: .text-delta }
 1. TOC
