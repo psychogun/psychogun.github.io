@@ -4,19 +4,25 @@ title: Dedicated Quake3 servers on Ubuntu
 parent: Linux
 nav_order: 3
 ---
-*WORK IN PROGRESS as of 2019-08-01*
+
 # How to set up dedicated Quake 3 Arena server(s) with different mods on Ubuntu Server 16.04
 {: .no_toc }
 I used to play Quake III: Arena with my friends when I grew up (way back in the 00s). I wanted to introduce Q3 to my kid and the easiest solution would be to just go online and download Quake Live from Steam (I remember trying QL when it was playable through the browser). However, since I am using macOS and QL is now only available on Windows, I had to think of alternatives.
 
 
-I took the challenge of trying to host my own dedicated Q3 server with the latest mods so I could bring some QUAD POWER, DENIED and M-M-M-MMULTIKILL and show my kid how a proper KILLING-SPREE is done.
+I took the challenge of trying to host my own dedicated Q3 server with the latest mods so I could bring some QUAD POWER, DENIED and M-M-M-MMULTIKILL* and show my kid how a proper KILLING-SPREE is done.
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 
 ## Getting started
@@ -41,6 +47,7 @@ in your terminal, following the guide below should be pretty safe, but I take no
 
 And as with every guide, I recommend to read through all of it before you begin.
 
+---
 
 ## Installation of Ubuntu Server 16.04
 If you do not have a dedicated machine to use for the installation of Ubuntu, you could download VirtualBox from Oracle ([https://www.virtualbox.org](https://www.virtualbox.org)) or use (any) another hypervisor for your platform ([https://en.wikipedia.org/wiki/Hypervisor](https://en.wikipedia.org/wiki/Hypervisor).
@@ -51,6 +58,8 @@ After following the guide above, update and upgrade your Ubuntu Server 16.04 ins
 ```bash
 sarge@quake3server:~$ sudo apt-get update && sudo apt-get upgrade
 ```
+
+---
 
 ## Configuration
 I thought it would be an easy quest of just importing some Q3 binaries from my old ripped up CD and do some tweaking and voilà- I have some executables to configure into a server. But it quickly came to my attention that the Q3 scene has gone (in many directions). 
@@ -142,6 +151,8 @@ ioq3srv@quake3server:~$ cd .q3a/baseq3/
 ioq3srv@quake3server:~/.q3a/baseq3$ more q3config_server.cfg 
 ```
 Because I wanted proper server settings, I searched online and looked for some “official” server settings from big tournaments such as QuakeCon, ESWC or CPL, but I was unsuccessfull. The closest thing I found was a guy ([http://www.esreality.com/post/2848596/new-q3-pro-osp-configs/](http://www.esreality.com/post/2848596/new-q3-pro-osp-configs/) who had some server config files stored in a shared dropbox amongst config files from pro players ([https://www.dropbox.com/s/6z2iz4ugd0zket6/configs.zip?dl=0&filesubpath=%2Fquake3](https://www.dropbox.com/s/6z2iz4ugd0zket6/configs.zip?dl=0&filesubpath=%2Fquake3). But, are those server configs valid? Now 10+ years after it presumably dates from? And is that config for Q3 or does it include settings for osp_mod/CPMA? Or any other mods? Read on. .
+
+---
 
 ## The Contest
 Correct me if I am mistaken,
@@ -467,8 +478,12 @@ If `sv_downloadAllow` is set to `1`, clients connecting to the server will be al
 
 PS: Remember that your client has to enable Automatic download (SETUP > GAME OPTIONS > Automatic Downloading “on”), or type `/cl_allowdownload 1` in the Q3 console from the loaded _mod_  to fully allow downloads of missing maps. 
 
+---
+
 ## Using screen to start the Q3 servers
 Read this guide for a good practise on how to start and monitor your Q3 server: [https://playmorepromode.com/guides/cnq3-dedicated-server-guide](https://playmorepromode.com/guides/cnq3-dedicated-server-guide).
+
+---
 
 ## Securing our server
 With our sudo user, we will issue a command called netstat ([https://en.wikipedia.org/wiki/Netstat](https://en.wikipedia.org/wiki/Netstat)), which shows us our open ports and current connections. 
@@ -534,6 +549,9 @@ I am not using IPV6, so I’ll just delete the rule number 3:
 ```
 sarge@quake3server:~$ sudo ufw delete 3
 ```
+
+---
+
 ## Getting players to play on your server
 
 Read this .pdf [http://caia.swin.edu.au/reports/070730A/CAIA-TR-070730A.pdf](http://caia.swin.edu.au/reports/070730A/CAIA-TR-070730A.pdf) for a brief description on how the server-discovery protocol for Q3 works. 
@@ -550,6 +568,13 @@ seta sv_master3 "master.gnw.de:27950"		//   use +set dedicated x to tell the ser
 seta sv_master4 "master3.idsoftware.com:27950"  //   to register itself there, x = 2 : register x = 1 : don't
 ```
 [https://ioquake3.org/2016/05/19/the-id-master-server-is-offline/](https://ioquake3.org/2016/05/19/the-id-master-server-is-offline/).
+
+---
+
+## Authors
+Mr. Johnson
+
+---
 
 ##  Acknowledgments
 URLs that I found useful at some time when I was writing this howto: 
