@@ -8,12 +8,19 @@ nav_order: 2
 {: .no_toc }
 This is how I generated a private/public key pair for securing the SSH logins for a user on a remote resource. 
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 Secure shell (SSH) is the encrypted protocol used to log in to user accounts on remote Linux or Unix-like computers. Typically such user accounts are secured using passwords. When you log in to a remote computer, you must provide the user name and password for the account you are logging in to.
 
@@ -36,9 +43,11 @@ Your computer accesses your private key and decrypts the message. It then sends 
 
 The remote computer now knows that you must be who you say you are because only your private key could extract the session Id from the message it sent to your computer.
 
-## Prerequisites
+### Prerequisites
 * pfSense 2.4.5-RELEASE-p3 (amd64)
 * linux client
+
+---
 
 ## ssh-keygen
 ```bash
@@ -162,9 +171,12 @@ rogue:.ssh one$
 
 Great! Let us use the private key from now on, yehaw!
 
+---
+
 ## Authors
 Mr. Johnson
 
+---
 
 ## Acknowledgments
 * [https://askubuntu.com/questions/53553/how-do-i-retrieve-the-public-key-from-a-ssh-private-key](https://askubuntu.com/questions/53553/how-do-i-retrieve-the-public-key-from-a-ssh-private-key)
