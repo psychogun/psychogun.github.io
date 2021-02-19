@@ -9,10 +9,17 @@ nav_order: 4
 {: .no_toc }
 I have Deluge 1.3.5 installed in an old warden jail on FreeNAS. This is how I replaced the warden jail with a new iocage jail with Deluge 2.0.3 on FreeNAS. This is the information that had me started: [https://forum.deluge-torrent.org/viewtopic.php?t=55437](https://forum.deluge-torrent.org/viewtopic.php?t=55437).
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 ## Getting started
 Go to your FreeNAS. Select Jails > and click Add.
@@ -34,6 +41,8 @@ Network properties > Interfaces: vnet0:bridge1.
 Click SAVE.
 
 Select and START Deluge.
+
+---
 
 ## Preconfiguration
 ### Log in to your FreeNAS via SSH
@@ -129,6 +138,9 @@ Change directory to `/home/deluge/`.
 Go to [https://github.com/deluge-torrent/deluge](https://github.com/deluge-torrent/deluge]) and copy the clone link; [https://github.com/deluge-torrent/deluge.git](https://github.com/deluge-torrent/deluge.git]). 
 
 then
+
+---
+
 ## Download deluge
 ```bash
 ross@Deluge:/home/deluge # git clone https://github.com/deluge-torrent/deluge.git
@@ -146,10 +158,14 @@ Check out the dependencies for deluge which is stated in `DEPENDS.md`:
 root@Deluge:/home/deluge/deluge # more DEPENDS.md
 ```
 
+---
+
 ## Install dependencies
 ```bash
 root@Deluge:/home/deluge/deluge # pkg install nano intltool closure-compiler py36-twisted  py36-OpenSSL py36-rencode py36-rencode py36-xdg  xdg-utils py36-six py36-zope.interface py36-chardet py36-setproctitle py36-pillow py36-dbus py36-distro py36-libtorrent-rasterbar py36-GeoIP2 py36-mako libnotify
 ```
+
+---
 
 ## Build deluge
 ```bash
@@ -157,11 +173,15 @@ ross@Deluge:/home/deluge # cd deluge/
 ross@Deluge:/home/deluge/deluge # python3.6 setup.py build
 ```
 
+---
+
 ## Install deluge
 ```bash
 ross@Deluge:/home/deluge # cd deluge/
 ross@Deluge:/home/deluge/deluge # python3.6 setup.py install
 ```
+
+---
 
 ## Startup script deluge_web
 ### /etc/rc.conf
@@ -275,6 +295,8 @@ ross@Deluge:/home/deluge/.config # mkdir deluge
 ross@Deluge:/home/deluge/.config # chown -R deluge:deluge /home/deluge/.config
 ```
 
+---
+
 ## Start deluge_web 
 Start our deluge_web service:
 ```bash
@@ -284,6 +306,8 @@ Starting deluge_web.
 
 ### 8112
 Navigate to localhost:8112 to see if the deluge webs service is up and running. From the web service, you can start `deluged` (Deluge daemon) through the Connection Manager. 
+
+---
 
 ## Startup script deluged
 If you do not want to have deluge start the daemon automatically, but started from the web service, skip this entire step. 
@@ -368,6 +392,7 @@ run_rc_command "$1"
 root@Deluge:/usr/local/etc/rc.d # chmod +x deluged 
 ```
 
+---
 
 ## Configuration of Deluge
 ### Downloads
@@ -404,12 +429,237 @@ Maximum Upload Speed (KiB/s): -1
 ### Interface
 * Allow the use of multiple filters at once
 
-## Other
+### Queue
+* Queue new torrents on top
+Active Torrents
+Total: 299
+Downloading: 250
+Seeding: 50
+* Ignore slow torrents
+
+Seeding Rotation
+Share Ratio: 0
+Time Ratio: 0
+Time (m): 0
+
+Share Ratio Reached
+* Share Ratio: 0
+ * Remove torrent
+* Stop seeding when share ratio reaches 0.5
+ * Remove torrent when share ratio is reached
+
+
+### Proxy
+
+### Plugins
+* AutoAdd
+* Blocklist
+* Label
+
+Restart the deluge jail.
+
+
+### Labels
+#### lidarr
+Queue
+v Apply queue settings:
+ v Auto Managed
+  v Stop seed at ratio: 0
+  v Remove at ratio
+
+Folders
+v Apply folder settings:
+ v Move completed to: 
+  /mnt/Torrents/Finished/lidarr_finished
+
+#### mylar
+Queue
+v Apply queue settings:
+ v Auto Managed
+  v Stop seed at ratio: 0
+  v Remove at ratio
+
+Folders
+v Apply folder settings:
+ v Move completed to: 
+  /mnt/Mylar_dump/DUMP/
+
+#### tv-sonarr
+Queue
+v Apply queue settings:
+ v Auto Managed
+  v Stop seed at ratio: 0
+
+#### radarr
+Queue
+v Apply queue settings:
+ v Auto Managed
+  v Stop seed at ratio: 0
+
+#### lazylibrarian
+Queue
+v Apply queue settings:
+ v Auto Managed
+  v Stop seed at ratio: 0
+  v Remove at ratio
+
+Folders
+v Apply folder settings:
+ v Move completed to: 
+  /mnt/Torrents/Finished/LazyLibrarian
+
+### AutoAdd
+Go to Preferences, select AutoAdd
+
+/mnt/Torrents/Watch
+
+
+### Execute
+ Torrent Complete /home/deluge/echo_script.sh
+ ```bash
+ ross@Deluge:/home/deluge # more echo_script.sh 
+#!/bin/bash
+torrentid=$1
+torrentname=$2
+torrentpath=$3
+echo "Torrent Details: " "$torrentname" "$torrentpath" "$torrentid"  >> /home/deluge/echo_script.log
+```
+
+---
+
+## Daemon 
+Daemon port: 58846
+Connections
+* Allow Remote Connections
+Other
+
+### Create users for daemond
+You can create users in the `auth` file.
+```bash
+ross@Deluge:/home/deluge # cd /home/deluge/.config/deluge/
+ross@Deluge:/home/deluge/.config/deluge # nano auth
+```
+
+---
+   
+## Install YaRSS
+### First install Deluge 
+This I did on my Mint linux edition.
+
+The ​Deluge PPA contains the latest Deluge releases for Ubuntu.
+```bash
+sudo add-apt-repository ppa:deluge-team/stable
+sudo apt-get update
+sudo apt-get install deluge
+```
+
+Start deluge by issuing `deluge`. Change to Thin Client in Preferences. Quit deluge. 
+
+Then run deluge with the following parameters:
+```bash
+deluge "connect ip-adress:port username:password"
+```
+
+See "Misc - Create users for daemond" for further information on how to create users. 
+
+Download [https://bitbucket.org/bendikro/deluge-yarss-plugin/downloads/](https://bitbucket.org/bendikro/deluge-yarss-plugin/downloads/): YaRSS2-2.1.4-py3.6.egg
+
+Go to Preferences, Plugins and press Install within the Deluge client. If nothing is happening, verify that you are using a correct python version which is corresponding with the version listed in the *.egg.
+### Add RSS Feeds
+Go to Preferences, select YaRSS2 - and then select RSS Feeds.
+
+Click Add Feed:
+RSS Feed Name: 
+RSS Feed URL:
+Update Interval (min): 120 v Run on startup
+Obey TTL: v Use TTL value from RSS Feed (recommended)
+Cookies:
+Magnet link: v Prefer magnet link over torrent
+
+### Add Subscriptions
+Go to Preferences, select YaRSS2 - and then select Subscriptions.
+
+Click Add Subscription
+Subscription name:
+RSS Feed:
+Filter include (regex)
+Filter exclude (regex)
+
+Options
+Label: 
+
+---
+
+## Groups
+Create a group called `mylar_dump` with GID = 1049 in the iocage jail.
+```bash
+ross@Deluge:~ # pw groupadd mylar_dump -g 1049
+ross@Deluge:~ # groups deluge
+deluge
+ross@Deluge:~ # pw usermod deluge -G deluge,mylar_dump
+ross@Deluge:~ # groups deluge
+deluge mylar_dump
+ross@Deluge:~ # 
+```
+
+---
+
+## Fault finding
+Set error logging to either
+* none
+* critical
+* error
+* warning
+* info
+* debug
+
+Note: `debug` is very verbose and with a lot of torrents log files will be MB's in size.
+
+You change the log levels your `/usr/local/etc/rc.d/deluge_web` and or `/usr/local/etc/rc.d/deluged` file.
+
+Logging for `deluged`:
+```bash
+root@Deluge:~ # tail -f /home/deluge/.config/deluge/deluged.log
+```
+
+Logging for `deluge_web`:
+```bash
+root@Deluge:~ # tail -f /var/tmp/deluge_web.log
+```
+
+### Old jail
+
+deluge:*:922:922:Deluge BitTorrent Client:/home/deluge:/sbin/nologin
+ross@Deluge:/ # groups deluge
+deluge mylar_dump
+
+groups deluge
+mylar_dump:*:1049:deluge
+
+ross@Deluge:/mnt # ls -alh
+total 578
+drwxr-xr-x     5 ross  wheel          5B Oct  4  2018 .
+drwxr-xr-x    18 ross  wheel         22B Mar 28  2018 ..
+drwxrwx---+ 1209 1000  1002         1.2K Dec 16 16:25 Movies
+drwxrwx---    12 ross  mylar_dump    15B Dec  8 00:20 Mylar_dump
+drwxrwx---+    7 1000  deluge         9B May  7  2018 Torrents
+ross@Deluge:/mnt # 
+
+#### Mount points
+I have to mount `Movies`, `Mylar_dump` and `Torrents`.
+And create a group called `mylar_dump` with `GID=1049`.
+
+And then turn off all torrents on the old warden jail, shut down the warden jail - mount the mount points, and then edit the IP of the new iocage jail. And then test.
+
+
+
+
+#### GeoIP
 GeoIP.dat is no longer maintained by MaxMind, but there is a guy converting the new GeoIP version 2 files `*.mmdb`  to `*.dat` which you can get here; [https://www.miyuru.lk/geoiplegacy](https://www.miyuru.lk/geoiplegacy).
 
 Anyways - even if you have the "old" `GeoIP.dat` files, we currently just have to wait for the deluge team to use GeoIP2 instead of the old legacy GeoIP python extension, as it is removed from freshports [https://www.freshports.org/net/py-GeoIP/](https://www.freshports.org/net/py-GeoIP/) -- or maybe you could download and install the old one? [https://github.com/maxmind/geoip-api-python](https://github.com/maxmind/geoip-api-python).
 
-### Download old GeoIP Legacy C API
+##### Download old GeoIP Legacy C API
 [https://github.com/maxmind/geoip-api-c](https://github.com/maxmind/geoip-api-c)
 ```bash
 root@Deluge:/home/deluge # git clone https://github.com/maxmind/geoip-api-c.git
@@ -424,7 +674,7 @@ Hm. Do not understand how I could get this installed. `./configure` which is sug
 
 Blaergh. 
 
-### Download old Legacy GeoIP
+##### Download old Legacy GeoIP
 [https://github.com/maxmind/geoip-api-python](https://github.com/maxmind/geoip-api-python)
 ```bash
 ross@Deluge:/home/deluge # git clone https://github.com/maxmind/geoip-api-python.git
@@ -458,221 +708,13 @@ GeoIP Database
 *Location: /usr/home/deluge/GeoIP/GeoIP.dat
 
 Yah, blaergh.
-## Daemon 
-Daemon port: 58846
-Connections
-* Allow Remote Connections
-Other
 
-## Queue
-* Queue new torrents on top
-Active Torrents
-Total: 299
-Downloading: 250
-Seeding: 50
-* Ignore slow torrents
-
-Seeding Rotation
-Share Ratio: 0
-Time Ratio: 0
-Time (m): 0
-
-Share Ratio Reached
-* Share Ratio: 0
- * Remove torrent
-* Stop seeding when share ratio reaches 0.5
- * Remove torrent when share ratio is reached
-
-## Proxy
-
-## Plugins
-* AutoAdd
-* Blocklist
-* Label
-
-Restart the deluge jail.
-
-## Labels
-### lidarr
-Queue
-v Apply queue settings:
- v Auto Managed
-  v Stop seed at ratio: 0
-  v Remove at ratio
-
-Folders
-v Apply folder settings:
- v Move completed to: 
-  /mnt/Torrents/Finished/lidarr_finished
-
-### mylar
-Queue
-v Apply queue settings:
- v Auto Managed
-  v Stop seed at ratio: 0
-  v Remove at ratio
-
-Folders
-v Apply folder settings:
- v Move completed to: 
-  /mnt/Mylar_dump/DUMP/
-
-### tv-sonarr
-Queue
-v Apply queue settings:
- v Auto Managed
-  v Stop seed at ratio: 0
-
-### radarr
-Queue
-v Apply queue settings:
- v Auto Managed
-  v Stop seed at ratio: 0
-
-### lazylibrarian
-Queue
-v Apply queue settings:
- v Auto Managed
-  v Stop seed at ratio: 0
-  v Remove at ratio
-
-Folders
-v Apply folder settings:
- v Move completed to: 
-  /mnt/Torrents/Finished/LazyLibrarian
-
-   
-### Install YaRSS
-#### First install Deluge 
-This I did on my Mint linux edition.
-
-The ​Deluge PPA contains the latest Deluge releases for Ubuntu.
-```bash
-sudo add-apt-repository ppa:deluge-team/stable
-sudo apt-get update
-sudo apt-get install deluge
-```
-
-Start deluge by issuing `deluge`. Change to Thin Client in Preferences. Quit deluge. 
-
-Then run deluge with the following parameters:
-```bash
-deluge "connect ip-adress:port username:password"
-```
-
-See "Misc - Create users for daemond" for further information on how to create users. 
-
-Download [https://bitbucket.org/bendikro/deluge-yarss-plugin/downloads/](https://bitbucket.org/bendikro/deluge-yarss-plugin/downloads/): YaRSS2-2.1.4-py3.6.egg
-
-Go to Preferences, Plugins and press Install within the Deluge client. If nothing is happening, verify that you are using a correct python version which is corresponding with the version listed in the *.egg.
-#### Add RSS Feeds
-Go to Preferences, select YaRSS2 - and then select RSS Feeds.
-
-Click Add Feed:
-RSS Feed Name: 
-RSS Feed URL:
-Update Interval (min): 120 v Run on startup
-Obey TTL: v Use TTL value from RSS Feed (recommended)
-Cookies:
-Magnet link: v Prefer magnet link over torrent
-
-#### Add Subscriptions
-Go to Preferences, select YaRSS2 - and then select Subscriptions.
-
-Click Add Subscription
-Subscription name:
-RSS Feed:
-Filter include (regex)
-Filter exclude (regex)
-
-Options
-Label: 
-
-## AutoAdd
-Go to Preferences, select AutoAdd
-
-/mnt/Torrents/Watch
-
-## Misc
-### Create users for daemond
-You can create users in the `auth` file.
-```bash
-ross@Deluge:/home/deluge # cd /home/deluge/.config/deluge/
-ross@Deluge:/home/deluge/.config/deluge # nano auth
-```
-
-### Old jail
-deluge:*:922:922:Deluge BitTorrent Client:/home/deluge:/sbin/nologin
-ross@Deluge:/ # groups deluge
-deluge mylar_dump
-
-groups deluge
-mylar_dump:*:1049:deluge
-
-ross@Deluge:/mnt # ls -alh
-total 578
-drwxr-xr-x     5 ross  wheel          5B Oct  4  2018 .
-drwxr-xr-x    18 ross  wheel         22B Mar 28  2018 ..
-drwxrwx---+ 1209 1000  1002         1.2K Dec 16 16:25 Movies
-drwxrwx---    12 ross  mylar_dump    15B Dec  8 00:20 Mylar_dump
-drwxrwx---+    7 1000  deluge         9B May  7  2018 Torrents
-ross@Deluge:/mnt # 
-
-
-### Groups
-Create a group called `mylar_dump` with GID = 1049 in the iocage jail.
-```bash
-ross@Deluge:~ # pw groupadd mylar_dump -g 1049
-ross@Deluge:~ # groups deluge
-deluge
-ross@Deluge:~ # pw usermod deluge -G deluge,mylar_dump
-ross@Deluge:~ # groups deluge
-deluge mylar_dump
-ross@Deluge:~ # 
-```
-
-### Mount points
-I have to mount Movies, Mylar_dump and Torrents.
-And create a group called mylar_dump with GID=1049.
-
-And then turn off all torrents on the old warden jail, shut down the warden jail - mount the mount points, and then edit the IP of the new iocage jail. And then test.
-
-## Execute
- Torrent Complete /home/deluge/echo_script.sh
- ```bash
- ross@Deluge:/home/deluge # more echo_script.sh 
-#!/bin/bash
-torrentid=$1
-torrentname=$2
-torrentpath=$3
-echo "Torrent Details: " "$torrentname" "$torrentpath" "$torrentid"  >> /home/deluge/echo_script.log
-```
-
-## Fault finding
-Set error logging to either
-* none
-* critical
-* error
-* warning
-* info
-* debug
-
-Note: `debug` is very verbose and with a lot of torrents log files will be MB's in size.
-
-You change the log levels your `/usr/local/etc/rc.d/deluge_web` and or `/usr/local/etc/rc.d/deluged` file.
-
-Logging for `deluged`:
-```bash
-root@Deluge:~ # tail -f /home/deluge/.config/deluge/deluged.log
-```
-
-Logging for `deluge_web`:
-```bash
-root@Deluge:~ # tail -f /var/tmp/deluge_web.log
-```
+---
 
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/](https://computingforgeeks.com/how-to-install-pip-python-package-manager-on-freebsd-12/)
