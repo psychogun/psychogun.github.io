@@ -9,17 +9,26 @@ nav_order: 10
 {: .no_toc }
 This is how I installed mylar3 in an python virtual environment in a FreeNAS iocage jail. 
 
-# Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 
-# Prerequisites
+## Prerequisites
 * FreeNAS Version: FreeNAS-11.3-RELEASE
 * Iocage jail version: 11.3-RELEASE
 
-# Getting started
+---
+
+## Getting started
 Go to your FreeNAS. Select Jails > and click Add.
 * Name: Mylar3
 * Jail Type: Default (Clone Jail)
@@ -30,12 +39,13 @@ Click NEXT.
 * [v] VNET
 Click NEXT and confirm the settings with clicking SUBMIT. 
 
-## Add mount points
+
+### Add mount points
 Add your mount points. 
 
 Start your jail by selecting it and then click START.
 
-## update && upgrade
+### update && upgrade
 SSH in to your FreeNAS and log in to your jail with the command `iocage console Mylar3`:
 
 ```bash
@@ -44,12 +54,12 @@ root@Mylar3:~ # pkg update
 root@Mylar3:~ # pkg upgrade
 ```
 
-## Install some necessary dependencies
+### Install some necessary dependencies
 ```bash
 root@Mylar3:~ # pkg install gmake wget screen nano git sudo bash py37-virtualenv py37-pip lzlib openjpeg unrar py37-sqlite3
 ```
 
-## Add a group
+### Add a group
 According to your ACLs on the mounted dataset(s), which groups have read/write access to the share? On my datasets, there is a group called `mylar` with a `GID=1048` and on another dataset there's a group called `mylar_dump` with a `GID=1049` that has read/write access.
 
 These mounted datasets are for the Comic Location Path and the folder to monitor.
@@ -59,7 +69,7 @@ These mounted datasets are for the Comic Location Path and the folder to monitor
 root@Mylar3:/etc/pkg # pw groupadd mylar -g 1048
 root@Mylar3:/etc/pkg # pw groupadd mylar_dump -g 1049
 ```
-## Add a service user
+### Add a service user
 Add a user which will act as a service user to start `mylar3`. This user is called `mylar` with `uid=8675309`, has `/nonexistent` home directory and sets the user's login shell to `/usr/sbin/nologin` which denies this user interactive login- and a comment is also provided to this user, `-c`.
 ```bash
 root@Mylar3:/etc/pkg # pw adduser mylar -u 8675309 -d /nonexistent -s /usr/sbin/nologin -c "Mylar service user for mylar3"
@@ -78,20 +88,21 @@ root@Mylar3:/usr/local # id mylar
 uid=8675309(mylar) gid=1048(mylar) groups=1048(mylar),1049(mylar_dump)
 ```
 
-## Create a virtual environment
+### Create a virtual environment
 To create a python virtual environment, which will be identified as `(mylar)`, inside of `/usr/local/virtual` folder, do this:
 ```
 root@Mylar3:/usr/local/virtual # python3.7 -m venv /usr/local/virtual/mylar
 ```
 
-## Activate the virtual environment
+### Activate the virtual environment
 ```bash
 root@Mylar3:/usr/local/virtual # cd /usr/local/virtual/mylar/bin
 root@Mylar3:/usr/local/virtual/mylar/bin # bash
 [root@Mylar3 /usr/local/virtual/mylar/bin]# source ./activate
 (mylar) [root@Mylar3 /usr/local/virtual/mylar/bin]# 
 ```
-# Requirements.txt
+
+### Requirements.txt
 There are some requirements for running `mylar3`. These can be found here [https://github.com/mylar3/mylar3/blob/master/requirements.txt](https://github.com/mylar3/mylar3/blob/master/requirements.txt). In the `requirements.txt` below, I have omitted `unrar` and `unrar-cffi` from the original file. This is because `unrar` broke `unrar-cffi` (and we've already installed `unrar`).
 
 Create a `requirements.txt` file:
@@ -160,7 +171,9 @@ PS: In order to activate SSL/TLS for webgui access, you'll also have to install 
 (mylar) [root@Mylar3 /tmp]# pip install pyopenssl
 ```
 
-# Install mylar3
+---
+
+## Install mylar3
 Now since we have all the required dependencies, let us install Mylar.
 
 We'll use `git clone` and this will create a folder called `mylar3` in the working current directory. Let us do this under the `/usr/local/` folder:
@@ -168,14 +181,17 @@ We'll use `git clone` and this will create a folder called `mylar3` in the worki
 (mylar) [root@Mylar3 /tmp/unrar-cffi-0.1.0a5]# cd /usr/local
 (mylar) [root@Mylar3 /usr/local]$ git clone https://github.com/mylar3/mylar3.git
 ```
-# Configuration of mylar3
-## chown
+
+---
+
+## Configuration of mylar3
+### chown
 Make our service user `mylar` the owner of the newly created `mylar3` folder, and do this recursively:
 ```bash
 (mylar) [root@Mylar3 /usr/local]$ chown -R mylar mylar3/
 ```
 
-## Carepackage
+### Carepackage
 If you try to generate a Carepackage (for logs and whatnot), it will fail. We have to create a symbolic link for `pip3` first.
 ```bash
 500 Internal Server Error
@@ -204,12 +220,15 @@ Traceback (most recent call last):
 FileNotFoundError: [Errno 2] No such file or directory: 'pip3': 'pip3'
 Powered by CherryPy 5.4.0
 ```
+
 ### Symbolic link pip
 ```bash
 (mylar) [root@Mylar3 /tmp]# ln -s /usr/local/bin/pip-3.7 /usr/local/bin/pip3
 ```
 
-# Manual start
+---
+
+## Manual start
 If you would like to manually start `mylar3` with the user `mylar` and all the default settings, I suggest doing this:
 ```bash
 (mylar) [root@Mylar3 /tmp]# screen
@@ -225,9 +244,11 @@ You will now be able to access `mylar3`, if you open http://ip-adress:8090/home.
 
 To reattach the `screen` session, write `screen -r`. For now, stop Mylar with using CTRL + C. You can exit from the screen session, writing `exit`, `exit` and `exit`. 
 
-# Automatic start
+---
+
+## Automatic start
 To make `mylar3` start at boot of the jail, do the following:
-## rc.d
+### rc.d
 Create a file called `mylar3` in `/usr/local/etc/rc.d/`:
 ```bash
 root@Mylar3:/usr/local/bin # nano /usr/local/etc/rc.d/mylar3
@@ -339,9 +360,9 @@ Configuration upgraded to version 10
 root@Mylar3:/usr/local/etc/rc.d # 
 ```
 
-# Fault finding
+## Fault finding
 
-## git --unfuk
+### git --unfuk
 Stop the `mylar3` service first:
 ```bash
 root@Mylar3:~ # service mylar3 stop
@@ -373,7 +394,7 @@ root@Mylar3:/usr/local/mylar3 # git reset --hard origin/python3-dev
 HEAD is now at d1a6e42 FIX:(#505) Fixes webviewer throwing a large X on new image load (just the cover)
 ```
 
-## pip freeze
+### pip freeze
 On the jail:
 ```bash
 root@Mylar3:~ # pip freeze
@@ -423,7 +444,7 @@ urllib3==1.25.8
 zc.lockfile==2.0
 ```
 
-## unrar.cffi
+### unrar.cffi
 This should come up blank if `unrar.cffi` is installed:
 ```bash
 (mylar) [mylar@Mylar3 /root]$ python
@@ -434,7 +455,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> 
 ```
 
-## Status
+### Status
 Check if `mylar3` is running (as a service):
 
 ```bash
@@ -448,7 +469,7 @@ root@Mylar3:~ # ps -aux | grep mylar3
 mylar 10075  0.0  0.1 98004 61108  -  SJ   22:36   0:00.13 /usr/local/bin/python /usr/local/mylar3/Mylar.py --daemon --nolaunch --pidfile /var/run/mylar3/mylar3.pid --config /usr/local/mylar3/config.ini (python3.7)
 ```
 
-## Change branch
+### Change branch
 If you would like to change `mylar3` from the `master` branch to `python3-dev` (which get updates more frequently), do this:
 
 Stop `mylar3` from running with `service mylar3 stop` (or use `screen -r` to reattach to your screen session and then press CTRL + C on your keyboard). 
@@ -480,7 +501,7 @@ git_branch = python3-dev
 ```
 Save and use `service mylar3 start` to start the service.
 
-## Debug mode
+### Debug mode
 Add the option `-v` to `Mylar.py` to enable `DEBUG` logging.
 
 ```bash
@@ -497,6 +518,8 @@ PS: You could also add `DEBUG` logging in your startup script, by adding the `--
 command_args="${mylar3_dir}/Mylar.py --daemon --nolaunch --pidfile $pidfile --config $mylar3_conf --v"
 (...)
 ```
+
+---
 
 ## Migrate / backup
 ### /cache
