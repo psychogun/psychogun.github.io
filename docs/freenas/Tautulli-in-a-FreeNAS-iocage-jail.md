@@ -9,16 +9,22 @@ nav_order: 17
 {: .no_toc }
 I wanted to access the Internet safely and securely from my smartphone or laptop when I am connected to an untrusted network such as the WiFi of a hotel or coffee shop. A Virtual Private Network (VPN) allows you to traverse untrusted networks privately and securely as if you were on a private network. The traffic emerges from the VPN server and continues its journey to the destination. 
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
----
+</details>
 
+{: .no_toc .text-delta }
+
+---
 ## Getting started
 
 
-## pkg update && pkg upgrade
+### pkg update && pkg upgrade
 ```bash
 root@Tautulli:~ # pkg update && pkg upgrade
 The package management tool is not yet installed on your system.
@@ -26,7 +32,7 @@ Do you want to fetch and install it now? [y/N]: yes
 ```
 
 
-## nano
+### nano
 ```bash
 root@Tautulli:~ # pkg install nano
 Updating FreeBSD repository catalogue...
@@ -62,12 +68,16 @@ FreeBSD: {
   url: "pkg+http://pkg.FreeBSD.org/${ABI}/latest",
 ```
 
+---
+
 ## Install Tautulli
 Change directory to `/usr/local/share`.
 
 ```bash
 root@Tautulli:~ # pkg install tautulli
 ```
+
+---
 
 ## Copy old database
 Copy the old database to Tautulli's installation folder which is `/usr/local/www/tautulli/`.
@@ -76,12 +86,16 @@ Copy the old database to Tautulli's installation folder which is `/usr/local/www
 root@freenas:/mnt/Baldhead/jails/Tautulli/usr/share # cp /mnt/Baldhead/jails/Tautulli/usr/local/share/Tautulli/tautulli.db /mnt/Baldhead/iocage/jails/Tautulli/root/var/db/tautulli/
 ```
 
+---
+
 ## Enable autostart
 ```bash
 root@Tautulli:/usr/local/www/tautulli # nano /etc/rc.conf
 # Enable Tautulli     
 tautulli_enable="YES"
 ```
+
+---
 
 ## Fault finding
 ### rc.d/tautulli
@@ -135,8 +149,16 @@ run_rc_command "$1"
 
 Create a user for this service. 
 
-
+```
 Type: cd /usr/local/share/
 Type: git clone https://github.com/Tautulli/Tautulli.gi
 ```
 
+----
+
+## Authors
+Mr. Johnson
+
+---
+
+## Acknowledgments
