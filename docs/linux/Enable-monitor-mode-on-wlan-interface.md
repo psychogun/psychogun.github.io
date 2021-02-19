@@ -67,6 +67,8 @@ Our `phy1` interface is `wlan1`. Smooth sailing.
 └──╼ $nmcli device wifi
 ```
 
+---
+
 ## airodump-ng
 ```bash
 ┌─[✗]─[black@mamba]─[/etc]
@@ -87,6 +89,7 @@ phy#1
 ┌─[✗]─[black@mamba]─[/etc]
 └──╼ $sudo airodump-ng wlan1mon
 ```
+---
 
 ### Come back
 ```bash
@@ -98,6 +101,8 @@ phy#1
 └──╼ $sudo service wpa_supplicant restart
 ```
 
+## Authors
+Mr. Johnson
 
 
 ## Acknowledgments
