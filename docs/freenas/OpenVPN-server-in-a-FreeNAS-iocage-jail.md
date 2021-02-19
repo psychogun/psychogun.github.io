@@ -9,13 +9,24 @@ nav_order: 11
 {: .no_toc }
 I wanted to access the Internet safely and securely from my smartphone or laptop when I am connected to an untrusted network such as the WiFi of a hotel or coffee shop. A Virtual Private Network (VPN) allows you to traverse untrusted networks privately and securely as if you were on a private network. The traffic emerges from the VPN server and continues its journey to the destination. 
 
-## Table of contents
-{: .no_toc .text-delta }
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
 
-## Getting started
+## Prerequisites
+* FreeNAS 11.3-r5
+
+
+### Getting started
 Requirements:
 
 FreeNAS User with ssh access and sudo
@@ -33,18 +44,18 @@ VPN Outside Access Port: 443 UDP
 Certificate Authority Password: Password1
 Bibi40k Client Certificate Password: Password2
 
-### Prerequisites
-* FreeNAS 11.3-r5
 
-## Create the jail
+### Create the jail
 Remember to go in to properties of the jail in FreeNAS GUI and Edit > Custom Properties and check `v allow_tun`.
 Also under Basic Properties, ensure that the jail `Autostarts`.
 
-## Update and Upgrade
+### Update and Upgrade
 ```bash
 root@Mbape:~ # pkg update 
 root@Mbape:~ # pkg upgrade
 ```
+
+---
 
 ## Install OpenVPN
 ```bash
@@ -67,6 +78,8 @@ The process will require 3 MiB more space.
 
 Proceed with this action? [y/N]: y
 ```
+
+---
 
 ## Set up the CA directory
 OpenVPN is an TLS/SSL VPN. This means that it utilizes certificates in order to encrypt traffic between the server and clients. In order to issue trusted certificates, we will need to set up our own simple certificate authority (CA).
@@ -165,6 +178,7 @@ Write out database with 1 new entries
 Data Base Updated
 root@Mbape:/usr/local/etc/openvpn/easy-rsa # 
 ```
+
 ### Build Client Certificate 
 Use unique name for each certificate, use Samba with Password2 and authorize with Password1
 
@@ -305,6 +319,8 @@ group nobody
 (...)
 ```
 
+---
+
 ## Server NAT Configuration
 Create `/usr/local/etc/ipfw.rules`:
 ```bash
@@ -319,6 +335,8 @@ ipfw -q add nat 1 all from any to any in via ${EPAIR}
 TUN=$(/sbin/ifconfig -l | tr " " "\n" | /usr/bin/grep tun)
 ifconfig ${TUN} name tun0
 ```
+
+---
 
 ## Startup script
 Edit `/etc/rc.conf` and add text at the end of the file:
@@ -335,6 +353,8 @@ firewall_enable="YES"
 firewall_script="/usr/local/etc/ipfw.rules"
 ```
 
+---
+
 ## Setup Logging
 Edit `/etc/syslog.conf`:
 ```bash
@@ -349,6 +369,8 @@ root@Mbape:/usr/local/etc/openvpn # nano /etc/syslog.conf
 include                                         /etc/syslog.d
 include                                         /usr/local/etc/syslog.d
 ```
+
+---
 
 ## Setup log rotation 
 Edit `/etc/newsyslog.conf`:
@@ -365,6 +387,8 @@ root@Mbape:/usr/local/etc/openvpn # nano /etc/newsyslog.conf
 ```
 
 In FreeNAS gui, select your OpenVPN jail and press STOP. Then start it again by pressing START.
+
+---
 
 ## Verify
 SSH to your FreeNAS box and make some checks
@@ -384,10 +408,14 @@ USER     COMMAND    PID   FD PROTO  LOCAL ADDRESS         FOREIGN ADDRESS
 root@Mbape:~ # 
 ```
 
+---
+
 ## Run as unpriviledged user
 Some misguided programs or guides suggest that this user `nobody should be used for untrusted program execution or handling untrusted data. This is bad advice. Services should have their own, dedicated, user account.
 
 Hm.
+
+---
 
 ## Client configuration
 ### Export files
@@ -488,6 +516,8 @@ key-direction 1
 root@Mbape:/usr/local/etc/openvpn # 
 ```
 
+---
+
 ## Fault finding
 Stop the service and start `openvpn` manually:
 
@@ -503,8 +533,13 @@ Tail the log:
 ```bash
 root@Mbape:~ # tail -f /var/log/openvpn.log
 ```
+
+---
+
 ## Authors
 Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://technofaq.org/posts/2017/08/a-to-z-of-a-secure-hardened-vanilla-openvpn-setup-for-debian-stretch-gnulinux/](https://technofaq.org/posts/2017/08/a-to-z-of-a-secure-hardened-vanilla-openvpn-setup-for-debian-stretch-gnulinux/)
