@@ -10,12 +10,19 @@ I wanted to create a better WiFi network for my self, thus setting my 802.11 wir
 
 This helped me reduce interference with other WiFi devices by choosing the least used WiFi channel for my Access Points. 
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
 ## Getting started
 You would need to have a computer running a flavour of linux and have a WiFi card (chipset) that supports monitor mode. 
 
