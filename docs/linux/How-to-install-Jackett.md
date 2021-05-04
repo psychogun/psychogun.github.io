@@ -52,18 +52,18 @@ In Proxmox, go to Options and Enable by selecting `Use QEMU Guest Agent`. Start 
 ---
 
 ## .NET
-https://github.com/dotnet/core/blob/master/Documentation/linux-prereqs.md
+[https://github.com/dotnet/core/blob/master/Documentation/linux-prereqs.md](https://github.com/dotnet/core/blob/master/Documentation/linux-prereqs.md)
 ```bash
-sparrow@h37bjackett01:/tmp$ sudo apt-get install libcurl4-openssl-dev bzip2 mono-devel
+jack@ett:/tmp$ sudo apt-get install libcurl4-openssl-dev bzip2 mono-devel
 ```
 
 ---
 
 ## Install Jackett
-Go to https://github.com/Jackett/Jackett/releases, download the latest `Jackett.Binaries.Mono.LinuxAMD64.tar.gz` (copy link):
+Go to [https://github.com/Jackett/Jackett/releases](https://github.com/Jackett/Jackett/releases), download the latest `Jackett.Binaries.Mono.LinuxAMD64.tar.gz` (copy link):
 ```bash
 jack@ett::~$ cd /tmp/
-jack@ett::/tmp$ https://github.com/Jackett/Jackett/releases/download/v0.14.365/Jackett.Binaries.LinuxAMDx64.tar.gz
+jack@ett::/tmp$ wget https://github.com/Jackett/Jackett/releases/download/v0.14.365/Jackett.Binaries.LinuxAMDx64.tar.gz
 ```
 Unpack the Jackett release:
 ```bash
@@ -87,7 +87,21 @@ jack@ett::/tmp$ cd /opt/jackett/
 jack@ett::/opt/jackett$ ./jackett
 ```
 
+Runs OK?
+
+```bash
+jack@ett::/opt/jackett$ ./jackett sudo ./install_service_systemd.sh
+```
+
+sudo systemctl status jackett.service
+sudo systemctl enable jackett.service
+
 ---
 
 ## Authors
 Mr. Johnson
+
+---
+
+## Acknowledgments
+* [https://varhowto.com/install-jackett-ubuntu-20-04/#Autostart_Jackett_with_systemd](https://varhowto.com/install-jackett-ubuntu-20-04/#Autostart_Jackett_with_systemd)
