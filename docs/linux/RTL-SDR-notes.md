@@ -2,21 +2,69 @@
 layout: default
 title: RTL-SDR notes
 parent: Linux
-nav_order: 16
+nav_order: 19
 ---
 # RTL-SDR notes
 {: .no_toc }
 This is how I used a DVB-T+DVB+FM dongle to scan for various things in my neighborhood.
 
-## Table of contents
-{: .no_toc .text-delta }
-
+<details open markdown="block">
+  <summary>
+   Table of contents
+  </summary>
+  {: .text-delta }
 1. TOC
 {:toc}
+</details>
+
+{: .no_toc .text-delta }
+
 ---
+
+
 ## Getting started
 
+### Prerequisites
 
+* 0bda:2838 Realtek Semiconductor Corp. RTL2838 DVB-T
+
+---
+
+## FM radio with GQRX
+
+* [https://www.rtl-sdr.com/rtl-sdr-quick-start-guide/](https://www.rtl-sdr.com/rtl-sdr-quick-start-guide/)
+* [https://osmocom.org/projects/rtl-sdr/wiki/Rtl-sdr](https://osmocom.org/projects/rtl-sdr/wiki/Rtl-sdr)
+* [https://www.google.copm/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwijlYPglPvsAhVu-yoKHZUwCgQQFjAGegQIDRAC&url=https%3A%2F%2Finst.eecs.berkeley.edu%2F~ee123%2Ffa12%2Frtl_sdr.html&usg=AOvVaw0OSCo8yX8nY3x-UQT1AF0K](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwijlYPglPvsAhVu-yoKHZUwCgQQFjAGegQIDRAC&url=https%3A%2F%2Finst.eecs.berkeley.edu%2F~ee123%2Ffa12%2Frtl_sdr.html&usg=AOvVaw0OSCo8yX8nY3x-UQT1AF0K)
+
+```bash
+sudo apt-get update 
+sudo apt-get install rtl-sdr
+
+sudo apt-get install libusb-1.0-0-dev git cmake 
+git clone git://git.osmocom.org/rtl-sdr.git 
+cd rtl-sdr/ 
+mkdir build 
+cd build 
+cmake ../ -DINSTALL_UDEV_RULES=ON 
+make 
+sudo make install 
+sudo cp ../rtl-sdr.rules /etc/udev/rules.d/ 
+sudo ldconfig
+```
+
+```bash
+echo 'blacklist dvb_usb_rtl28xxu' | sudo tee --append /etc/modprobe.d/blacklist-dvb_usb_rtl28xxu.conf
+```
+
+```bash
+gqrx
+```
+
+---
+
+## DVB-T with VLC
+
+---
 
 ## Cell phone
 
@@ -48,6 +96,13 @@ When mobile stations are powered on, they perform a location update procedure by
 
 On your iPhone, make a call to *#06#, a message should appear with your IMSI number.
 888421023563517
+
+---
+
+## Authors
+Mr. Johnson
+
+---
 
 ## Acknowledgments
 * [https://www.quora.com/What-is-the-difference-between-ICCID-IMSI-and-IMEI-numbers](https://www.quora.com/What-is-the-difference-between-ICCID-IMSI-and-IMEI-numbers)
