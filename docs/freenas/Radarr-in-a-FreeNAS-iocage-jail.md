@@ -221,6 +221,22 @@ root@Radarr:~ # find / -group 352 -exec chgrp -h radarr {} \;
 
 ---
 
+## Mono 5.20
+```bash
+pkg install screen
+pkg install llvm90
+pkg install -y llvm80 libepoxy-1.5.2
+```
+
+
+```bash
+nano /tmp/mono-patch-5.20.1.34
+```
+
+Copy everything from [https://bz-attachments.freebsd.org/attachment.cgi?id=205999](https://bz-attachments.freebsd.org/attachment.cgi?id=205999) into that file, save and close
+
+---
+
 ## Authors
 Mr. Johnson
 
