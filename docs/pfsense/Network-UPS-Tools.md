@@ -64,6 +64,7 @@ In order to make it correctly pick up the usb connection, you will have to reboo
 * Driver: blazer
 
 * Extra Arguments to driver (optional): 
+
 ```bash
 desc="PowerWalker Line Interactive 850 LCD"
 ignorelb
