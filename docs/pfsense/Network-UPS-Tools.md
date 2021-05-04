@@ -88,21 +88,8 @@ upsmon master
 
 ---
 
-## Fault finding
-### upscmd
-SSH in to your pfsense firewall, open up Shell (8):
-
-Show the list of supported instant commands on our UPS named "PowerWalker_VI_850_LCD":
-```bash
-upscmd -l PowerWalker_VI_850_LCD
-```
-Use a user which has sufficient permissions, `instcmds=all`, to send a command to the UPS:
-```bash
-upscmd -u admin -p 437219huadshfe04 PowerWalker_VI_850_LCD <command>
-```
-
 ## Proxmox as netserver
-
+If you have your UPS connected to your <kbd>Proxmox</kbd> host through USB, do this to have the Proxmox host act as a UPS server, telling other NUT clients to shut down their hosts: 
 ```bash
 nano /etc/nut/nut.conf
 MODE=netserver
@@ -136,6 +123,21 @@ Remember the formula <kbd>t = V * Ah / W</kbd>?
 So I would have a `runtimecal` for this setup, and lets throw in a margin here of 0.6 and 0.8; 
 
 <kbd>486,100,1296,50</kbd>
+
+---
+
+## Fault finding
+### upscmd
+SSH in to your pfsense firewall, open up Shell (8):
+
+Show the list of supported instant commands on our UPS named "PowerWalker_VI_850_LCD":
+```bash
+upscmd -l PowerWalker_VI_850_LCD
+```
+Use a user which has sufficient permissions, `instcmds=all`, to send a command to the UPS:
+```bash
+upscmd -u admin -p 437219huadshfe04 PowerWalker_VI_850_LCD <command>
+```
 
 ---
 
