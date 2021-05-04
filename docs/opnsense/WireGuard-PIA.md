@@ -363,9 +363,9 @@ curl --silent "https://api.nordvpn.com/v1/servers/countries" | jq --raw-output '
 ```
 
 #### Display 4 servers with WG in specific country
-
+```bash
 curl -s "https://api.nordvpn.com/v1/servers/recommendations?&filters\[servers_technologies\]\[identifier\]=wireguard_udp&filters\[country_id\]=209&limit=4"|jq -r '.[]|.hostname, .station, (.locations|.[]|.country|.city.name), (.locations|.[]|.country|.name), (.technologies|.[].metadata|.[].value), .load'
-
+```
 
 ---
 
