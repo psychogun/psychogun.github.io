@@ -307,8 +307,9 @@ Firewall > NAT > Port Forward.
 
 ```bash
 resolvectl | grep 'DNS'
-```
+
 Current DNS Server: 103.86.96.100
+````
 
 Download `dnsleaktest.sh` from [https://github.com/macvk/dnsleaktest](https://github.com/macvk/dnsleaktest)
 ```bash
