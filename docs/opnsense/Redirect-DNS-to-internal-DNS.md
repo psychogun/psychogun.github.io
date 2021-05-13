@@ -20,17 +20,17 @@ This is how I made sure clients on the LAN could not use external DNS on port 53
 
 OPNsense > Firewall > NAT and click + Add.
 
-Navigate to Firewall > NAT > Port Forward tab and click + Add
-Click fa-level-up Add to create a new rule
-Fill in the following fields on the port forward rule:
-Interface: LAN
-Protocol: TCP/UDP
-Destination: Invert Match checked, LAN Address
-Destination Port Range: DNS (53)
-Redirect Target IP: 127.0.0.1
-Redirect Target Port: DNS (53)
-Description: Redirect DNS
-NAT Reflection: Disable
+* Navigate to Firewall > NAT > Port Forward tab and click + Add
+* Click fa-level-up Add to create a new rule
+* Fill in the following fields on the port forward rule:
+* Interface: LAN
+* Protocol: TCP/UDP
+* Destination: Invert Match checked, LAN Address
+* Destination Port Range: DNS (53)
+* Redirect Target IP: 127.0.0.1
+* Redirect Target Port: DNS (53)
+* Description: Redirect DNS
+* NAT Reflection: Disable
 
 ---
 
