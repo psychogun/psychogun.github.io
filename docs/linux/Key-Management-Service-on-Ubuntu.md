@@ -6,7 +6,7 @@ nav_order: 13
 ---
 # Key Management Service on Ubuntu
 {: .no_toc }
-This is how I used `kms-server` on an Ubuntu 
+This is how I used `kms-server` on an Ubuntu server 20.04. 
 
 <details open markdown="block">
   <summary>
@@ -68,9 +68,10 @@ Sat 11 Jan 22:24:16 CET 2020
 ## Installing the KMS server
 The KMS server is available as binaries or source code that needs to be compiled. Let us use the source code.
 
-``bash
+```bash
 administrator@kms:~$ sudo apt-get install git gcc make
 ```
+
 `git clone` the KMS server source code:
 ```bash
 administrator@kms:~$ git clone https://github.com/Wind4/vlmcsd
@@ -135,12 +136,12 @@ administrator@kms:/etc/systemd/system$ sudo systemctl disable kms@administrator.
 Removed /etc/systemd/system/multi-user.target.wants/kms@administrator.service.
 ```
 
-To start the KMS daemon now, use this command.
+To start the KMS daemon now, use this command (you might get an error if you have not killed the last process of the kms service, when you started it manually):
 ```bash
 administrator@kms:/etc/systemd/system$ sudo systemctl start kms@administrator.service 
 ```
 
-You can also substitute the `start` above with `stop` to stop Home Assistant, `restart` to restart Home Assistant, and `status` to see a brief status report as seen below.
+Use `status` to see a brief status report as seen below:
 ```bash
 administrator@kms:/etc/systemd/system$ sudo systemctl status kms@administrator.service 
 ● kms@administrator.service - KMS
@@ -166,18 +167,21 @@ C:\Windows\system32\> slmgr /skms YOUR_IP_OR_HOSTNAME
 C:\Windows\system32\> slmgr /ato
 ```
 
+Some more commands
+```cmd
 slmgr /upk
 slmgr /ipk XXXXX-XXXXX-XXXXX-XXXXX-XXXXX
 slmgr /skms YOUR_IP_OR_HOSTNAME
 slmgr /ato
+```
 
-
+```cmd
 CD \Program Files\Microsoft Office\Office16 OR CD \Program Files (x86)\Microsoft Office\Office16
 cscript ospp.vbs /sethst:YOUR_IP_OR_HOSTNAME
 cscript ospp.vbs /inpkey:xxxxx-xxxxx-xxxxx-xxxxx-xxxxx
 cscript ospp.vbs /act
 cscript ospp.vbs /dstatusall
-
+```
 
 ---
 
@@ -187,6 +191,7 @@ Mr. Johnson
 ---
 
 ## Acknowledgments
+* [https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys](https://docs.microsoft.com/en-us/windows-server/get-started/kmsclientkeys)
 * [https://github.com/kebe7jun/linux-kms-server](https://github.com/kebe7jun/linux-kms-server)
 * [https://ryanrudolfoba.com/blog/2019-06-12-hosting-my-own-kms-server-and-creating-bind-dns-records-for-streamlined-windows-and-office-activation/](https://ryanrudolfoba.com/blog/2019-06-12-hosting-my-own-kms-server-and-creating-bind-dns-records-for-streamlined-windows-and-office-activation/)
 * [https://pve.proxmox.com/wiki/Qemu-guest-agent](https://pve.proxmox.com/wiki/Qemu-guest-agent)
