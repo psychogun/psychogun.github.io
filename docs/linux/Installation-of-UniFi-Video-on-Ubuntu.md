@@ -8,9 +8,9 @@ nav_order: 20
 {: .no_toc }
 This is how I installed `unifi-video` on an Ubuntu 20.04 server, to use with my Home Assistant installation. 
 
-However, Unifi-Video is deprecated; [https://help.ui.com/hc/en-us/articles/360057458834-Accessing-UniFi-Video-after-End-of-Support](https://help.ui.com/hc/en-us/articles/360057458834-Accessing-UniFi-Video-after-End-of-Support) - so later on I'll write down how I could utilize RTSP directly from camera. 
+Even though Unifi-Video is deprecated; [https://help.ui.com/hc/en-us/articles/360057458834-Accessing-UniFi-Video-after-End-of-Support](https://help.ui.com/hc/en-us/articles/360057458834-Accessing-UniFi-Video-after-End-of-Support) - you are still able to install it. It will not receive any security updates or further development, so it might be not that wise to expose this instance fully on the world wide web, but hide it behind a VPN if you are connecting externally.  
 
-The latest version I've found is 3.10.13.
+The latest version I've found of `unifi-video` was ~~3.10.11~~ 3.10.13.
 
 <details open markdown="block">
   <summary>
@@ -27,9 +27,9 @@ The latest version I've found is 3.10.13.
 
 ## Getting started
 
-It's a real pain in the butt to find the latest version of the `unifi-video` software, as it has been removed from the download site [https://www.ui.com/download/unifi-video/](https://www.ui.com/download/unifi-video/) / ([https://www.reddit.com/r/Ubiquiti/comments/l94er8/does_anyone_know_where_i_can_download_unifi_video/](https://www.reddit.com/r/Ubiquiti/comments/l94er8/does_anyone_know_where_i_can_download_unifi_video/) 
+It was a  real pain in the butt to find the latest version of the `unifi-video` software, as it has been removed from the download site [https://www.ui.com/download/unifi-video/](https://www.ui.com/download/unifi-video/) / [https://www.reddit.com/r/Ubiquiti/comments/l94er8/does_anyone_know_where_i_can_download_unifi_video/](https://www.reddit.com/r/Ubiquiti/comments/l94er8/does_anyone_know_where_i_can_download_unifi_video/) 
 
- Ubiquiti has stopped developing UniFi-Video products, and people are forced to use UniFi-Protect instead on dedicated hardware from Ubiquiti. A shame, really - as the comments do show [https://community.ui.com/questions/UniFi-Video-Products-End-of-Life-Announcement/dc529d39-0e58-43cc-96f0-8f0eed0d002c](https://community.ui.com/questions/UniFi-Video-Products-End-of-Life-Announcement/dc529d39-0e58-43cc-96f0-8f0eed0d002c).
+ Ubiquiti has stopped developing UniFi-Video products, and people are forced to use UniFi-Protect instead which works only on dedicated hardware from Ubiquiti. A shame, really - as the comments do show [https://community.ui.com/questions/UniFi-Video-Products-End-of-Life-Announcement/dc529d39-0e58-43cc-96f0-8f0eed0d002c](https://community.ui.com/questions/UniFi-Video-Products-End-of-Life-Announcement/dc529d39-0e58-43cc-96f0-8f0eed0d002c).
 
 However, I've found some downloads which should be appropriate for our manual installation:
 
@@ -66,13 +66,14 @@ Install dependencies:
 ```bash
 nvr@nvr:~$ sudo apt-get install mongodb mongodb-server openjdk-8-jre-headless jsvc
 ```
-As we do not want to later on update our openjdk installation to a newer version than 8, do: 
+As we do not want to later on update our `openjdk` installation to a newer version than 8, do: 
 ```bash
 nvr@nvr:/tmp$ sudo apt-mark hold openjdk-11-*
 ```
 
-And, as I found out, the installed Java version is too new for this old `unifi-video` installation, we'll have to downgrade Java. Thanks to this post, [https://community.ui.com/questions/unifi-video-wont-start-anymore-FIX-INSIDE/297dbfc0-7e04-4a50-92b8-dab4acf50a03i](https://community.ui.com/questions/unifi-video-wont-start-anymore-FIX-INSIDE/297dbfc0-7e04-4a50-92b8-dab4acf50a03), it is fairly easy:
+And, as I found out writing this, the installed Java version is too new for this old `unifi-video` installation. We will have to downgrade Java. Thanks to this post, [https://community.ui.com/questions/unifi-video-wont-start-anymore-FIX-INSIDE/297dbfc0-7e04-4a50-92b8-dab4acf50a03i](https://community.ui.com/questions/unifi-video-wont-start-anymore-FIX-INSIDE/297dbfc0-7e04-4a50-92b8-dab4acf50a03), it is fairly easy.
 
+Download `jre1.8.0_271` from this direct link:
 ```bash
 nvr@nvr:~$ sudo su
 root@nvr:/tmp# mkdir /usr/local/java
@@ -80,12 +81,11 @@ root@nvr:/tmp# cd /usr/local/java
 root@nvr:/usr/local/java# wget https://javadl.oracle.com/webapps/download/AutoDL?BundleId=243727_61ae65e088624f5aaa0b1d2d801acb16
 root@nvr:/usr/local/java# tar zxvf AutoDL\?BundleId\=243727_61ae65e088624f5aaa0b1d2d801acb16 
 ```
-You should now have a file called `jre1.8.0_271` in your `/usr/local/java` directory. We can remove the downloaded file with `rm AutoDL\?BundleId\=243727_61ae65e088624f5aaa0b1d2d801acb16`.
+You should now have a file called `jre1.8.0_271` in your `/usr/local/java` directory. We can remove the downloaded file with command `rm AutoDL\?BundleId\=243727_61ae65e088624f5aaa0b1d2d801acb16`.
 
 Let us continue:
 ```bash
 root@nvr:/usr/local/java# update-alternatives --install "/usr/bin/java" "java" "/usr/local/java/jre1.8.0_271/bin/java" 1
-
 root@nvr:/usr/local/java#  update-alternatives --config java
 There are 2 choices for the alternative java (providing /usr/bin/java).
 
@@ -97,8 +97,10 @@ There are 2 choices for the alternative java (providing /usr/bin/java).
 
 Press <enter> to keep the current choice[*], or type selection number: 2
 update-alternatives: using /usr/local/java/jre1.8.0_271/bin/java to provide /usr/bin/java (java) in manual mode
-root@nvr:/usr/local/java# 
+```
 
+Update the environment:
+```bash
 root@nvr:/usr/local/java# echo "JAVA_HOME=/usr/local/java/jre1.8.0_271" | tee -a /etc/default/unifi
 JAVA_HOME=/usr/local/java/jre1.8.0_271
 ```
@@ -119,19 +121,20 @@ Check status
 nvr@nvr:~$ sudo systemctl status unifi-video
 ```
 
-Try to start it:
+If it hasn't started, try to start it:
 ```bash
 nvr@nvr:~$ sudo systemctl start unifi-video
 ```
 
-Now you should access your `unifi-video` installation at port :7080 in your webbrowser (http). After the initial configuration, all subsequent traffic should be used using https and port :7443, with the self-signed certificate from UniFi-Video. 
+Now you can access your `unifi-video` installation at port `:7080 `in your webbrowser (`http`). After the initial configuration, all subsequent traffic should be used using `https` and port `:7443`, with the self-signed certificate from UniFi-Video. 
 
 I had to use Google Chrome on this part, as Safari on my Mac did not work (everywhere I clicked, I was prompted to upload a file - I could not even give the installation a name). This software is old..
 
 
 ### Upgrade unfi-video
-I did not check this post [https://community.ui.com/releases/UniFi-Video-3-10-13/7cca7ae9-f4ff-4844-a7c4-b8163bb81f21](https://community.ui.com/releases/UniFi-Video-3-10-13/7cca7ae9-f4ff-4844-a7c4-b8163bb81f21) thouroughly, but on the very bottom it had listed a newer version of `unifi-video` (Download Links). So let us upgrade our current installation:
+I did not check this post [https://community.ui.com/releases/UniFi-Video-3-10-13/7cca7ae9-f4ff-4844-a7c4-b8163bb81f21](https://community.ui.com/releases/UniFi-Video-3-10-13/7cca7ae9-f4ff-4844-a7c4-b8163bb81f21) thouroughly, as on the very bottom it had listed a newer version of `unifi-video` (Download Links). 
 
+So let us upgrade our current installation:
 ```bash
 nvr@nvr:~$ cd /tmp
 nvr@nvr:/tmp$ wget https://dl.ubnt.com/firmwares/ufv/v3.10.13/unifi-video.Ubuntu18.04_amd64.v3.10.13.deb
