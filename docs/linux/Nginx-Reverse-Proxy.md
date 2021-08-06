@@ -6,7 +6,7 @@ nav_order: 15
 ---
 # Nginx Reverse Proxy
 {: .no_toc }
-This is how I used Nginx Reverse Proxy for accessing my internal services on the web. 
+This is how I used Nginx Reverse Proxy for accessing my internal services on the web. I think. There were a lot of scattered notes I have somewhat tried to collect in an orderly fashion.
 
 <details open markdown="block">
   <summary>
@@ -84,8 +84,232 @@ igor@nginx:~$ sudo systemctl restart systemd-timesyncd
 igor@nginx:~$ sudo apt update
 igor@nginx:~$ sudo apt install qemu-guest-agent
 ```
-Issue `sudo shutdown now`. 
+Issue `sudo shutdown now` and go to Options in Proxmox to enable this Guest Agent.
 
+---
+
+## Portainer prerequisites
+We install the necessary packages to be able to install Docker:
+```bash
+igor@nginx:~$ sudo apt install apt-transport-https ca-certificates curl software-properties-common
+```
+We add the official Docker GPG key:
+```bash
+igor@nginx:~$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+```
+We activate Docker repository and update it:
+```bash
+igor@nginx:~$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+igor@nginx:~$ sudo apt update
+```
+We install the latest Docker version:
+```bash
+igor@nginx:~$ sudo apt install docker-ce
+```
+
+---
+
+## Portainer installation
+As we mentioned at the beginning of this article, installing Portainer is very simple since it works in a Docker container, for this we will execute:
+```bash
+igor@nginx:~$ sudo docker volume create portainer_data
+igor@nginx:~$ sudo docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce
+```
+
+### Admin user
+Create an admin user through interface http://ip-adress:90000, after which you have opted for `Connect local`.
+
+### Make portainer start at boot
+Go to Containers, select the portainer container and under `Container details`, select `Restart policies` and use `Always` and press `Update`. 
+Connect locally. 
+
+---
+
+## Nginx Proxy Manager prerequisites
+### MariaDB
+*[https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04](https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-20-04)
+
+To be able to install packages from the MariaDB repository you’ll need to update the packages list:
+```bash
+igor@nginx:/usr/local/etc$ sudo apt update
+```
+Now that the repository is added install the MariaDB package with:
+```bash
+igor@nginx:/usr/local/etc$ sudo apt install mariadb-server
+```
+The MariaDB service will start automatically, to verify it type:
+```bash
+igor@nginx:/usr/local/etc$ sudo systemctl status mariadb
+```
+And print the MariaDB server version, with:
+```bash
+igor@nginx:/usr/local/etc$ mysql -V
+mysql  Ver 15.1 Distrib 10.3.23-MariaDB, for debian-linux-gnu (x86_64) using readline 5.2
+```
+
+#### Securing MariaDB
+Run the mysql_secure_installation command to improve the security of the MariaDB installation:
+```bash
+sudo mysql_secure_installation
+```
+Allow connections from remote host:
+```bash
+igor@nginx:/etc/mysql/mariadb.conf.d$ sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf 
+bind-address = 172.17.0.1
+```
+The `bind-address` above is the `docker0` interface (`ifconfig`).
+
+```bash
+sudo systemctl restart mariadb
+```
+
+### Create a DB for NPM
+```bash
+igor@nginx:~$ sudo mysql -u root
+MariaDB [(none)]> CREATE DATABASE npm_db;
+Query OK, 1 row affected (0.000 sec)
+
+MariaDB [(none)]> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| npm_db             |
+| performance_schema |
++--------------------+
+4 rows in set (0.000 sec)
+
+MariaDB [(none)]> 
+```
+
+### Create a new MariaDB user;
+```bash
+MariaDB [(none)]> CREATE USER 'npm'@localhost IDENTIFIED BY 'password1';
+Query OK, 0 rows affected (0.000 sec)
+
+MariaDB [(none)]> SELECT User FROM mysql.user;
++------------------+
+| User             |
++------------------+
+| debian-sys-maint |
+| npm              |
+| root             |
++------------------+
+3 rows in set (0.000 sec)
+
+
+
+
+MariaDB [(none)]> 
+```
+### Grant privileges to MariaDB user for db 'npm_db'
+Let us make sure our user can connect from the NGINX docker from ip-address `172.17.0.%`:
+```bash
+MariaDB [(none)]> GRANT ALL PRIVILEGES ON npm_db.* TO 'npm'@'172.17.0.%' IDENTIFIED BY 'password1';
+Query OK, 0 rows affected (0.000 sec)
+```
+It’s crucial to refresh the privileges once new ones have been awarded with the command:
+```bash
+MariaDB [(none)]> FLUSH PRIVILEGES;
+```
+The user you have created now has full privileges and access to the specified database and tables.
+Once you have completed this step, you can verify the new user has the right permissions by using the following statement:
+```bash
+MariaDB [(none)]> SHOW GRANTS FOR 'npm'@localhost;
++------------------------------------------------------------------------------------------------------------+
+| Grants for npm@localhost                                                                                   |
++------------------------------------------------------------------------------------------------------------+
+| GRANT USAGE ON *.* TO `npm`@`localhost` IDENTIFIED BY PASSWORD '*D28D32D11CCDDACF77E9456485C8BDF9482D84B2' |
+| GRANT ALL PRIVILEGES ON `npm`.* TO `npm`@`localhost`                                                       |
++------------------------------------------------------------------------------------------------------------+
+2 rows in set (0.000 sec)
+```
+
+### config.json
+```bash
+igor@nginx:~$ cd /usr/local/etc
+igor@nginx:/usr/local/etc$ sudo mkdir npm
+igor@nginx:/usr/local/etc$ cd npm
+igor@nginx:/usr/local/etc/npm$ sudo nano config.json
+{
+  "database": {
+    "engine": "mysql",
+    "host": "ip-adress-to-mariadb-docker-interface-172.17.0.1",
+    "name": "npm_db",
+    "user": "npm",
+    "password": "password1",
+    "port": 3306
+  }
+}
+```
+
+Secure our file:
+```bash
+sudo chmod 640 config.json 
+```
+
+### Deploy Nginx Proxy Manager
+In Portainer, go to `Container` and select `+ Add container`. 
+
+* Name: nginx-proxy-manager
+* Image: docker.io jc21/nginx-proxy-manager
+* Manual network port publishing
+** host 80 > container 80
+** host 443 >  container 443
+** host 81 > container 81  
+* Env: add environment variable: DISABLE_IPV6 true 
+* Restart policy: Always 
+* Volumes `map additional volumes` (Bind):
+** container: /app/config/production.json
+** host: /usr/local/etc/npm/config.json
+
+Optional (`sudo mkdir /usr/local/etc/data ; sudo mkdir /usr/local/etc/letsencrypt`):
+** container: /data
+**  host: /usr/local/etc/npm/data
+
+** container: letsencrypt
+** host: /usr/local/etc/npm/letsencrypt
+
+Make it writable. 
+
+
+Select `Deploy the container`. 
+
+When your docker container is running, connect to it on port 81 for the admin interface. Sometimes this can take a little bit because of the entropy of keys.
+
+http://127.0.0.1:81
+
+Default Admin User:
+
+Email:    admin@example.com
+Password: changeme
+
+---
+
+## Auto update container
+```bash
+igor@nginx:~$ sudo docker pull containrrr/watchtower
+Using default tag: latest
+latest: Pulling from containrrr/watchtower
+3ed6cec7d4d1: Pull complete 
+c0706b5a6b44: Pull complete 
+6eae408ad811: Pull complete 
+Digest: sha256:ff3ba4f421801c07754150aee4c03fdde26a0a9783d36021e81c7097d6842f25
+Status: Downloaded newer image for containrrr/watchtower:latest
+docker.io/containrrr/watchtower:latest
+igor@nginx:~$ 
+```
+
+Update all containers:
+```bash
+igor@nginx:~$ sudo docker run -d --restart=always --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower --stop-timeout 300s
+74d839c3459e3b2153500b2f2dcc3084caa67106a521501c600846b422b8587f
+```
+
+---
+
+## Fault finding
 ### Second interface Add a second interface in proxmox. VLAN tag 22. 
 Enable VLAN interface 22 in pfsense, activate DHCP server.
 Change / add network (T) and native in UniFi Network. 
@@ -130,242 +354,13 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 192.168.82.1    0.0.0.0         255.255.255.255 UH    100    0        0 ens19
 igor@nginx:~$ 
 ```
-
----
-
-## Portainer prerequisites
-We install the necessary packages to be able to install Docker:
-```bash
-igor@nginx:~$ sudo apt install apt-transport-https ca-certificates curl software-properties-common
-```
-We add the official Docker GPG key:
-```bash
-igor@nginx:~$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-```
-We activate Docker repository and update it:
-```bash
-igor@nginx:~$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-igor@nginx:~$ sudo apt update
-```
-We install the latest Docker version:
-```bash
-igor@nginx:~$ sudo apt install docker-ce
-```
-
----
-
-## Portainer installation
-As we mentioned at the beginning of this article, installing Portainer is very simple since it works in a Docker container, for this we will execute:
-```bash
-igor@nginx:~$ sudo docker volume create portainer_data
-igor@nginx:~$ sudo docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
-```
-
-### Admin user
-Create an admin user through interface http://ip-adress:90000, after which you have opted for `Connect local`.
-
-### Make portainer start at boot
-Go to Containers, select the portainer container and under `Container details`, select `Restart policies` and use `Always` and press `Update`. 
-Connect locally. 
-
----
-
-## Nginx Proxy Manager prerequisites
-### MariaDB
-First add the MariaDB GPG key to your system using the following command:
-```bash
-igor@nginx:/usr/local/etc$ sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
-```
-Once the key is imported, add the MariaDB repository with:
-```bash
-igor@nginx:/usr/local/etc$ sudo add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.3/ubuntu bionic main'
-```
-To be able to install packages from the MariaDB repository you’ll need to update the packages list:
-```bash
-igor@nginx:/usr/local/etc$ sudo apt update
-```
-Now that the repository is added install the MariaDB package with:
-```bash
-igor@nginx:/usr/local/etc$ sudo apt install mariadb-server
-```
-The MariaDB service will start automatically, to verify it type:
-```bash
-igor@nginx:/usr/local/etc$ sudo systemctl status mariadb
-```
-And print the MariaDB server version, with:
-```bash
-igor@nginx:/usr/local/etc$ mysql -V
-mysql  Ver 15.1 Distrib 10.3.23-MariaDB, for debian-linux-gnu (x86_64) using readline 5.2
-```
-#### Securing MariaDB
-Run the mysql_secure_installation command to improve the security of the MariaDB installation:
-```bash
-sudo mysql_secure_installation
-```
-Allow connections from remote host:
-```bash
-igor@nginx:/etc/mysql/mariadb.conf.d$ sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf 
-bind-address = 172.17.0.1
-```
-The `bind-address` above is the `docker0` interface (`ifconfig`).
-
-### Create a DB for NPM
-```bash
-igor@nginx:~$ sudo mysql -u root
-MariaDB [(none)]> CREATE DATABASE npm;
-Query OK, 1 row affected (0.000 sec)
-
-MariaDB [(none)]> SHOW DATABASES;
-+--------------------+
-| Database           |
-+--------------------+
-| information_schema |
-| mysql              |
-| npm                |
-| performance_schema |
-+--------------------+
-4 rows in set (0.000 sec)
-
-MariaDB [(none)]> 
-```
-### Create a new MariaDB user;
-```bash
-MariaDB [(none)]> CREATE USER 'npm'@localhost IDENTIFIED BY 'password1';
-Query OK, 0 rows affected (0.000 sec)
-
-MariaDB [(none)]> SELECT User FROM mysql.user;
-+------------------+
-| User             |
-+------------------+
-| debian-sys-maint |
-| npm              |
-| root             |
-+------------------+
-3 rows in set (0.000 sec)
-
-MariaDB [(none)]> 
-```
-### Grant privileges to MariaDB user for db 'npm'
-Let us make sure our user can connect from the NGINX docker from ip-address `172.17.0.3`:
-```bash
-MariaDB [(none)]> GRANT ALL PRIVILEGES ON npm.* TO 'npm'@'172.17.0.3' IDENTIFIED BY 'password';
-Query OK, 0 rows affected (0.000 sec)
-```
-It’s crucial to refresh the privileges once new ones have been awarded with the command:
-```bash
-MariaDB [(none)]> FLUSH PRIVILEGES;
-```
-The user you have created now has full privileges and access to the specified database and tables.
-Once you have completed this step, you can verify the new user1 has the right permissions by using the following statement:
-```bash
-MariaDB [(none)]> SHOW GRANTS FOR 'npm'@localhost;
-+------------------------------------------------------------------------------------------------------------+
-| Grants for npm@localhost                                                                                   |
-+------------------------------------------------------------------------------------------------------------+
-| GRANT USAGE ON *.* TO `npm`@`localhost` IDENTIFIED BY PASSWORD '*D28D32D11DCDDACF77E9456485C8BDF9482D84B2' |
-| GRANT ALL PRIVILEGES ON `npm`.* TO `npm`@`localhost`                                                       |
-+------------------------------------------------------------------------------------------------------------+
-2 rows in set (0.000 sec)
-```
-
-### config.json
-```bash
-igor@nginx:~$ cd /usr/local/etc
-igor@nginx:/usr/local/etc$ sudo mkdir npm
-igor@nginx:/usr/local/etc$ cd npm
-igor@nginx:/usr/local/etc/npm$ sudo nano config.json
-{
-  "database": {
-    "engine": "mysql",
-    "host": "ip-adress-to-mariadb-docker-interface-172.17.0.1",
-    "name": "npm",
-    "user": "npm",
-    "password": "password1",
-    "port": 3306
-  }
-}
-```
-
-### Deploy Nginx Proxy Manager
-In Portainer, go to `Container` and select `+ Add container`. 
-
-* Name: nginx-proxy-manager
-* Image: docker.io jc21/nginx-proxy-manager
-* Manual network port publishing
-** host 80 > container 80
-** host 443 >  container 443
-** host 81 > container 81  
-* Env: add environment variable: DISABLE_IPV6 true 
-* Restart policy: Always 
-* Volumes `map additional volumes`:
-** container: /app/config/production.json
-** host: /usr/local/etc/npm/config.json
-
-Optional:
-** container: /data
-**  host: /usr/local/etc/npm/data
-
-** container: letsencrypt
-** host: /usr/local/etc/npm/letsencrypt
-
-Make it writable. 
-
-
-Select `Deploy the container`. 
-
-When your docker container is running, connect to it on port 81 for the admin interface. Sometimes this can take a little bit because of the entropy of keys.
-
-http://127.0.0.1:81
-
-Default Admin User:
-
-Email:    admin@example.com
-Password: changeme
-
-
-
-After a while, stop the container.
-
-
-Add Let's Encrypt Certificate - use freedns network name
-
-
-
-igor@nginx:~$ sudo ifconfig ens19 up
-igor@nginx:~$ sudo dhclient ens19
-cmp: EOF on /tmp/tmp.30tz3S1FTt which is empty
-
----
-
-## Auto update container
-```bash
-igor@nginx:~$ sudo docker pull containrrr/watchtower
-Using default tag: latest
-latest: Pulling from containrrr/watchtower
-3ed6cec7d4d1: Pull complete 
-c0706b5a6b44: Pull complete 
-6eae408ad811: Pull complete 
-Digest: sha256:ff3ba4f421801c07754150aee4c03fdde26a0a9783d36021e81c7097d6842f25
-Status: Downloaded newer image for containrrr/watchtower:latest
-docker.io/containrrr/watchtower:latest
-igor@nginx:~$ 
-```
-
-Update all containers:
-```bash
-igor@nginx:~$ sudo docker run -d --restart=always --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower --stop-timeout 300s
-74d839c3459e3b2153500b2f2dcc3084caa67106a521501c600846b422b8587f
-```
-
----
-
-## Fault finding
 ### Packets out of order
 ```bash
 [8/18/2020] [9:17:51 PM] [Global   ] › ✖  error     Packets out of order. Got: 1 Expected: 0
 ```
 
-Check the IP adress of the NGINX docker you have created- perhaps it has changed? GRANT ALL PRIVILEGES on the database from the new IP address:
+Check the IP adress of the NGINX docker you have created- perhaps it has changed? 
+GRANT ALL PRIVILEGES on the database from the new IP address:
 ```bash
 igor@nginx:/usr/local/etc/npm$ sudo mariadb 
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
@@ -381,8 +376,14 @@ MariaDB [(none)]> GRANT ALL PRIVILEGES ON npm.* TO 'npm'@'172.17.0.3' IDENTIFIED
 Query OK, 0 rows affected (0.000 sec)
 ```
 
+### Verify correct database  name
 
-### Set the clock?
+Check `config.json` if it contains the correct database name:
+```
+[7/12/2021] [3:00:15 PM] [Global   ] › ✖  error     ER_DBACCESS_DENIED_ERROR: Access denied for user 'npm'@'172.17.0.%' to database 'npm'
+```
+
+### Connect to a MySQL database remotely
 
 *[https://support.rackspace.com/how-to/mysql-connect-to-your-database-remotely/](https://support.rackspace.com/how-to/mysql-connect-to-your-database-remotely/)
 
@@ -394,6 +395,8 @@ Mr. Johnson
 ----
 
 ## Acknowledgments
+* [https://www.cyberciti.biz/faq/mysql-change-user-password/](https://www.cyberciti.biz/faq/mysql-change-user-password/)
+* [https://stackoverflow.com/questions/39281594/error-1698-28000-access-denied-for-user-rootlocalhost](https://stackoverflow.com/questions/39281594/error-1698-28000-access-denied-for-user-rootlocalhost)
 * [https://hub.docker.com/r/jc21/nginx-proxy-manager/tags](https://hub.docker.com/r/jc21/nginx-proxy-manager/tags)
 * [https://clouding.io/hc/en-us/articles/360010398219-Install-Portainer-on-Ubuntu-18-04](https://clouding.io/hc/en-us/articles/360010398219-Install-Portainer-on-Ubuntu-18-04)
 * [https://nginxproxymanager.com/advanced-config/](https://nginxproxymanager.com/advanced-config/)
