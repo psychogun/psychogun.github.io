@@ -145,11 +145,80 @@ root@nvr:/tmp# service unifi-video start
 ```
 ---
 
+## Recording disk
+Datacenter > 102 (nvr) > Hardware > Add > Hard Disk
+
+I've chosen to add a 200GB disk.
+
+Reboot the VM. 
+
+Use `sudo cfdisk /dev/sdb` to create a partition and set the type to Linux File System. Initially, set label to GPT.
+
+Then use `sudo mkfs.ext4 /dev/sdb1` to reformat to ext4.
+
+To check which file system you have, use `sudo file -sL /dev/sdb1`. It should state `ext4` somewhere.
+
+To find out which UUID the disk has, use `blkid` - we'll use this output in a bit.
+```bash
+nvr@nvr:~$ sudo blkid
+/dev/sdb1: UUID="85254ce0-4151-4232-9cd0-f7cf7f3c107e" TYPE="ext4" PARTUUID="03532 (...)
+```
+
+
+I want to mount this disk to `/mnt`, you can do wherever. First, let us create a mount point.
+```bash
+nvr@nvr:~$ cd /mnt
+sudo unifi-video-recordings
+```
+
+Make the mount permanent by adding a entry in `/etc/fstab`;
+```bash
+nvr@nvr:~$ sudo vim /etc/fstab
+# UniFi-Video recordings
+/dev/disk/by-uuid/85245ce0-4151-4232-9cd0-f7cf7f3c107e /mnt/unifi-video-recordings ext4 defaults 0 1
+```
+
+Let's mount it by using `mount -a`. If no errors, success - you can also verify by issuing `df -hT` to see where the disk is mounted.
+
+Create a folder in this mount point and give the user which executes `unifi-video` permissions on this folder.
+
+I like to name the folder the same as the site name, e.g. "paris".
+```bash
+nvr@nvr:~$ sudo su
+cd /mnt/unifi-video-recordings
+mkdir paris
+```
+
+Using `more /etc/passwd | grep unifi` I take a wild guess and assume that the user `unifi-video` is the appropriate user to give permissions to this folder to:
+```bash
+chown -R unifi-video:unifi-video paris
+```
+(This was also confirmed by checking out the permissions on Ubiquitis default folder, `ls -alh /usr/lib/unifi-video/data/videos`)
+
+Anyways, let's make sure noone can snoop around in this folder:
+```bash
+chmod -R 750 paris
+```
+
+Allright. Go to UniFi video in your web browser. Down on the left, click SETTINGS. 
+
+* Recording path: /mnt/unifi-video-recordings/paris
+
+Click Save.
+
+Verify that it is working by setting a camera to always record. I am recording only motion, alter to suite your needs.
+
+---
+
 ## Fault finding
+### Logs
 Check the logs;
 ```bash
 nvr@nvr:~$ more /var/log/unifi-video/
 ```
+
+### Update
+`sudo apt update ; sudo apt upgrade -y`
 
 ---
 
