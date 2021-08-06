@@ -7,12 +7,13 @@ nav_order: 10
 
 # Installation and configuration of Home Assistant
 {: .no_toc }
-This is how I used Home Assistant to send notifications through Apple's Home app on my iOS devices, with the help of an <kbd>ubuntu-server</kbd> installation in a Proxmox Virtual Environment 6.1-5, with USB devices (Zigbee / Z-Wave dongles) passed through the host. 
+This is how I used Home Assistant to send notifications through Apple's Home app on my iOS devices, with the help of an <kbd>ubuntu-server</kbd> installation on a ~~<kbd>Proxmox/kbd>~~ <kbd>xcp-ng 8.2</kbd>hypervisor, with USB devices (Zigbee / Z-Wave dongles) passed through. Z-Wave is communicating with HA using [https://hub.docker.com/r/zwavejs/zwavejs2mqtt](https://hub.docker.com/r/zwavejs/zwavejs2mqtt) and my Zigbee devices are using Zigbee.
+
+* This guide is no longer relevant, as I am using the VM from Home Assistant. But these notes are kept anyways.
 
 I have some lights, a smartlock, some devices to measure temperatures with and, hm, what else; a motion detector that triggers the light if it is dark. This documentation is an attempt to gather all of my trials and notes when learning about Home Assistant. 
 
-
-I am basically following this guide for the starting installation: [https://www.home-assistant.io/docs/installation/raspberry-pi/](https://www.home-assistant.io/docs/installation/raspberry-pi/)
+I am basically following this guide for the starting installation (Home Assistant Core): [https://www.home-assistant.io/installation/linux](https://www.home-assistant.io/installation/linux)
 
 <details open markdown="block">
   <summary>
@@ -27,7 +28,6 @@ I am basically following this guide for the starting installation: [https://www.
 
 ---
 
-
 ## Getting started
 This is my guide. There are many like it, but this one is mine. My guide is my best friend. It is my life. 
 I must master it as I must master my life. Without me, my guide is useless. Without my guide I am useless. I must trigger my guide true. 
@@ -35,10 +35,9 @@ I must master it as I must master my life. Without me, my guide is useless. With
 ### Prerequisites
 
 **Software:**
-* Proxmox Virtual Environment 6.1-5
+* xcp-ng 8.2
 * Ubuntu 20.04 LTS
-* Home Assistant 0.113.3
-* Deconz Docker
+* Home Assistant 2021.6.1
 
 **Hardware:**
 * Aeotec ZW090 Z-Stick Gen5 EU
@@ -51,14 +50,15 @@ I must master it as I must master my life. Without me, my guide is useless. With
 * IKEA TRADFRI Remote
 * Apple TV 4th gen
 
-## Allocating a VM in Proxmox
-Log in to your Proxmox in a web-browser and create a new virtal machine. 2GiB RAM and 32GiB harddrive is enough.
+## Allocating a VM 
+Log in to your XOA instance and create a new virtal machine. 2GiB RAM and 32GiB harddrive is enough.
 
 Power on the Virtual machine and follow this guide for an excellent guide to installing <kbd>ubuntu-server</kbd>: [https://tutorials.ubuntu.com/tutorial/tutorial-install-ubuntu-server-1604](https://tutorials.ubuntu.com/tutorial/tutorial-install-ubuntu-server-1604#0) 
 (even though the link is for 1604, almost the same applies for 20.04).
 
 Remember to select to install `OpenSSH server` under the installation of Ubuntu.
 
+## Prerequisites
 ### Update && upgrade
 Update and upgrade:
 ```bash
@@ -80,7 +80,66 @@ assistant@linuxbabe:~$ date
 Sat 11 Jan 22:24:16 CET 2020
 ```
 
-### Disable IPv6
+### Guest agent
+This is only necessary if you are using <kbd>xcp-ng</kbd> or another linux KVM: 
+```bash
+assistant@linuxbabe:~$ sudo apt-get install xe-guest-utilities
+```
+
+Issue `sudo reboot now` to power of the guest to allow the guest utilities to function correctly. 
+
+
+### Optional configuration
+#### Upgrade python3
+Which version do you currently have?
+```bash
+assistant@linuxbabe:~$ python3 -V
+Python 3.8.2
+```
+
+Install `python3.8` if you do not have the required version installed (`python3.7` and above is required- as of time writing):
+
+```bash
+assistant@linuxbabe:~$ python3 -V
+Python 3.6.9
+```
+
+```bash
+assistant@linuxbabe:~$ sudo apt-get install python3.8
+```
+The default `python3` environment is still `Python 3.6.9`.
+```bash
+assistant@linuxbabe:~$ python3 -V
+Python 3.6.9
+```
+
+Add `python3.6` & `python3.8` to `update-alternatives`:
+```bash
+assistant@linuxbabe:~$ sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
+update-alternatives: using /usr/bin/python3.6 to provide /usr/bin/python3 (python3) in auto mode
+assistant@linuxbabe:~$ sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
+update-alternatives: using /usr/bin/python3.8 to provide /usr/bin/python3 (python3) in auto mode
+```
+Update `python3` to point to `python3.8`:
+```bash
+assistant@linuxbabe:~$ sudo update-alternatives --config python3
+There are 2 choices for the alternative python3 (providing /usr/bin/python3).
+
+  Selection    Path                Priority   Status
+------------------------------------------------------------
+* 0            /usr/bin/python3.8   2         auto mode
+  1            /usr/bin/python3.6   1         manual mode
+  2            /usr/bin/python3.8   2         manual mode
+
+Press <enter> to keep the current choice[*], or type selection number: 2
+```
+Test the version of `python`:
+```bash
+assistant@linuxbabe:~$ python3 -V
+Python 3.8.0
+```
+
+#### Disable IPv6
 ```bash
 assistant@linuxbabe:~$ sudo nano /etc/default/grub
 (...)
@@ -98,7 +157,7 @@ Then run:
 assistant@linuxbabe:~$ sudo update-grub
 ```
 
-### Change NTP 
+#### Change NTP 
 Add your preferred NTP server:
 ```bash
 assistant@linuxbabe:~$  sudo nano /etc/systemd/timesyncd.conf 
@@ -152,73 +211,22 @@ Jul 27 13:54:32 linuxbabe systemd-timesyncd[626]: No network connectivity, watch
 Jul 27 13:54:59 linuxbabe systemd-timesyncd[626]: Synchronized to time server 192.168.78.1:123 (192.168.78.1).
 assistant@linuxbabe:~$ 
 ```
-### Qemu-guest-agent
-This is only necessary if you are using <kbd>Proxmox</kbd> or another linux KVM: 
-```bash
-assistant@linuxbabe:~$ sudo apt-get install qemu-guest-agent
-```
-Issue `sudo shutdown now` to power of the guest and go to the <kbd>Proxmox</kbd> web gui and enable <kbd>QEMU Guest Agent</kbd> under <kbd>Options</kbd>, then start it again.
 
+---
 
-### python3 version
-Which version do you currently have?
-```bash
-assistant@linuxbabe:~$ python3 -V
-Python 3.8.2
-```
-#### (Optional) upgrade python
-Install `python3.8` if you do not have the required version installed (`python3.7` and above is required- as of time writing):
-
-```bash
-assistant@linuxbabe:~$ python3 -V
-Python 3.6.9
-```
-
-```bash
-assistant@linuxbabe:~$ sudo apt-get install python3.8
-```
-The default `python3` environment is still `Python 3.6.9`.
-```bash
-assistant@linuxbabe:~$ python3 -V
-Python 3.6.9
-```
-
-Add `python3.6` & `python3.8` to `update-alternatives`:
-```bash
-assistant@linuxbabe:~$ sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
-update-alternatives: using /usr/bin/python3.6 to provide /usr/bin/python3 (python3) in auto mode
-assistant@linuxbabe:~$ sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 2
-update-alternatives: using /usr/bin/python3.8 to provide /usr/bin/python3 (python3) in auto mode
-```
-Update `python3` to point to `python3.8`:
-```bash
-assistant@linuxbabe:~$ sudo update-alternatives --config python3
-There are 2 choices for the alternative python3 (providing /usr/bin/python3).
-
-  Selection    Path                Priority   Status
-------------------------------------------------------------
-* 0            /usr/bin/python3.8   2         auto mode
-  1            /usr/bin/python3.6   1         manual mode
-  2            /usr/bin/python3.8   2         manual mode
-
-Press <enter> to keep the current choice[*], or type selection number: 2
-```
-Test the version of `python`:
-```bash
-assistant@linuxbabe:~$ python3 -V
-Python 3.8.0
-```
-
-### Install the dependencies
+## Install Home Assistant Core
 Install all the required dependencies for running Home Assistant in an `python` ***virtual environment***:
 ```bash
-assistant@linuxbabe:~$ sudo apt-get install python3.8-dev python3.8-venv python3-pip libffi-dev libssl-dev libudev-dev build-essential
+assistant@linuxbabe:~$ sudo apt-get install -y python3 python3-dev python3-venv python3-pip libffi-dev libssl-dev libjpeg-dev zlib1g-dev autoconf build-essential libopenjp2-7 libtiff5 ffmpeg
 ```
-Add an account for Home Assistant called `homeassistant`. Since this account is only for running Home Assistant the extra arguments of `-rm` is added to create a system account and create a home directory. The arguments `-G dialout` adds the user to the `dialout` group. The `dialout` group is required for using Z-Wave and Zigbee controllers.
+Add an account for Home Assistant called `homeassistant`. 
+
+Since this account is only for running Home Assistant the extra arguments of `-rm` is added to create a system account and create a home directory.
 
 ```bash
-assistant@linuxbabe:~$ sudo useradd -rm homeassistant -G dialout
+assistant@linuxbabe:~$ sudo useradd -rm homeassistant
 ```
+
 Next we will create a directory for the installation of Home Assistant and change the owner to the `homeassistant` account.
 
 ```bash
@@ -237,7 +245,7 @@ homeassistant@linuxbabe:/srv/homeassistant$ source bin/activate
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ 
 ```
 
-Once you have activated the virtual environment (notice the prompt change to `(homeassistant) homeassistant@linuxbabe:/srv/homeassistant $)` you will need to run the following command to install a required `python` package inside of the virtual environment (`wheel`):
+Once you have activated the virtual environment (notice the prompt change to `(homeassistant) homeassistant@linuxbabe:/srv/homeassistant $)` you will need to run the following command to install a required `python` package with `pip` inside of the virtual environment (`wheel`):
 
 ```bash
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ python3 -m pip install wheel
@@ -250,9 +258,6 @@ Successfully installed wheel-0.33.6
 
 Once you have installed the required `wheel` package it is now time to install Home Assistant in our virtual environment!
 
----
-
-## Install Home Assistant
 ```bash
 (homeassistant) homeassistant@linuxbabe:/srv/homeassistant$ pip3 install homeassistant
 ```
@@ -334,7 +339,12 @@ Do these things that are stated above/whatever you want, and shut down your VM g
 ---
 
 ## Attaching Z-Wave controllers
-I am using a Aeotec ZW090 Z-Stick Gen5 EU for communication with my Z-Wave devices. We will have to pass USB device through the <kbd>Proxmox</kbd>host to the guest OS. 
+I am using a Aeotec ZW090 Z-Stick Gen5 EU for communication with my Z-Wave devices. We will have to pass through the USB device to our xen server. 
+
+
+* [https://xcp-ng.org/docs/compute.html#usb-passthrough](https://xcp-ng.org/docs/compute.html#usb-passthrough)
+
+We will have to pass USB device through the <kbd>Proxmox</kbd>host to the guest OS. 
 
 First, list available USB devices on the proxmox host:
 ```bash
@@ -399,6 +409,10 @@ assistant@linuxbabe:/sys/class/tty$ readlink ttyACM0
 ```
 
 After we have passed the USB device to our installation, we will further pass the USB device- to a docker running `ozwdaemon` which we will use to pair Z-Wave devices to our dongle with. 
+
+---
+
+## zwavejs2mqtt
 
 ---
 
@@ -1123,7 +1137,7 @@ homeassistant ALL=(ALL) NOPASSWD:SETENV: /home/homeassistant/certbot/certbot-aut
 In this way you, only allow the user/systemuser that is running the homeassistant process (`hass`) only to run the cerbot for generating and renewing the certificate. This should be more secure in case of a security breach within the process `hass`.
 
 ### Apple Home dependencies
-Controlling Home Assistant entities from Apple Home app on your iOs. 
+Controlling Home Assistant entities from Apple Home app on your iOS. 
 Install the necessary dependencies to be able to forward entities from Home Assistant to Apple HomeKit, so they can be controlled from Apple’s Home app and Siri.
 ```bash
 assistant@linuxbabe:/home/homeassistant/.homeassistant$ sudo apt-get install libavahi-compat-libdnssd-dev
@@ -1281,6 +1295,7 @@ Mr. Johnson
 ---
 
 ## Acknowledgments
+* [https://github.com/home-assistant/core/issues/33150](https://github.com/home-assistant/core/issues/33150)
 * [https://community.letsencrypt.org/t/certbot-command-not-found/16547/13](https://community.letsencrypt.org/t/certbot-command-not-found/16547/13)
 * [https://community.home-assistant.io/t/configuring-z-wave-door-sensor/107408/6?u=gsemet](https://community.home-assistant.io/t/configuring-z-wave-door-sensor/107408/6?u=gsemet)
 * [https://translate.google.com/translate?sl=auto&tl=en&u=https%3A%2F%2Fforum.jeedom.com%2Fviewtopic.php%3Ft%3D39395](https://translate.google.com/translate?sl=auto&tl=en&u=https%3A%2F%2Fforum.jeedom.com%2Fviewtopic.php%3Ft%3D39395)
