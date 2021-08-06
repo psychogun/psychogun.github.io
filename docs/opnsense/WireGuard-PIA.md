@@ -2,7 +2,7 @@
 layout: default
 title: WireGuard PIA
 parent: OPNsense
-nav_order: 4
+nav_order: 6
 ---
 
 # WireGuard Private Internet Access

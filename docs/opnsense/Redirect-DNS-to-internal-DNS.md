@@ -2,7 +2,7 @@
 layout: default
 title: Redirect DNS to internal DNS
 parent: OPNsense
-nav_order: 2
+nav_order: 3
 ---
 # Redirect DNS to internal DNS
 {: .no_toc }

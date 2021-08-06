@@ -2,7 +2,7 @@
 layout: default
 title: Redirect NTP to internal NTP
 parent: OPNsense
-nav_order: 3
+nav_order: 5
 ---
 # Redirect NTP to internal NTP
 {: .no_toc }
