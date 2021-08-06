@@ -34,7 +34,7 @@ Even though WireGuard requires static IPs, NordVPN has deviced a solution which 
 
 We need to fetch our private key and the corresponding site's public key. Since there are no documentation for 3rd party apps yet, we'll have to use what is available to do this for now, using the linux cli, WireGuard itself and software from NordVPN. 
 
-Subnet which will travel through NordVPN WireGuard interface is `192.168.10.0/24` (`10_VPN`). 
+Subnet which will travel through NordVPN WireGuard interface is `192.168.10.0/24` - named `10_VPN`. 
 
 WireGuard tunnel interface is named `WG_NordVPN_FR`.
 
@@ -50,7 +50,7 @@ sudo apt install wireguard
 ```
 
 ### NordLynx
-Install NordVPN. Check tutorial here; [https://support.nordvpn.com/Connectivity/Linux/1325531132/Installing-and-using-NordVPN-on-Debian-Ubuntu-Raspberry-Pi-Elementary-OS-and-Linux-Mint.htm](https://support.nordvpn.com/Connectivity/Linux/1325531132/Installing-and-using-NordVPN-on-Debian-Ubuntu-Raspberry-Pi-Elementary-OS-and-Linux-Mint.htm).
+Install NordVPN. Check tutorial here; [https://support.nordvpn.com/Connectivity/Linux/1325531132/Installing-and-using-NordVPN-on-Debian-Ubuntu-Raspberry-Pi-Elementary-OS-and-Linux-Mint.htm](Installing-and-using-NordVPN-on-Debian-Ubuntu-Raspberry-Pi-Elementary-OS-and-Linux-Mint.htm).
 
 ```bash
 sudo sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
@@ -133,7 +133,7 @@ FSzJDH1171AJKldoqohndlakO3918djals/jkdjkfl0=
 ```
 (This is not a valid key by the way).
 
-Now you have everything you need. Your private key, your public key, servers public key, the endpoint address and the port. Let's try to configure OPNsense. 
+Now you have everything you need. Your **private key**, your **public key**, **servers public key**, the **endpoint address** and the **port**. 
 
 ---
 
@@ -145,14 +145,15 @@ Allright, we have what we need to get things going regards to configuring our OP
 #### Local
 Add a server by pressing the little + icon
 
-MAKE SURE TO SELECT "SHOW ADVANCED"
+* MAKE SURE TO SELECT "SHOW ADVANCED"
+
 * Enabled: [-]
 * Name: NordVPN
-* Public Key: insert public key from `sudo wg` (`UTZ4PHmX5zAOSvdhqp0Ed8q4z0OHgMk8ztalChHaPU=`)
-* Private Key: insert private key from `sudo wg show nordlynx private-key` (`FSzJDH1171AJKldoqohndlakO3918djals/jkdjkfl0=`)
+* Public Key: insert public key from `sudo wg` : `UTZ4PHmX5zAOSvdhqp0Ed8q4z0OHgMk8ztalChHaPU=`)
+* Private Key: insert private key from `sudo wg show nordlynx private-key` : `FSzJDH1171AJKldoqohndlakO3918djals/jkdjkfl0=`
 * Listen Port: 51822 (use a random port which is not in use on the system)
 * DNS Server: 103.86.96.100, 103.86.99.100 ([https://support.nordvpn.com/General-info/1047409702/What-are-your-DNS-server-addresses.htm](https://support.nordvpn.com/General-info/1047409702/What-are-your-DNS-server-addresses.htm)
-* Tunnel Address: insert inet address from `ip addr show nordlynx` (`10.5.0.2/16`)
+* Tunnel Address: insert inet address from `ip addr show nordlynx` : `10.5.0.2/16`
 * Peers: Nothing selected, leave blank for now
 * Disable Routes: Check
 * Gateway: 10.5.0.1
@@ -160,15 +161,15 @@ MAKE SURE TO SELECT "SHOW ADVANCED"
 Click Save.
 
 #### Endpoints
-Create a new Endpoint by hitting the + icon. Here you will copy the information from the `[peer]` section (`sudo wg`).
+Create a new Endpoint by hitting the + icon. Here you will copy the information from the `[peer]` section from `sudo wg`.
 
-Name: fr111.nordvpn.com
-Public Key: insert public key from `sudo wg` (`21dz9Y6HFRzaXKLpFpcZHjcI5AJQopJW/JZShKjTKkZ=`)
-Shared Secret: 
-Allowed IPs: 0.0.0.0/0
-Endpoint Address: 11.112.192.11
-Endpoint Port: 51820
-Keepalive: 25
+* Name: fr111.nordvpn.com
+* Public Key: insert public key from `sudo wg` (`21dz9Y6HFRzaXKLpFpcZHjcI5AJQopJW/JZShKjTKkZ=`)
+* Shared Secret: 
+* Allowed IPs: 0.0.0.0/0
+* Endpoint Address: 11.112.192.11
+* Endpoint Port: 51820
+* Keepalive: 25
 
 Click Save. 
 
@@ -205,9 +206,9 @@ Apply the changes.
 Go System > Gateways
 Click +Add gateway.
 
-Name: GW_WG_NordVPN_FR
-Description: PIA through WG_NordVPN_FR
-Interface: WG_NordVPN_FR
+* Name: GW_WG_NordVPN_FR
+* Description: PIA through WG_NordVPN_FR
+* Interface: WG_NordVPN_FR
 
 * IP adress: 10.5.0.1
 
@@ -242,11 +243,11 @@ Leave the rest as default. This will be our "kill switch". Make sure the `reject
 ### Kill switch
 Firewall > Rules > Floating > +Add
 
-Action: Block
-Interface: WAN
-Direction: out
-Description: NO_WAN_EGRESS match
-Match local tag: NO_WAN_EGRESS
+* Action: Block
+* Interface: WAN
+* Direction: out
+* Description: NO_WAN_EGRESS match
+* Match local tag: NO_WAN_EGRESS
 
 ---
 
