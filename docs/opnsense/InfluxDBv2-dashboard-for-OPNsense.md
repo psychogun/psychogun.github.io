@@ -1,7 +1,7 @@
 ---
 layout: default
 title: InfluxDBv2 dashboard for OPNsense
-parent: opnsense
+parent: OPNsense
 nav_order: 2
 ---
 
