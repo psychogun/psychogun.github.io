@@ -183,13 +183,12 @@ chmod 750 /var/log/suricata/eve.json
 
 Now running `sudo -u telegraf more /var/log/suricata/eve.json` - you will see that the `telegraf` user is able to view the file. 
 
----
 
-## [[inputs.suricata]]
+### [[inputs.suricata]]
 There is an already built in plugin for Telegraf which you can use to monitor suricata with. It is called [[inputs.suricata]]. This plugin can take stats from suricata and produce them as metrics in InfluxDBv2. 
 
 
-### Increase localhost buffer space
+#### Increase localhost buffer space
 Under FreeBSD it is necessary to increase the localhost buffer space, otherwise messages from Suricata are truncated as they exceed the default available buffer space, consequently no statistics are processed by the [[inputs.suricata]] plugin.
 
 How large this buffer space will have to be depends on your particular firewall. The number of interfaces you have matter in this regard, because the length of the event sent from Suricatat will increase due to this fact.
@@ -224,7 +223,7 @@ sysctl -w net.local.stream.sendspace=131072
 ```
 
 
-### Configure the telegraf plugin
+#### Configure the telegraf plugin
 Suricata sends a stream of data to an already created UNIX-socket. Let us configure the [[inputs.suricatta]] plugin in Telegraf. 
 
 Edit the telegraf.conf file on your OPNsense installation:
@@ -248,7 +247,7 @@ Add to the bottom of the file:
 
 Restart the telegraf plugin; `service telegraf restart`.
 
-### Configure eve-output
+#### Configure eve-output
 As of today's date, the [[inputs.suricata]] plugin in Telegraf shipped with OPNsense is not able to parse "alert" events. I found out this, because [[inputs.suricata]] was newly updated with the ability to do this, detect alerts; [https://github.com/influxdata/telegraf/tree/master/plugins/inputs/suricata](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/suricata). Anyways, it is currently able to produce stats metrics. 
 
 Add this configuration to the `custom.yaml` file, which is loaded by Suricata when you start `suricata` (I have thrown in alerts settings, just because):
