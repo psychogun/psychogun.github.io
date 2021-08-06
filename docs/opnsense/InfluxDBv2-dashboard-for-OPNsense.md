@@ -206,14 +206,13 @@ Then you avoid getting truncated, and the [[inputs.suricata]] plugin will parse 
 
 Go to System > Settings > Tunables. Click +Add on the top right corner and add the 2 tunables:
 
-* Tunable: net.local.stream.recvspace
-* Description: Increase the localhost buffer space
-* Value: 131072
+* **Tunable**: net.local.stream.recvspace
+* **Description**: Increase the localhost buffer space
+* **Value**: 131072
 
-
-* Tunable: net.local.stream.sendspace
-* Description: Increase the localhost buffer space
-* Value: 131072
+* **Tunable**: net.local.stream.sendspace
+* **Description**: Increase the localhost buffer space
+* **Value**: 131072
 
 Apply, then reboot the firewall. 
 
@@ -287,9 +286,10 @@ I have not found a way to check if there is any data flowing from Suricata to Te
 After a while, stat metrics will show up in InfluxDBv2. 
 
 * Remember to not use the GUI as the configuration / permissions on file / folder will reset.
+
 ---
 
-### Firewall dashboard
+## Firewall dashboard
 ...
 
 ---
