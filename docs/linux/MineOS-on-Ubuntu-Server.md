@@ -231,6 +231,165 @@ Add users by typing next to the `>`: whitelist add [username]
 
 ---
 
+## Fault finding
+
+### Upgrade JAVA to play v1.17+
+Unable to Build Spigot? Because you are moving to MineCraft v1.17? And you have the wrong JAVA version? 
+
+```tail -f /var/log/mineos.log
+{"level":"error","message":"stderr: Error: Invalid or corrupt jarfile /var/games/minecraft/profiles/spigot_1.17.1/BuildTools.jar\n","timestamp":"2021-09-14T17:05:25.443Z"}````
+
+Let's check the filesize:
+```
+per@sson:/var/games/minecraft/profiles$ cd BuildTools-latest/
+per@sson:/var/games/minecraft/profiles/BuildTools-latest$ ls -l
+total 4
+-rw-rw-r-- 1 root root 16 Sep 14 19:00 BuildTools.jar
+```
+
+Let us make a backup: 
+```bash
+per@sson:/var/games/minecraft/profiles/BuildTools-latest$ sudo mv BuildTools.jar BuildTools.ja_r
+```
+
+Let us download a new BuildTool:
+```bash
+per@sson:/var/games/minecraft/profiles/BuildTools-latest$ sudo wget https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar
+```
+
+Now we have a file which has a larger size:
+```bash
+per@sson:/var/games/minecraft/profiles/BuildTools-latest$ ls -l
+total 4088
+-rw-rw-r-- 1 root root      16 Sep 14 19:00 BuildTools.ja_r
+-rw-r--r-- 1 root root 4179124 Aug 13 00:45 BuildTools.jar
+```
+
+Let us fix permissions:
+```bash
+per@sson:/var/games/minecraft/profiles/BuildTools-latest$ chmod 664 BuildTools.jar 
+```
+
+Now let's see what the log is telling us:
+```bash
+{"builder":{"id":"BuildTools-latest","time":1631639050675,"releaseTime":1631639050675,"type":"release","group":"spigot","webui_desc":"Latest BuildTools.jar for building Spigot/Craftbukkit","weight":0,"filename":"BuildTools.jar","downloaded":true,"version":0,"release_version":"","url":"https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar","$$hashKey":"object:4021"},"version":"1.17.1","command":"build_jar","level":"info","message":"[WEBUI] Received emit command from 192.168.5.50:mine","timestamp":"2021-09-14T17:14:40.124Z"}
+{"builder":{"id":"BuildTools-latest","time":1631639050675,"releaseTime":1631639050675,"type":"release","group":"spigot","webui_desc":"Latest BuildTools.jar for building Spigot/Craftbukkit","weight":0,"filename":"BuildTools.jar","downloaded":true,"version":0,"release_version":"","url":"https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar","$$hashKey":"object:4021"},"version":"1.17.1","command":"build_jar","level":"info","message":"[WEBUI] BuildTools starting with arguments:","timestamp":"2021-09-14T17:14:40.134Z"}
+{"level":"error","message":"stderr: *** The version you have requested to build requires Java versions between [Java 16, Java 17], but you are using Java 8","timestamp":"2021-09-14T17:15:02.557Z"}
+{"level":"error","message":"stderr: \n","timestamp":"2021-09-14T17:15:02.558Z"}
+{"level":"error","message":"stderr: *** Please rerun BuildTools using an appropriate Java version. For obvious reasons outdated MC versions do not support Java versions that did not exist at their release.","timestamp":"2021-09-14T17:15:02.558Z"}
+{"level":"error","message":"stderr: \n","timestamp":"2021-09-14T17:15:02.559Z"}
+{"level":"info","message":"[WEBUI] BuildTools jar compilation finished unsuccessfully in /var/games/minecraft/profiles/spigot_1.17.1","timestamp":"2021-09-14T17:15:02.573Z"}
+{"level":"info","message":"[WEBUI] Buildtools used: /var/games/minecraft/profiles/spigot_1.17.1/BuildTools.jar","timestamp":"2021-09-14T17:15:02.573Z"}
+```
+
+Aha. 
+* [https://www.spigotmc.org/threads/mojang-is-moving-to-java-16.505588/](https://www.spigotmc.org/threads/mojang-is-moving-to-java-16.505588/) 
+
+We will have to update our java version:
+```bash
+per@sson:/var/games/minecraft/profiles$ java -version
+openjdk version "1.8.0_292"
+OpenJDK Runtime Environment (build 1.8.0_292-8u292-b10-0ubuntu1~20.04-b10)
+OpenJDK 64-Bit Server VM (build 25.292-b10, mixed mode)
+```
+
+Let's follow this guide:
+* [https://java.tutorials24x7.com/blog/how-to-install-openjdk-16-on-ubuntu-20-04-lts](https://java.tutorials24x7.com/blog/how-to-install-openjdk-16-on-ubuntu-20-04-lts)
+
+
+Stop the `mineos.service`:
+```
+per@sson:/var/games/minecraft/profiles$ systemctl stop mineos
+==== AUTHENTICATING FOR org.freedesktop.systemd1.manage-units ===
+Authentication is required to stop 'mineos.service'.
+Authenticating as: Markus Persson (mcs)
+Password: 
+==== AUTHENTICATION COMPLETE ===
+```
+
+Do you have any more installations of Java on your server?
+```bash
+per@sson:/var/games/minecraft/profiles$ sudo update-alternatives --config java
+[sudo] password for mcs: 
+There is only one alternative in 
+```
+
+```bash
+wget https://download.java.net/java/GA/jdk16.0.2/d4a915d82b4c4fbb9bde534da945d746/7/GPL/openjdk-16.0.2_linux-x64_bin.tar.gz
+
+>sudo mkdir -p /usr/java/openjdk
+>cd /usr/java/openjdk
+>sudo cp /data/setups/openjdk-16_linux-x64_bin.tar.gz openjdk-16_linux-x64_bin.tar.gz
+>sudo tar -xzvf openjdk-16_linux-x64_bin.tar.gz
+```
+
+Add these couple of lines tot the `/etc/profile` file:
+```bash
+per@sson:/usr/java/openjdk$ 
+per@sson:/usr/java/openjdk$ sudo vim /etc/profile
+# OpenJDK 16
+JAVA_HOME=/usr/java/openjdk/jdk-16
+PATH=$PATH:$HOME/bin:$JAVA_HOME/bin
+export JAVA_HOME
+export PATH
+```
+
+
+```bash
+per@sson:/usr/java/openjdk$ 
+per@sson:/usr/java/openjdk$ java -version
+openjdk version "1.8.0_292"
+OpenJDK Runtime Environment (build 1.8.0_292-8u292-b10-0ubuntu1~20.04-b10)
+OpenJDK 64-Bit Server VM (build 25.292-b10, mixed mode)
+per@sson:/usr/java/openjdk$ 
+per@sson:/usr/java/openjdk$ sudo update-alternatives --install "/usr/bin/java" "java" "/usr/java/openjdk/jdk-16.0.2/bin/java" 1
+per@sson:/usr/java/openjdk$ 
+per@sson:/usr/java/openjdk$ sudo update-alternatives --install "/usr/bin/javac" "javac" "/usr/java/openjdk/jdk-16.0.2/bin/javac" 1
+update-alternatives: using /usr/java/openjdk/jdk-16.0.2/bin/javac to provide /usr/bin/javac (javac) in auto mode
+per@sson:/usr/java/openjdk$ java -version
+openjdk version "1.8.0_292"
+OpenJDK Runtime Environment (build 1.8.0_292-8u292-b10-0ubuntu1~20.04-b10)
+OpenJDK 64-Bit Server VM (build 25.292-b10, mixed mode)
+per@sson:/usr/java/openjdk$ 
+per@sson:/usr/java/openjdk$ sudo update-alternatives --config java
+There are 2 choices for the alternative java (providing /usr/bin/java).
+
+  Selection    Path                                            Priority   Status
+------------------------------------------------------------
+* 0            /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java   1081      auto mode
+  1            /usr/java/openjdk/jdk-16.0.2/bin/java            1         manual mode
+  2            /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java   1081      manual mode
+
+Press <enter> to keep the current choice[*], or type selection number: 1
+update-alternatives: using /usr/java/openjdk/jdk-16.0.2/bin/java to provide /usr/bin/java (java) in manual mode
+per@sson:/usr/java/openjdk$ 
+per@sson:/usr/java/openjdk$ sudo update-alternatives --config java
+There are 2 choices for the alternative java (providing /usr/bin/java).
+
+  Selection    Path                                            Priority   Status
+------------------------------------------------------------
+  0            /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java   1081      auto mode
+* 1            /usr/java/openjdk/jdk-16.0.2/bin/java            1         manual mode
+  2            /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java   1081      manual mode
+
+Press <enter> to keep the current choice[*], or type selection number: 
+
+per@sson:/usr/java/openjdk$ java -version
+openjdk version "16.0.2" 2021-07-20
+OpenJDK Runtime Environment (build 16.0.2+7-67)
+OpenJDK 64-Bit Server VM (build 16.0.2+7-67, mixed mode, sharing)
+per@sson:/usr/java/openjdk$ 
+per@sson:/usr/java/openjdk$ systemctl start mineos
+```
+
+### Screen
+Your servers are attachable through screen (to view events):
+```bash
+screen -r
+```
+
+--
+
 ## Authors
 Mr. Johnson
 
