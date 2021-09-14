@@ -236,11 +236,13 @@ Add users by typing next to the `>`: whitelist add [username]
 ### Upgrade JAVA to play v1.17+
 Unable to Build Spigot? Because you are moving to MineCraft v1.17? And you have the wrong JAVA version? 
 
-```tail -f /var/log/mineos.log
+```bash
+tail -f /var/log/mineos.log
 {"level":"error","message":"stderr: Error: Invalid or corrupt jarfile /var/games/minecraft/profiles/spigot_1.17.1/BuildTools.jar\n","timestamp":"2021-09-14T17:05:25.443Z"}````
+```
 
 Let's check the filesize:
-```
+```bash
 per@sson:/var/games/minecraft/profiles$ cd BuildTools-latest/
 per@sson:/var/games/minecraft/profiles/BuildTools-latest$ ls -l
 total 4
