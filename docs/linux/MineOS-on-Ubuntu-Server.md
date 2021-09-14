@@ -390,7 +390,7 @@ Your servers are attachable through screen (to view events):
 screen -r
 ```
 
---
+---
 
 ## Authors
 Mr. Johnson
