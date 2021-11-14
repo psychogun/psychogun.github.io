@@ -6,7 +6,7 @@ nav_order: 21
 ---
 # How to install ZNB bouncer on Ubuntu 
 {: .no_toc }
-ZNC is a bouncer for IRC. 
+ZNC is a bouncer for IRC. This is how I installed it on an Proxmox VM using Docker CE, Portainer (optional) and Watchtower (optional). I also used the ability through Nginx Reverse Proxy Manager to secure my cononection with an official certificate. 
 
 <details open markdown="block">
   <summary>
@@ -132,7 +132,6 @@ znc_data
 spider@man:~$ sudo docker run -it -v znc_data:/znc-data znc --makeconf
 ```
 
-
 ```bash
 spider@man:~$ sudo docker run -it -v znc_data:/znc-data znc --makeconf
 [ .. ] Checking for list of available modules...
@@ -200,15 +199,20 @@ spider@man:~$ sudo docker run -it -v znc_data:/znc-data znc --makeconf
 CTRL + C
 
 ### Run
+```bash
 sudo docker run -d -p 1337:1337 -v znc_data:/znc-data znc
+```
 
 ### Configuration
 * [https://address:1337](https://address:1337)
 
 Username should be different from nickname. 
 
+```bash 
 /znc AddNetwork freenode
+```
 
+---
 
 ## Textual
 ### Server Properties
@@ -232,6 +236,20 @@ sudo docker run -d \
     containrrr/watchtower \
     znc
 ```
+
+---
+
+## NPM
+Generate a certificate through NPM. Download the certificate.
+
+```bash
+cat privkey1.pem > fullchain-with-privkey.pem
+cat fullchain1.pem >> fullchain-with-privkey.pem
+
+cp fullchain-with-privkey.pem znc.pem
+chmod 600 znc.pem
+```
+
 ---
 
 ## Authors
