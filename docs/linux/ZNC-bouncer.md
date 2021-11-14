@@ -128,10 +128,7 @@ spider@man:~$ sudo docker volume create znc_data
 znc_data
 ```
 
-```bash
-spider@man:~$ sudo docker run -it -v znc_data:/znc-data znc --makeconf
-```
-
+Create configuration file:
 ```bash
 spider@man:~$ sudo docker run -it -v znc_data:/znc-data znc --makeconf
 [ .. ] Checking for list of available modules...
@@ -240,7 +237,7 @@ sudo docker run -d \
 ---
 
 ## NPM
-Generate a certificate through NPM. Download the certificate.
+Generate a certificate through NPM. Download the certificate, e.g. irc.example.com
 
 ```bash
 cat privkey1.pem > fullchain-with-privkey.pem
@@ -249,6 +246,8 @@ cat fullchain1.pem >> fullchain-with-privkey.pem
 cp fullchain-with-privkey.pem znc.pem
 chmod 600 znc.pem
 ```
+
+Remember to do a NAT portforwarding rule to your ZNC server's ip address:port (1337) on your gateway, and maybe a host override in your network as well to allow connections using the certificate internally. 
 
 ---
 
