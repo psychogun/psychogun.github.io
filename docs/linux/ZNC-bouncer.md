@@ -81,6 +81,7 @@ read@arr:~$ sudo systemctl restart systemd-timesyncd
 ```
 
 ### qemu-guest-agent
+Install `qemu-guest-agent` for Proxmox VMs.
 ```bash
 spider@man~$ sudo apt update
 spider@man~$ sudo apt upgrade
@@ -92,12 +93,16 @@ Shut down the VM. Enable Qemu Guest Agent in Proxmox and start the VM.
 
 ## Docker
 Installation of Docker:
+
 * [https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04)
 
 ---
 
 ## Portainer
+Install portainer to give an graphical overview for our Docker container. 
+
 * [https://hub.docker.com/r/portainer/portainer-ce](https://hub.docker.com/r/portainer/portainer-ce)
+
 ```bash
 spider@man:~$ sudo docker volume create portainer_data
 portainer_data
@@ -197,7 +202,7 @@ CTRL + C
 sudo docker run -d -p 1337:1337 -v znc_data:/znc-data znc
 
 ### Configuration
-[https://address:1337](https://address:1337)
+* [https://address:1337](https://address:1337)
 
 Username should be different from nickname. 
 
@@ -207,23 +212,25 @@ Username should be different from nickname.
 ## Textual
 ### Server Properties
 #### General
-Connection Name: 
-Server Address:
-Port: 
-Server Password: han's password
+* Connection Name: 
+* Server Address:
+* Port: 
+* Server Password: han's password
 
 #### Identity
-Username: solo
+* Username: solo
 
 ---
 
 ## Watchtower 
+To automatically update your ZNC container, you can use `watchtower`:
+```
 sudo docker run -d \
     --name watchtower \
     -v /var/run/docker.sock:/var/run/docker.sock \
     containrrr/watchtower \
     znc
-
+```
 ---
 
 ## Authors
