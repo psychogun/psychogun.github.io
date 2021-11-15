@@ -259,3 +259,6 @@ Mr. Johnson
 ## Acknowledgments
 * [https://www.reddit.com/r/irc/comments/14p6it/how_do_i_remain_logged_into_a_server_when_idling/](https://www.reddit.com/r/irc/comments/14p6it/how_do_i_remain_logged_into_a_server_when_idling/)
 * [https://www.letscloud.io/community/how-to-install-portainer](https://www.letscloud.io/community/how-to-install-portainer)
+* [https://www.cloudsavvyit.com/1727/what-is-a-pem-file-and-how-do-you-use-it/](https://www.cloudsavvyit.com/1727/what-is-a-pem-file-and-how-do-you-use-it/)
+* [https://wiki.znc.in/Reverse_Proxy](https://wiki.znc.in/Reverse_Proxy)
+* [https://willpittman.net:8080/index.php?title=Znc_config](https://willpittman.net:8080/index.php?title=Znc_config)
