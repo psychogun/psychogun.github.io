@@ -38,19 +38,19 @@ I suggest taking a minute or two to read the Conceptual Overview on the official
 ## Prerequisites
 ### Site A 
 * OPNsense 20.7.8_4-amd64
-Public IP: 123.44.55.66.77 (obviously not mine)
-WireGuard Internal IP: 10.0.88.1
-VLAN 22: 172.10.22.0/24 (used for network management)
-VLAN 50: 172.10.50.0/24 (server resources)
-VLAN 77: 10.0.77.0/24 (clients on Site A)
+* Public IP: 123.44.55.66.77 (obviously not mine)
+* WireGuard Internal IP: 10.0.88.1
+* VLAN 22: 172.10.22.0/24 (used for network management)
+* VLAN 50: 172.10.50.0/24 (server resources)
+* VLAN 77: 10.0.77.0/24 (clients on Site A)
 
 ### Site B
 * pfSense 2.5.0-RELEASE (amd64) 
-Public IP: 88.99.77.66 (obviously not mine)
-WireGuard Internal IP: 10.0.88.2
-VLAN 5: 192.168.5.0/24 (full access on every LAN @ Site A)
-VLAN 200: 192.168.200.0/24 (access only to server resources on Site A)
-VLAN 40: 10.0.40.0/24 (CCTV network)
+* Public IP: 88.99.77.66 (obviously not mine)
+* WireGuard Internal IP: 10.0.88.2
+* VLAN 5: 192.168.5.0/24 (full access on every LAN @ Site A)
+* VLAN 200: 192.168.200.0/24 (access only to server resources on Site A)
+* VLAN 40: 10.0.40.0/24 (CCTV network)
 
 
 ---
@@ -89,13 +89,16 @@ Hit `+` icon
 Hit `Save`. We will come back to this endpoint configuration page in a moment.
 
 PS: PS: 
-* Allowed IPs: First, you have to allow the remote wg0 interface to traverse the tunnel (10.0.88.2).
-Secondly, the next IP(s) you define here, is the local network on your remote site from which you want to allow traffic to your network on. Each peer / client / endpoint (a client) will be able to send packets to the network interface with a source IP matching his corresponding list of allowed IPs. For example, when a packet is received by the server from peer / Site B, after being decrypted and authenticated, if its source IP is 192.168.200.0/24 then it's allowed onto the interface; otherwise it's dropped.
+*Allowed IPs**: First, you have to allow the remote wg0 interface to traverse the tunnel (10.0.88.2).
+Secondly, the next IP(s) you define here, is the local network on your remote site from which you want to allow traffic to your network on. Each peer / client / endpoint (a client) will be able to send packets to the network interface with a source IP matching his corresponding list of allowed IPs. 
+
+For example, when a packet is received by the server from peer / Site B, after being decrypted and authenticated, if its source IP is 192.168.200.0/24 then it's allowed onto the interface; otherwise it's dropped.
 
 This is however, call it, just basic security. We'll do more granular security in a bit, in the Firewall Rules section of the particular `wg` interface. 
 
-By default, WireGuard tries to be as silent as possible when not being used; it is not a chatty protocol. For the most part, it only transmits data when a peer wishes to send packets. When it's not being asked to send packets, it stops sending packets until it is asked again. In the majority of configurations, this works well. However, when a peer is behind NAT or a firewall, it might wish to be able to receive incoming packets even when it is not sending any packets. Because NAT and stateful firewalls keep track of "connections", if a peer behind NAT or a firewall wishes to receive incoming packets, he must keep the NAT/firewall mapping valid, by periodically sending keepalive packets. This is called persistent keepalives. When this option is enabled, a keepalive packet is sent to the server endpoint once every interval seconds. A sensible interval that works with a wide variety of firewalls is 25 seconds. Setting it to 0 turns the feature off, which is the default, since most users will not need this, and it makes WireGuard slightly more chatty. This option will keep the "connection" open in the eyes of NAT.
+By default, WireGuard tries to be as silent as possible when not being used; it is not a chatty protocol. For the most part, it only transmits data when a peer wishes to send packets. When it's not being asked to send packets, it stops sending packets until it is asked again. In the majority of configurations, this works well. However, when a peer is behind NAT or a firewall, it might wish to be able to receive incoming packets even when it is not sending any packets. Because NAT and stateful firewalls keep track of "connections", if a peer behind NAT or a firewall wishes to receive incoming packets, he must keep the NAT/firewall mapping valid, by periodically sending keepalive packets. This is called persistent keepalives. When this option is enabled, a keepalive packet is sent to the server endpoint once every interval seconds. 
 
+A sensible interval that works with a wide variety of firewalls is 25 seconds. Setting it to 0 turns the feature off, which is the default, since most users will not need this, and it makes WireGuard slightly more chatty. This option will keep the "connection" open in the eyes of NAT.
 
 Go back to the `Local` tab, open the instance and choose the newly created endpoint in `Peers`, Hit `Save`. 
 
@@ -121,9 +124,9 @@ We will apply rules here in a bit.
 Enable incoming IPv4 UDP connections to 51821 on your WAN address.
 
 #### WG_Site_B
-You can add granular rules here for your incoming clients;
-allow 192.168.5.0/24 to all your networks on Site A - like, for management?
-allow 192.168.200.0/24 only to specific networks on Site A - like, for SMB traffic?
+You can add granular rules on this interface for your incoming clients;
+* allow 192.168.5.0/24 to all your networks on Site A - like, for management?
+* allow 192.168.200.0/24 only to specific networks on Site A - like, for SMB traffic?
 
 
 ### NAT
@@ -156,7 +159,7 @@ Hit `Save`.
 
 PS: Public key: Hit the pencil (edit button) of your newly created server on Site A, `Local` - and copy your servers Public Key
 
-Add a Passphrase here if you would like an additional layer of security (PS: Generate a PSK on your pfSense)
+Add a Passphrase here if you would like an additional layer of security (PS: Generate a PSK on your pfSense - this must be copied to the other site as well)
 
 --- 
 
@@ -167,7 +170,6 @@ Wireguard
 
 Copy the Public Key for this tunnel from pfSense. Go back to your Endpoint configuration in OPNsense and edit the connection. 
 Paste in the public key. 
-
 
 ---
 
@@ -193,10 +195,6 @@ Go back to tab Local, open the instance and choose the newly created endpoint in
 
 Now we can Enable the VPN in tab General and go on with the setup.
 
-
-
-
-
 Tunnel Address: 10.0.88.1/24
 
 ---
@@ -212,8 +210,6 @@ Unable to find port of endpoint: `siteb.asdf.net:'
 Configuration parsing error
 [#] rm -f /var/run/wireguard/wg0.sock
 ```
-
-Endpoint address should be an IP - not FQDN (?).
 
 ---
 
