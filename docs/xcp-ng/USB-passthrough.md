@@ -6,7 +6,9 @@ nav_order: 1
 ---
 # USB-passthrough
 {: .no_toc }
-This is how I passed through a Z-Wave USB dongle to a Home Assistant Operating System guest.
+This is how I passed through a Z-Wave USB dongle to a Home Assistant Operating System guest. Just some personal notes, it is basically this guide [https://xcp-ng.org/docs/compute.html#usb-passthrough](https://xcp-ng.org/docs/compute.html#usb-passthrough).
+
+I have not found out if this survives a reboot of the host. Probably will not. I would not recommend this, as adding USB devices in Proxmox is very trivial compared to xcp-ng. 
 
 <details open markdown="block">
   <summary>
@@ -22,10 +24,10 @@ This is how I passed through a Z-Wave USB dongle to a Home Assistant Operating S
 ---
 
 ## Getting started
-I am using an Ubuntu 20.04 installation on a virtual machine deployed from XCP-NG. 
+I am using an Home Assistant installation on a virtual machine deployed from XCP-NG. I do not remember how I installed it, I think somehow somewhere along the line I used someones script to convert the HA machine to a usable format for xcp-ng. 
 
 ### Prerequsites
-* Ubuntu 20.04 LTS
+* Home Assistant OS 6.1
 * xcp-ng 8.2
 
 ---
@@ -173,32 +175,6 @@ Device Status:     0x0000
 [18:50 xcp-ng ~]# 
 ```
 
-Add `ALLOW` entry on the very top of this list:
-```bash
-[18:51 xcp-ng ~]# nano /etc/xensource/usb-policy.conf 
-# When you change this file, run 'xe pusb-scan' to confirm
-# the file can be parsed correctly.
-#
-# Syntax is an ordered list of case insensitive rules where # is line comment
-#  and each rule is (ALLOW | DENY) : ( match )*
-#  and each match is (class|subclass|prot|vid|pid|rel) = hex-number
-# Maximum hex value for class/subclass/prot is FF, and for vid/pid/rel is FFFF
-#
-# USB Hubs (class 09) are always denied, independently of the rules in this file
-ALLOW:vid=0658 pid=0200 # Sigma Designs, Inc. Aeotec Z-Stick Gen5 (ZW090) - UZB
-DENY: vid=17e9 # All DisplayLink USB displays
-DENY: class=02 # Communications and CDC-Control
-ALLOW:vid=056a pid=0315 class=03 # Wacom Intuos tablet
-ALLOW:vid=056a pid=0314 class=03 # Wacom Intuos tablet
-ALLOW:vid=056a pid=00fb class=03 # Wacom DTU tablet
-DENY: class=03 subclass=01 prot=01 # HID Boot keyboards
-DENY: class=03 subclass=01 prot=02 # HID Boot mice
-DENY: class=0a # CDC-Data
-DENY: class=0b # Smartcard
-DENY: class=e0 # Wireless controller
-DENY: class=ef subclass=04 # Miscellaneous network devices
-ALLOW: # Otherwise allow everything else
-```
 
 Run `xe pusb-scan`to confirm the file can be parsed correctly:
 ```bash
@@ -221,7 +197,7 @@ uuid ( RO)                : 6d7c0694-6d96-f957-c1f3-4b124a8c9f8d
 [16:26 xcp-ng ~]# 
 ```
 
-Note  the `group uuid`: `6d7c0694-6d96-f957-c1f3-4b124a8c9f8d.
+Note  the `group uuid`: `6d7c0694-6d96-f957-c1f3-4b124a8c9f8d`.
 
 List the current VMs:
 ```bash
@@ -346,7 +322,37 @@ Error in driver ZWaveError: Failed to initialize the driver: Timeout while waiti
 [20:40:30] INFO: Successfully send discovery information to Home Assistant.
 ```
 
-* DO NOT MISTAKE THE CONBEE ZIGBEE DEVICE TO A Z-WAVE DEVICE 8oF
+Moral of the story? Do not mistake the Conbee device for a Z-Wave device.
+
+### usb-policy.conf
+This is not required. Kept here for historical reasons. 
+
+Add `ALLOW` entry on the very top of this list:
+```bash
+[18:51 xcp-ng ~]# nano /etc/xensource/usb-policy.conf 
+# When you change this file, run 'xe pusb-scan' to confirm
+# the file can be parsed correctly.
+#
+# Syntax is an ordered list of case insensitive rules where # is line comment
+#  and each rule is (ALLOW | DENY) : ( match )*
+#  and each match is (class|subclass|prot|vid|pid|rel) = hex-number
+# Maximum hex value for class/subclass/prot is FF, and for vid/pid/rel is FFFF
+#
+# USB Hubs (class 09) are always denied, independently of the rules in this file
+ALLOW:vid=0658 pid=0200 # Sigma Designs, Inc. Aeotec Z-Stick Gen5 (ZW090) - UZB
+DENY: vid=17e9 # All DisplayLink USB displays
+DENY: class=02 # Communications and CDC-Control
+ALLOW:vid=056a pid=0315 class=03 # Wacom Intuos tablet
+ALLOW:vid=056a pid=0314 class=03 # Wacom Intuos tablet
+ALLOW:vid=056a pid=00fb class=03 # Wacom DTU tablet
+DENY: class=03 subclass=01 prot=01 # HID Boot keyboards
+DENY: class=03 subclass=01 prot=02 # HID Boot mice
+DENY: class=0a # CDC-Data
+DENY: class=0b # Smartcard
+DENY: class=e0 # Wireless controller
+DENY: class=ef subclass=04 # Miscellaneous network devices
+ALLOW: # Otherwise allow everything else
+```
 
 ---
 
